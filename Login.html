@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title data-i18n="login_title">Login - Gestor de PYMES</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body,
+    html {
+      height: 100%;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      overflow: hidden;
+      background: #0f2027;
+      color: #fff;
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .login-container {
+      position: relative;
+      z-index: 10;
+      background: rgba(255, 255, 255, 0.95);
+      color: #333;
+      padding: 2.5em 2em;
+      border-radius: 12px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+      width: 320px;
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 1em;
+      font-weight: 700;
+      color: #0f2027;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px 15px;
+      margin-top: 10px;
+      border: 1.5px solid #ccc;
+      border-radius: 8px;
+      font-size: 1em;
+      transition: border-color 0.3s ease;
+    }
+
+    input:focus {
+      border-color: #008CBA;
+      outline: none;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 15px;
+      border: none;
+      border-radius: 8px;
+      font-size: 1em;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      color: #fff;
+      background-color: #0000FF;
+      font-weight: 600;
+    }
+
+    button:hover {
+      background-color: #000000;
+    }
+
+    #btnRegistrar {
+      background: #4CAF50;
+      margin-top: 12px;
+    }
+
+    #btnRegistrar:hover {
+      background: #000000;
+    }
+
+    .error {
+      color: #d32f2f;
+      margin-top: 10px;
+      font-size: 0.9em;
+      min-height: 18px;
+      text-align: center;
+    }
+
+    #backgroundCanvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 1;
+      pointer-events: none;
+      background: #0f2027;
+    }
+
+    #language-select {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      z-index: 20;
+      padding: 5px;
+      font-size: 1em;
+    }
+  </style>
+</head>
+
+<body>
+
+  <select id="language-select">
+    <option value="es">Español</option>
+    <option value="en">English</option>
+  </select>
+
+  <div class="login-container">
+    <h2 data-i18n="login_title">Iniciar Sesión</h2>
+    <form id="loginForm">
+      <input type="text" id="usuario" data-i18n-placeholder="username" placeholder="Usuario" required />
+      <input type="password" id="contrasena" data-i18n-placeholder="password" placeholder="Contraseña" required />
+      <button type="submit" data-i18n="login_btn">Ingresar</button>
+      <button type="button" id="btnRegistrar" data-i18n="register_btn">Registrar</button>
+      <p id="mensaje-error" class="error"></p>
+    </form>
+  </div>
+
+  <canvas id="backgroundCanvas"></canvas>
+
+  <script>
+    // Traducciones
+    const traducciones = {
+      es: {
+        login_title: "Iniciar Sesión",
+        username: "Usuario",
+        password: "Contraseña",
+        login_btn: "Ingresar",
+        register_btn: "Registrar",
+        login_error: "Error al iniciar sesión",
+        connection_error: "Error de conexión con el servidor"
+      },
+      en: {
+        login_title: "Login",
+        username: "Username",
+        password: "Password",
+        login_btn: "Login",
+        register_btn: "Register",
+        login_error: "Login failed",
+        connection_error: "Connection error with server"
+      }
+    };
+
+    const langSelect = document.getElementById('language-select');
+    const mensajeError = document.getElementById('mensaje-error');
+
+    function aplicarTraduccion(lang) {
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (traducciones[lang][key]) el.textContent = traducciones[lang][key];
+      });
+      document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+        const key = el.getAttribute('data-i18n-placeholder');
+        if (traducciones[lang][key]) el.placeholder = traducciones[lang][key];
+      });
+    }
+
+    langSelect.addEventListener('change', () => {
+      const selectedLang = langSelect.value;
+      localStorage.setItem('lang', selectedLang);
+      aplicarTraduccion(selectedLang);
+    });
+
+    const idiomaGuardado = localStorage.getItem('lang') || 'es';
+    langSelect.value = idiomaGuardado;
+    aplicarTraduccion(idiomaGuardado);
+
+    document.getElementById('loginForm').addEventListener('submit', async function (e) {
+      e.preventDefault();
+
+      const usuario = document.getElementById('usuario').value;
+      const contrasena = document.getElementById('contrasena').value;
+      mensajeError.textContent = '';
+
+      try {
+        const response = await fetch('http://localhost:3000/jefe/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ usuario, contrasena })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          mensajeError.textContent = data.error || traducciones[langSelect.value]['login_error'];
+          return;
+        }
+
+        localStorage.setItem('jefe_id', data.jefe.id);
+        localStorage.setItem('usuario', data.jefe.usuario);
+        window.location.href = 'Clientes.html';
+      } catch (error) {
+        console.error('❌ Error en login:', error);
+        mensajeError.textContent = traducciones[langSelect.value]['connection_error'];
+      }
+    });
+
+    document.getElementById('btnRegistrar').addEventListener('click', function () {
+      window.location.href = 'Registrar.html';
+    });
+
+    // Fondo animado canvas
+    const canvas = document.getElementById('backgroundCanvas');
+    const ctx = canvas.getContext('2d');
+    let width, height;
+
+    function resize() {
+      width = window.innerWidth;
+      height = window.innerHeight;
+      canvas.width = width;
+      canvas.height = height;
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    class Shape {
+      constructor() { this.reset(); }
+      reset() {
+        this.x = Math.random() * width;
+        this.y = Math.random() * height;
+        this.size = 50 + Math.random() * 80;
+        this.speedX = (Math.random() * 0.3 + 0.05) * (Math.random() < 0.5 ? 1 : -1);
+        this.speedY = (Math.random() * 0.2 + 0.03) * (Math.random() < 0.5 ? 1 : -1);
+        this.opacity = 0.05 + Math.random() * 0.15;
+        this.color = `rgba(0, 140, 186, ${this.opacity})`;
+        this.type = Math.floor(Math.random() * 3);
+        this.rotation = Math.random() * 2 * Math.PI;
+        this.rotationSpeed = (Math.random() - 0.5) * 0.002;
+      }
+      draw(ctx) {
+        ctx.save();
+        ctx.translate(this.x, this.y);
+        ctx.rotate(this.rotation);
+        ctx.fillStyle = this.color;
+        switch (this.type) {
+          case 0:
+            ctx.beginPath();
+            ctx.arc(0, 0, this.size / 2, 0, Math.PI * 2);
+            ctx.fill();
+            break;
+          case 1:
+            ctx.beginPath();
+            ctx.moveTo(0, -this.size / 1.5);
+            ctx.lineTo(this.size / 1.3, this.size / 2);
+            ctx.lineTo(-this.size / 1.3, this.size / 2);
+            ctx.closePath();
+            ctx.fill();
+            break;
+          case 2:
+            const r = this.size / 5;
+            ctx.beginPath();
+            ctx.moveTo(-this.size / 2 + r, -this.size / 2);
+            ctx.lineTo(this.size / 2 - r, -this.size / 2);
+            ctx.quadraticCurveTo(this.size / 2, -this.size / 2, this.size / 2, -this.size / 2 + r);
+            ctx.lineTo(this.size / 2, this.size / 2 - r);
+            ctx.quadraticCurveTo(this.size / 2, this.size / 2, this.size / 2 - r, this.size / 2);
+            ctx.lineTo(-this.size / 2 + r, this.size / 2);
+            ctx.quadraticCurveTo(-this.size / 2, this.size / 2, -this.size / 2, this.size / 2 - r);
+            ctx.lineTo(-this.size / 2, -this.size / 2 + r);
+            ctx.quadraticCurveTo(-this.size / 2, -this.size / 2, -this.size / 2 + r, -this.size / 2);
+            ctx.closePath();
+            ctx.fill();
+            break;
+        }
+        ctx.restore();
+      }
+      update() {
+        this.x += this.speedX;
+        this.y += this.speedY;
+        this.rotation += this.rotationSpeed;
+        if (this.x > width + this.size) this.x = -this.size;
+        else if (this.x < -this.size) this.x = width + this.size;
+        if (this.y > height + this.size) this.y = -this.size;
+        else if (this.y < -this.size) this.y = height + this.size;
+      }
+    }
+
+    const shapes = [];
+    const maxShapes = 35;
+    for (let i = 0; i < maxShapes; i++) shapes.push(new Shape());
+
+    function animate() {
+      ctx.clearRect(0, 0, width, height);
+      for (let shape of shapes) {
+        shape.update();
+        shape.draw(ctx);
+      }
+      requestAnimationFrame(animate);
+    }
+    animate();
+  </script>
+</body>
+
+</html>

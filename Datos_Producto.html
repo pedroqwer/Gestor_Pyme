@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Datos del Producto</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #d0e7ff, #ffffff);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Menú */
+    nav.menu-desplegable {
+      background-color: #333;
+      padding: 0.5em 1em;
+      display: flex;
+      justify-content: flex-start;
+      position: sticky;
+      top: 0;
+      width: 100%;
+      z-index: 100;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+    }
+    .dropdown { position: relative; }
+    .dropbtn {
+      background-color: #333;
+      color: white;
+      padding: 10px 18px;
+      font-size: 1rem;
+      border: none;
+      cursor: pointer;
+      border-radius: 6px;
+      transition: background-color 0.3s;
+    }
+    .dropbtn:hover { background-color: #1c80c8; }
+    .dropdown-content {
+      display: none;
+      position: absolute;
+      background-color: #444;
+      min-width: 200px;
+      margin-top: 5px;
+      border-radius: 6px;
+      overflow: hidden;
+      box-shadow: 0px 8px 16px rgba(0,0,0,0.25);
+      z-index: 1000;
+    }
+    .dropdown-content a {
+      color: white;
+      padding: 12px 16px;
+      text-decoration: none;
+      display: block;
+    }
+    .dropdown-content a:hover { background-color: #1c80c8; }
+    .dropdown:hover .dropdown-content { display: block; }
+
+    /* Contenido principal */
+    .container {
+      padding: 2em;
+      max-width: 800px;
+      margin: auto;
+      width: 100%;
+    }
+
+    .card {
+      background: white;
+      padding: 2em;
+      border-radius: 15px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .card h2 {
+      margin-top: 0;
+      font-size: 1.8em;
+      color: #1c80c8;
+      border-bottom: 2px solid #e5e5e5;
+      padding-bottom: 0.5em;
+    }
+    .info p {
+      font-size: 1.1em;
+      margin: 12px 0;
+    }
+    .info strong { color: #333; }
+
+    /* Botones */
+    .acciones {
+      margin-top: 20px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .acciones button {
+      padding: 10px 20px;
+      background: #1c80c8;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 1em;
+      transition: background-color 0.3s;
+    }
+    .acciones button:hover { background: #1560a8; }
+
+    .btn-borrar { background: #e74c3c; }
+    .btn-borrar:hover { background: #c0392b; }
+
+    .btn-actualizar { background: #27ae60; }
+    .btn-actualizar:hover { background: #1e8449; }
+
+    /* Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 2000;
+      left: 0; top: 0;
+      width: 100%; height: 100%;
+      background-color: rgba(0,0,0,0.5);
+      justify-content: center; align-items: center;
+    }
+    .modal-content {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      width: 400px;
+      max-width: 90%;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    }
+    .cerrar {
+      float: right;
+      font-size: 1.5em;
+      cursor: pointer;
+    }
+    .modal-content h2 {
+      margin-top: 0;
+      color: #1c80c8;
+    }
+    .modal-content input {
+      width: 100%;
+      padding: 8px;
+      margin: 6px 0 12px 0;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 1em;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Menú -->
+  <nav class="menu-desplegable">
+    <div class="dropdown">
+      <button class="dropbtn">☰ Menú</button>
+      <div class="dropdown-content">
+        <a href="Dashboard.html">Inicio</a>
+        <a href="Clientes.html">Clientes</a>
+        <a href="Productos.html">Productos</a>
+        <a href="Top_Ventas.html">Más vendidos</a>
+        <a href="Ventas.html">Ventas</a>
+        <a href="Registrar_Entrada.html">Registrar Entrada</a>
+        <a href="Proveedores.html">Proveedores</a>
+        <a href="historial.html">Historial</a>
+        <a href="Salidas.html">Salidas</a>
+        <a href="Movimientos.html">Movimientos</a>
+        <a href="Login.html" id="logoutLink">Cerrar sesión</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Contenido -->
+  <div class="container">
+    <div class="card">
+      <h2 id="nombreProducto">Producto</h2>
+      <div class="info" id="infoProducto">
+        <!-- Aquí se generan dinámicamente los datos -->
+      </div>
+      <div class="acciones">
+        <button onclick="volver()">⬅ Volver</button>
+        <button class="btn-actualizar" onclick="abrirModal()">✏️ Actualizar</button>
+        <button class="btn-borrar" onclick="borrarProducto()">🗑 Eliminar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal actualizar -->
+  <div id="modalActualizar" class="modal">
+    <div class="modal-content">
+      <span class="cerrar" onclick="cerrarModal()">&times;</span>
+      <h2>Actualizar producto</h2>
+      <form id="formActualizar">
+        <div id="camposActualizar"><!-- Inputs dinámicos --></div>
+        <button type="submit" class="btn-actualizar">Guardar cambios</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const productoId = params.get("producto_id");
+    const jefeId = localStorage.getItem("jefe_id");
+
+    if (!productoId || !jefeId) {
+      alert("No se recibió información del producto");
+      window.location.href = "Productos.html";
+    }
+
+    // Campos que NO se deben mostrar/editar
+    const camposBloqueados = ["id", "jefe_id", "fecha_ingreso", "categoria_id"];
+
+    // Cargar datos producto
+    fetch(`http://localhost:3000/productos/${productoId}?jefe_id=${jefeId}`)
+      .then(res => res.json())
+      .then(p => {
+        document.getElementById("nombreProducto").textContent = p.nombre;
+        window.productoActual = p;
+
+        const infoDiv = document.getElementById("infoProducto");
+        infoDiv.innerHTML = "";
+
+        for (const key in p) {
+          if (!camposBloqueados.includes(key)) {
+            infoDiv.innerHTML += `<p><strong>${key}:</strong> ${p[key]}</p>`;
+          }
+        }
+      })
+      .catch(err => {
+        console.error(err);
+        alert("Error al cargar producto");
+      });
+
+    function volver() {
+      window.location.href = "Productos.html";
+    }
+
+    function abrirModal() {
+      document.getElementById("modalActualizar").style.display = "flex";
+      const camposDiv = document.getElementById("camposActualizar");
+      camposDiv.innerHTML = "";
+
+      for (const key in window.productoActual) {
+        if (!camposBloqueados.includes(key)) {
+          let valor = window.productoActual[key] ?? "";
+          let tipo = "text";
+
+          if (typeof valor === "number") tipo = "number";
+          if (key.toLowerCase().includes("precio")) tipo = "number";
+
+          camposDiv.innerHTML += `
+            <label for="${key}">${key}:</label>
+            <input type="${tipo}" id="${key}" name="${key}" value="${valor}" required>
+          `;
+        }
+      }
+    }
+
+    function cerrarModal() {
+      document.getElementById("modalActualizar").style.display = "none";
+    }
+
+    document.getElementById("formActualizar").addEventListener("submit", function(e) {
+      e.preventDefault();
+
+      const data = {};
+      for (const key in window.productoActual) {
+        if (!camposBloqueados.includes(key)) {
+          const input = document.getElementById(key);
+          if (input) {
+            data[key] = input.value;
+          }
+        }
+      }
+
+      fetch(`http://localhost:3000/productos/${productoId}?jefe_id=${jefeId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+      })
+      .then(res => {
+        if (res.ok) {
+          alert("Producto actualizado correctamente");
+          location.reload();
+        } else {
+          alert("Error al actualizar producto");
+        }
+      })
+      .catch(err => {
+        console.error(err);
+        alert("Error al conectar con el servidor");
+      });
+    });
+
+    function borrarProducto() {
+      if (confirm("¿Seguro que deseas borrar este producto?")) {
+        fetch(`http://localhost:3000/productos/${productoId}?jefe_id=${jefeId}`, {
+          method: "DELETE"
+        })
+          .then(res => {
+            if (res.ok) {
+              alert("Producto borrado correctamente");
+              window.location.href = "Productos.html";
+            } else {
+              alert("Error al borrar producto");
+            }
+          })
+          .catch(err => {
+            console.error(err);
+            alert("Error al conectar con el servidor");
+          });
+      }
+    }
+
+    document.getElementById('logoutLink').addEventListener('click', () => {
+      localStorage.clear();
+    });
+  </script>
+</body>
+</html>

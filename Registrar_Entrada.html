@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Registrar Entrada</title>
+<style>
+  /* ==== RESET Y FONDO ==== */
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #e0f7e9, #b2d8b2);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ==== MENÚ ==== */
+  nav.menu-desplegable {
+    background-color: #333;
+    padding: 0.5em 1em;
+    display: flex;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+  }
+  .dropdown { position: relative; }
+  .dropbtn {
+    background-color: #333;
+    color: white;
+    padding: 8px 18px;
+    font-size: 1rem;
+    border: none;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: background-color 0.3s;
+  }
+  .dropbtn:hover { background-color: #1c80c8; }
+  .dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #444;
+    min-width: 180px;
+    margin-top: 5px;
+    border-radius: 6px;
+    overflow: hidden;
+    box-shadow: 0px 8px 16px rgba(0,0,0,0.25);
+    z-index: 20;
+  }
+  .dropdown-content a {
+    color: white;
+    padding: 12px 16px;
+    display: block;
+    text-decoration: none;
+    transition: background 0.2s;
+  }
+  .dropdown-content a:hover { background-color: #1c80c8; }
+  .dropdown:hover .dropdown-content { display: block; }
+
+  /* ==== FORMULARIO ==== */
+  form {
+    background: white;
+    padding: 30px 40px;
+    border-radius: 12px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+    max-width: 900px;
+    width: 90%;
+    margin: 50px auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    position: relative;
+    z-index: 5;
+  }
+  form h2 {
+    grid-column: span 2;
+    text-align: center;
+    color: #2f6627;
+    margin-bottom: 20px;
+  }
+  label { display: block; font-weight: 600; color: #444; margin-bottom: 6px; }
+  input, select {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1.5px solid #c4c4c4;
+    border-radius: 6px;
+    font-size: 1rem;
+    transition: border-color 0.3s ease;
+  }
+  input:focus, select:focus { border-color: #4CAF50; outline: none; }
+
+  button {
+    grid-column: span 2;
+    padding: 14px;
+    width: 100%;
+    background-color: #4CAF50;
+    color: white;
+    font-size: 1.1rem;
+    font-weight: 700;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    box-shadow: 0 3px 8px rgba(76, 175, 80, 0.5);
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  }
+  button:hover {
+    background-color: #3b8b3b;
+    box-shadow: 0 5px 15px rgba(59,139,59,0.7);
+  }
+
+  .mensaje {
+    grid-column: span 2;
+    text-align: center;
+    font-weight: 600;
+    margin-top: 12px;
+  }
+
+  /* ==== FONDO ANIMADO ==== */
+  #backgroundCanvas {
+    position: fixed;
+    top:0; left:0;
+    width: 100vw; height: 100vh;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  /* ==== RESPONSIVE ==== */
+  @media(max-width: 768px){
+    form { grid-template-columns: 1fr; }
+    h2, button, .mensaje { grid-column: span 1; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="menu-desplegable">
+  <div class="dropdown">
+    <button class="dropbtn">☰ Menú</button>
+    <div class="dropdown-content">
+      <a href="Dashboard.html">Inicio</a>
+      <a href="Clientes.html">Clientes</a>
+      <a href="Productos.html">Productos</a>
+      <a href="Ventas.html">Ventas</a>
+      <a href="Registrar_Entrada.html">Registrar Entrada</a>
+      <a href="Proveedores.html">Proveedores</a>
+      <a href="historial.html">Historial</a>
+      <a href="Salidas.html">Salidas</a>
+      <a href="Movimientos.html">Movimientos</a>
+      <a href="Login.html" id="logoutLink">Cerrar sesión</a>
+    </div>
+  </div>
+</nav>
+
+<form id="entradaForm">
+  <h2>Registrar Entrada</h2>
+
+  <div>
+    <label for="nombre">Nombre del Producto:</label>
+    <input type="text" id="nombre" name="nombre" required>
+  </div>
+  <div>
+    <label for="descripcion">Descripción:</label>
+    <input type="text" id="descripcion" name="descripcion">
+  </div>
+  <div>
+    <label for="modelo">Modelo:</label>
+    <input type="text" id="modelo" name="modelo">
+  </div>
+  <div>
+    <label for="marca">Marca:</label>
+    <input type="text" id="marca" name="marca">
+  </div>
+  <div>
+    <label for="precio_venta">Precio de Venta:</label>
+    <input type="number" step="0.01" id="precio_venta" name="precio_venta">
+  </div>
+  <div>
+    <label for="ubicacion">Ubicación:</label>
+    <input type="text" id="ubicacion" name="ubicacion">
+  </div>
+  <div>
+    <label for="proveedor_id">Proveedor:</label>
+    <select id="proveedor_id" name="proveedor_id" required></select>
+  </div>
+  <div>
+    <label for="cantidad">Cantidad:</label>
+    <input type="number" id="cantidad" name="cantidad" min="1" required>
+  </div>
+  <div>
+    <label for="precio_compra">Precio de Compra:</label>
+    <input type="number" step="0.01" id="precio_compra" name="precio_compra" required>
+  </div>
+  <div>
+    <label for="fecha">Fecha:</label>
+    <input type="date" id="fecha" name="fecha">
+  </div>
+
+  <button type="submit">Registrar Entrada</button>
+  <div class="mensaje" id="mensaje"></div>
+</form>
+
+<canvas id="backgroundCanvas"></canvas>
+
+<script>
+// ==== CARGAR PROVEEDORES ====
+async function cargarProveedores(){
+  try {
+    const jefeId = localStorage.getItem('jefe_id');
+    if(!jefeId) throw new Error("No se encontró el ID del jefe");
+    const res = await fetch(`http://localhost:3000/proveedores?jefe_id=${jefeId}`);
+    let proveedores = await res.json();
+    const select = document.getElementById('proveedor_id');
+    proveedores.forEach((p,i)=>{
+      const option = document.createElement('option');
+      option.value = p.id;
+      option.textContent = p.nombre;
+      select.appendChild(option);
+      if(i===0) select.value=p.id;
+    });
+  } catch(e){
+    document.getElementById('mensaje').textContent = e.message;
+    document.getElementById('mensaje').style.color = 'red';
+  }
+}
+cargarProveedores();
+
+// ==== REGISTRAR ENTRADA ====
+document.getElementById('entradaForm').addEventListener('submit', async e=>{
+  e.preventDefault();
+  const jefeId = localStorage.getItem('jefe_id');
+  const form = e.target;
+  const data = {
+    nombre: form.nombre.value.trim(),
+    descripcion: form.descripcion.value.trim(),
+    modelo: form.modelo.value.trim(),
+    marca: form.marca.value.trim(),
+    precio_venta: parseFloat(form.precio_venta.value)||0,
+    ubicacion: form.ubicacion.value.trim(),
+    proveedor_id: parseInt(form.proveedor_id.value),
+    cantidad: parseInt(form.cantidad.value),
+    precio_compra: parseFloat(form.precio_compra.value),
+    fecha: form.fecha.value || new Date().toISOString().slice(0,10),
+    jefe_id: parseInt(jefeId)
+  };
+  try{
+    const res = await fetch('http://localhost:3000/registrar/entrada',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify(data)
+    });
+    const result = await res.json();
+    const mensaje = document.getElementById('mensaje');
+    if(res.ok){
+      mensaje.style.color='green';
+      mensaje.textContent = "✅ Entrada registrada correctamente";
+      form.reset();
+      setTimeout(()=> window.location.href='Productos.html',1000);
+    }else{
+      mensaje.style.color='red';
+      mensaje.textContent = result.error || 'Error al registrar entrada';
+    }
+  }catch(err){
+    console.error(err);
+    const mensaje = document.getElementById('mensaje');
+    mensaje.style.color='red';
+    mensaje.textContent='Error al conectar con el servidor';
+  }
+});
+
+// ==== LOGOUT ====
+document.getElementById('logoutLink').addEventListener('click', ()=>{
+  localStorage.removeItem('jefe_id');
+  localStorage.removeItem('usuario');
+});
+
+// ==== FONDO ANIMADO ====
+const canvas=document.getElementById('backgroundCanvas');
+const ctx=canvas.getContext('2d');
+let width,height;
+function resize(){width=window.innerWidth;height=window.innerHeight;canvas.width=width;canvas.height=height;}
+window.addEventListener('resize',resize);
+resize();
+
+class Particle{
+  constructor(){this.reset();}
+  reset(){this.x=Math.random()*width;this.y=Math.random()*height;this.radius=1+Math.random()*3;this.speedX=(Math.random()-0.5)*0.4;this.speedY=(Math.random()-0.5)*0.4;this.alpha=0.1+Math.random()*0.3;}
+  update(){this.x+=this.speedX;this.y+=this.speedY;if(this.x<0||this.x>width)this.speedX*=-1;if(this.y<0||this.y>height)this.speedY*=-1;}
+  draw(ctx){ctx.beginPath();ctx.arc(this.x,this.y,this.radius,0,2*Math.PI);ctx.fillStyle=`rgba(76,175,80,${this.alpha})`;ctx.fill();}
+}
+const particles=Array.from({length:100},()=>new Particle());
+function animate(){
+  ctx.clearRect(0,0,width,height);
+  particles.forEach(p1=>{
+    p1.update();
+    p1.draw(ctx);
+    particles.forEach(p2=>{
+      const dist=Math.hypot(p1.x-p2.x,p1.y-p2.y);
+      if(dist<120){ctx.strokeStyle=`rgba(76,175,80,${(120-dist)/300})`;ctx.lineWidth=0.7;ctx.beginPath();ctx.moveTo(p1.x,p1.y);ctx.lineTo(p2.x,p2.y);ctx.stroke();}
+    });
+  });
+  requestAnimationFrame(animate);
+}
+animate();
+</script>
+
+</body>
+</html>

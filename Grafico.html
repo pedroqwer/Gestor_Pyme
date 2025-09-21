@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Gráfico de Productos Más Vendidos</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; background: #f4f6f9; text-align: center; margin: 0; }
+    h1 { margin-bottom: 40px; }
+    #grafico-container { width: 95%; max-width: 1200px; margin: 0 auto; height: 600px; }
+    canvas { width: 100% !important; height: 100% !important; }
+    #mensaje { font-weight: bold; color: #555; margin-top: 20px; }
+  </style>
+</head>
+<body>
+  <h1>📊 Gráfico de Productos Más Vendidos</h1>
+  <div id="grafico-container">
+    <canvas id="grafico"></canvas>
+  </div>
+  <div id="mensaje"></div>
+
+  <script>
+    const jefeId = localStorage.getItem("jefe_id");
+
+    if (!jefeId) {
+      document.getElementById("mensaje").textContent = "⚠️ No se encontró el ID del jefe en localStorage.";
+    } else {
+      fetch(`http://localhost:3000/productos/mas-vendidos?jefe_id=${jefeId}`)
+        .then(res => res.json())
+        .then(data => {
+          if (!Array.isArray(data) || data.length === 0) {
+            document.getElementById("mensaje").textContent = "📭 No hay productos vendidos todavía.";
+            return;
+          }
+
+          const nombres = data.map(p => p.nombre);
+          const totales = data.map(p => parseInt(p.total_vendido) || 0);
+
+          const ctx = document.getElementById('grafico').getContext('2d');
+          new Chart(ctx, {
+            type: 'bar',
+            data: {
+              labels: nombres,
+              datasets: [{
+                label: 'Total Vendido',
+                data: totales,
+                backgroundColor: 'rgba(54, 162, 235, 0.7)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1
+              }]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false, // 🔹 permite que ocupe todo el div
+              plugins: {
+                legend: { display: false },
+                title: {
+                  display: true,
+                  text: 'Productos más vendidos',
+                  font: { size: 20 }
+                }
+              },
+              scales: {
+                y: {
+                  beginAtZero: true,
+                  title: { display: true, text: 'Cantidad Vendida', font: { size: 16 } },
+                  ticks: { font: { size: 14 } }
+                },
+                x: {
+                  title: { display: true, text: 'Producto', font: { size: 16 } },
+                  ticks: { font: { size: 14 } }
+                }
+              }
+            }
+          });
+
+        })
+        .catch(err => {
+          console.error("Error al obtener productos:", err);
+          document.getElementById("mensaje").textContent = "❌ Error al cargar el gráfico.";
+        });
+    }
+  </script>
+</body>
+</html>

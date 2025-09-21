@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Historial y Detalles</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+<style>
+    body {
+        margin: 0;
+        font-family: "Poppins", sans-serif;
+        color: #333;
+        overflow: hidden;
+        background: transparent;
+    }
+
+    /* ==== MENÚ DESPLEGABLE ==== */
+    nav.menu-desplegable {
+        background-color: #2c3e50;
+        padding: 0.5em 1em;
+        display: flex;
+        justify-content: flex-start;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+    }
+    .dropdown {
+        position: relative;
+    }
+    .dropbtn {
+        background-color: #2c3e50;
+        color: #ecf0f1;
+        padding: 10px 18px;
+        font-size: 1rem;
+        font-weight: 600;
+        border: none;
+        cursor: pointer;
+        border-radius: 8px;
+        transition: background-color 0.3s, transform 0.2s;
+    }
+    .dropbtn:hover {
+        background-color: #1c80c8;
+        transform: scale(1.05);
+    }
+    .dropdown-content {
+        display: none;
+        position: absolute;
+        background-color: #34495e;
+        min-width: 220px;
+        margin-top: 5px;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.25);
+        z-index: 1000;
+    }
+    .dropdown-content a {
+        color: white;
+        padding: 12px 18px;
+        text-decoration: none;
+        display: block;
+        font-size: 0.95rem;
+    }
+    .dropdown-content a:hover {
+        background-color: #1c80c8;
+    }
+    .dropdown:hover .dropdown-content {
+        display: block;
+    }
+
+    /* CONTENEDOR PRINCIPAL */
+    .container {
+        position: relative;
+        z-index: 10;
+        display: flex;
+        height: calc(100vh - 55px);
+    }
+
+    /* PANEL HISTORIAL */
+    .historial {
+        width: 28%;
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(6px);
+        border-right: 2px solid rgba(0,0,0,0.1);
+        overflow-y: auto;
+        box-shadow: 2px 0 8px rgba(0,0,0,0.1);
+        animation: slideInLeft 0.8s ease;
+    }
+    .historial h2 {
+        margin: 0;
+        padding: 16px;
+        background: #27ae60;
+        color: white;
+        font-size: 1.2em;
+        position: sticky;
+        top: 0;
+        letter-spacing: 0.5px;
+    }
+    .historial ul {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+    .historial li {
+        padding: 14px 16px;
+        cursor: pointer;
+        transition: background 0.3s, transform 0.2s;
+        border-bottom: 1px solid rgba(0,0,0,0.05);
+    }
+    .historial li:hover {
+        background: rgba(39, 174, 96, 0.15);
+        transform: translateX(4px);
+    }
+    .historial li.active {
+        background: rgba(39, 174, 96, 0.25);
+        font-weight: 600;
+        border-left: 4px solid #27ae60;
+    }
+
+    /* PANEL DETALLES */
+    .detalles {
+        flex: 1;
+        padding: 24px;
+        overflow-y: auto;
+        animation: fadeIn 1s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .detalle-box {
+        background: rgba(255, 255, 255, 0.95);
+        padding: 28px;
+        border-radius: 14px;
+        max-width: 700px;
+        width: 100%;
+        box-shadow: 0 4px 14px rgba(0,0,0,0.12);
+        transition: transform 0.3s, box-shadow 0.3s;
+    }
+    .detalle-box:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+    }
+    .detalle-box h3 {
+        margin-top: 0;
+        color: #27ae60;
+    }
+    .detalle-box p {
+        line-height: 1.6;
+    }
+
+    /* ANIMACIONES */
+    @keyframes slideInLeft {
+        from { transform: translateX(-100%); }
+        to { transform: translateX(0); }
+    }
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    /* FONDO ANIMADO */
+    #backgroundCanvas {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        z-index: 0;
+        pointer-events: none;
+        background: linear-gradient(135deg, #e0f7e9, #b2d8b2);
+    }
+</style>
+</head>
+<body>
+
+<!-- FONDO ANIMADO -->
+<canvas id="backgroundCanvas"></canvas>
+
+<!-- MENÚ DESPLEGABLE -->
+   <nav class="menu-desplegable">
+    <div class="dropdown">
+      <button class="dropbtn">☰ Menú</button>
+      <div class="dropdown-content">
+        <a href="Dashboard.html">Inicio</a>
+        <a href="Clientes.html">Clientes</a>
+        <a href="Productos.html">Productos</a>
+        <a href="Ventas.html">Ventas</a>
+        <a href="Registrar_Entrada.html">Registrar Entrada nuevo producto</a>
+        <a href="Proveedores.html">Proveedores</a>
+        <a href="historial.html">Historial</a>
+        <a href="Salidas.html">Salidas</a>
+        <a href="Movimientos.html">Movimientos</a>
+        <a href="Login.html" id="logoutLink">Cerrar sesión</a>
+      </div>
+    </div>
+  </nav>
+
+<!-- CONTENEDOR PRINCIPAL -->
+<div class="container">
+    <div class="historial">
+        <h2>Historial</h2>
+        <ul id="lista-historial">
+            <!-- Se llenará dinámicamente -->
+        </ul>
+    </div>
+    <div class="detalles">
+        <div class="detalle-box" id="detalle">
+            <h3>Selecciona un registro</h3>
+            <p>Elige un elemento del historial para visualizar la información detallada aquí.</p>
+        </div>
+    </div>
+</div>
+
+<script>
+    const listaHistorial = document.getElementById("lista-historial");
+    const detalleBox = document.getElementById("detalle");
+
+    const jefeId = localStorage.getItem('jefe_id');
+
+    if (!jefeId) {
+        alert("No se encontró el ID del jefe en localStorage. Redirigiendo al login...");
+        window.location.href = "Login.html";
+    } else {
+        fetch(`http://localhost:3000/historial?jefe_id=${jefeId}`)
+            .then(res => res.json())
+            .then(data => {
+                listaHistorial.innerHTML = "";
+
+                if (!data || data.length === 0) {
+                    listaHistorial.innerHTML = "<li>No hay registros en el historial.</li>";
+                    return;
+                }
+
+                data.forEach(item => {
+                    const li = document.createElement("li");
+                    li.textContent = `${item.accion} - ${formatearFecha(item.fecha)}`;
+                    li.dataset.detalle = item.descripcion;
+                    listaHistorial.appendChild(li);
+                });
+
+                document.querySelectorAll("#lista-historial li").forEach(item => {
+                    item.addEventListener("click", () => {
+                        document.querySelectorAll("#lista-historial li").forEach(li => li.classList.remove("active"));
+                        item.classList.add("active");
+                        const textoDetalle = item.getAttribute("data-detalle");
+                        detalleBox.innerHTML = `<h3>${item.textContent}</h3><p>${textoDetalle}</p>`;
+                    });
+                });
+            })
+            .catch(err => {
+                console.error("Error al obtener historial:", err);
+                listaHistorial.innerHTML = "<li>Error al cargar historial.</li>";
+            });
+    }
+
+    function formatearFecha(fechaISO) {
+        const fecha = new Date(fechaISO);
+        return fecha.toLocaleDateString("es-ES", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric"
+        });
+    }
+
+    // ===== FONDO ANIMADO =====
+    const canvas = document.getElementById('backgroundCanvas');
+    const ctx = canvas.getContext('2d');
+    let width, height;
+
+    function resize() {
+        width = window.innerWidth;
+        height = window.innerHeight;
+        canvas.width = width;
+        canvas.height = height;
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    class Particle {
+        constructor() { this.reset(); }
+        reset() {
+            this.x = Math.random() * width;
+            this.y = Math.random() * height;
+            this.radius = 1 + Math.random() * 3;
+            this.speedX = (Math.random() - 0.5) * 0.4;
+            this.speedY = (Math.random() - 0.5) * 0.4;
+            this.alpha = 0.1 + Math.random() * 0.3;
+        }
+        update() {
+            this.x += this.speedX;
+            this.y += this.speedY;
+            if (this.x < 0 || this.x > width) this.speedX *= -1;
+            if (this.y < 0 || this.y > height) this.speedY *= -1;
+        }
+        draw(ctx) {
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
+            ctx.fillStyle = `rgba(39, 174, 96, ${this.alpha})`;
+            ctx.fill();
+        }
+    }
+
+    const particles = Array.from({ length: 100 }, () => new Particle());
+
+    function animate() {
+        ctx.clearRect(0, 0, width, height);
+        particles.forEach(p1 => {
+            p1.update();
+            p1.draw(ctx);
+            particles.forEach(p2 => {
+                const dist = Math.hypot(p1.x - p2.x, p1.y - p2.y);
+                if (dist < 120) {
+                    ctx.strokeStyle = `rgba(39, 174, 96, ${(120 - dist) / 300})`;
+                    ctx.lineWidth = 0.7;
+                    ctx.beginPath();
+                    ctx.moveTo(p1.x, p1.y);
+                    ctx.lineTo(p2.x, p2.y);
+                    ctx.stroke();
+                }
+            });
+        });
+        requestAnimationFrame(animate);
+    }
+    animate();
+</script>
+
+</body>
+</html>
