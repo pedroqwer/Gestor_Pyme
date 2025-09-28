@@ -50,6 +50,10 @@
       background: #6c757d;
       color: #fff;
     }
+    .btn-export {
+      background: #28a745;
+      color: #fff;
+    }
     table {
       width: 100%;
       border-collapse: collapse;
@@ -96,7 +100,12 @@
     <div>
       <button class="btn-refresh" onclick="cargarMovimientos()">🔄 Refrescar</button>
       <button class="btn-clear" onclick="limpiarFiltros()">🧹 Limpiar</button>
+      <button class="btn-export" onclick="exportarCSV()">📄 Exportar CSV</button>
     </div>
+  </div>
+
+  <div id="totales" style="margin-bottom: 10px; font-weight: bold;">
+    Totales: Entradas: 0 | Salidas: 0 | Ventas: 0
   </div>
 
   <table id="tablaMovimientos">
@@ -112,7 +121,7 @@
       </tr>
     </thead>
     <tbody>
-      <!-- Aquí se insertarán los datos dinámicamente -->
+      <tr><td colspan="7" style="text-align:center; color:#777;">Cargando movimientos...</td></tr>
     </tbody>
   </table>
 
@@ -134,6 +143,8 @@
         aplicarFiltros();
       } catch (error) {
         console.error("❌ Error cargando movimientos:", error);
+        document.querySelector("#tablaMovimientos tbody").innerHTML =
+          `<tr><td colspan="7" style="text-align:center; color:red;">Error al cargar movimientos</td></tr>`;
       }
     }
 
@@ -148,17 +159,27 @@
 
       lista.forEach(m => {
         const fila = document.createElement("tr");
+
+        // Resaltar movimientos recientes (<24h)
+        const fechaMovimiento = new Date(m.fecha);
+        const now = new Date();
+        if ((now - fechaMovimiento) / (1000 * 60 * 60) < 24) {
+          fila.style.backgroundColor = "#e6f7ff";
+        }
+
         fila.innerHTML = `
           <td>${m.id}</td>
           <td class="${m.tipo}">${m.tipo}</td>
           <td>${m.producto}</td>
           <td>${m.cantidad}</td>
           <td>${m.jefe}</td>
-          <td>${new Date(m.fecha).toLocaleString()}</td>
+          <td>${fechaMovimiento.toLocaleString()}</td>
           <td>${m.observacion || ""}</td>
         `;
         tbody.appendChild(fila);
       });
+
+      actualizarTotales(lista);
     }
 
     function aplicarFiltros() {
@@ -193,12 +214,52 @@
       mostrarMovimientos(movimientosCache);
     }
 
+    function actualizarTotales(lista) {
+      const totalEntradas = lista.filter(m => m.tipo === 'entrada').reduce((a,b) => a+b.cantidad, 0);
+      const totalSalidas = lista.filter(m => m.tipo === 'salida').reduce((a,b) => a+b.cantidad, 0);
+      const totalVentas = lista.filter(m => m.tipo === 'venta').reduce((a,b) => a+b.cantidad, 0);
+
+      document.getElementById("totales").innerHTML =
+        `Totales: Entradas: ${totalEntradas} | Salidas: ${totalSalidas} | Ventas: ${totalVentas}`;
+    }
+
+    function exportarCSV() {
+      if (movimientosCache.length === 0) {
+        alert("No hay movimientos para exportar.");
+        return;
+      }
+
+      const lista = movimientosCache.map(m => ({
+        ID: m.id,
+        Tipo: m.tipo,
+        Producto: m.producto,
+        Cantidad: m.cantidad,
+        Jefe: m.jefe,
+        Fecha: new Date(m.fecha).toLocaleString(),
+        Observacion: m.observacion || ""
+      }));
+
+      const csv = [
+        Object.keys(lista[0]).join(','), 
+        ...lista.map(row => Object.values(row).map(v => `"${v}"`).join(','))
+      ].join('\n');
+
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `movimientos_${new Date().toISOString().slice(0,10)}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
     // Eventos de filtros
     document.getElementById("buscar").addEventListener("input", aplicarFiltros);
     document.getElementById("filtroTipo").addEventListener("change", aplicarFiltros);
     document.getElementById("filtroFecha").addEventListener("change", aplicarFiltros);
 
-    // Cargar al abrir
+    // Cargar al iniciar
     cargarMovimientos();
   </script>
 </body>
