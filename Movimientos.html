@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Movimientos de Inventario</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f7f7f7;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .acciones {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+      gap: 10px;
+    }
+    .acciones input, .acciones select {
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    .acciones input[type="text"] {
+      flex: 1;
+      min-width: 200px;
+    }
+    button {
+      padding: 8px 15px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: 0.2s ease;
+    }
+    button:hover {
+      opacity: 0.85;
+    }
+    .btn-refresh {
+      background: #007bff;
+      color: #fff;
+    }
+    .btn-clear {
+      background: #6c757d;
+      color: #fff;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #fff;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+    thead {
+      background: #f0f0f0;
+    }
+    th, td {
+      padding: 10px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+    }
+    tr:hover {
+      background: #f9f9f9;
+    }
+    .entrada {
+      color: green;
+      font-weight: bold;
+    }
+    .salida {
+      color: red;
+      font-weight: bold;
+    }
+    .venta {
+      color: blue;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h1>📦 Movimientos de Inventario</h1>
+
+  <div class="acciones">
+    <input type="text" id="buscar" placeholder="🔍 Buscar producto u observación...">
+    <select id="filtroTipo">
+      <option value="">Todos los tipos</option>
+      <option value="entrada">Entradas</option>
+      <option value="salida">Salidas</option>
+      <option value="venta">Ventas</option>
+    </select>
+    <input type="date" id="filtroFecha">
+    <div>
+      <button class="btn-refresh" onclick="cargarMovimientos()">🔄 Refrescar</button>
+      <button class="btn-clear" onclick="limpiarFiltros()">🧹 Limpiar</button>
+    </div>
+  </div>
+
+  <table id="tablaMovimientos">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Tipo</th>
+        <th>Producto</th>
+        <th>Cantidad</th>
+        <th>Jefe</th>
+        <th>Fecha</th>
+        <th>Observación</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- Aquí se insertarán los datos dinámicamente -->
+    </tbody>
+  </table>
+
+  <script>
+    let movimientosCache = []; // Guardamos todos los movimientos
+
+    async function cargarMovimientos() {
+      try {
+        const jefeId = localStorage.getItem("jefe_id");
+        if (!jefeId) {
+          alert("⚠️ No se encontró jefe_id en el almacenamiento local.");
+          return;
+        }
+
+        const res = await fetch(`http://localhost:3000/movimientos?jefe_id=${jefeId}`);
+        if (!res.ok) throw new Error("Error al obtener movimientos");
+
+        movimientosCache = await res.json();
+        aplicarFiltros();
+      } catch (error) {
+        console.error("❌ Error cargando movimientos:", error);
+      }
+    }
+
+    function mostrarMovimientos(lista) {
+      const tbody = document.querySelector("#tablaMovimientos tbody");
+      tbody.innerHTML = "";
+
+      if (lista.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:#777;">No hay movimientos encontrados</td></tr>`;
+        return;
+      }
+
+      lista.forEach(m => {
+        const fila = document.createElement("tr");
+        fila.innerHTML = `
+          <td>${m.id}</td>
+          <td class="${m.tipo}">${m.tipo}</td>
+          <td>${m.producto}</td>
+          <td>${m.cantidad}</td>
+          <td>${m.jefe}</td>
+          <td>${new Date(m.fecha).toLocaleString()}</td>
+          <td>${m.observacion || ""}</td>
+        `;
+        tbody.appendChild(fila);
+      });
+    }
+
+    function aplicarFiltros() {
+      const texto = document.getElementById("buscar").value.toLowerCase();
+      const tipo = document.getElementById("filtroTipo").value;
+      const fecha = document.getElementById("filtroFecha").value;
+
+      let filtrados = movimientosCache;
+
+      if (texto) {
+        filtrados = filtrados.filter(m =>
+          m.producto.toLowerCase().includes(texto) ||
+          (m.observacion && m.observacion.toLowerCase().includes(texto))
+        );
+      }
+
+      if (tipo) {
+        filtrados = filtrados.filter(m => m.tipo === tipo);
+      }
+
+      if (fecha) {
+        filtrados = filtrados.filter(m => m.fecha.startsWith(fecha));
+      }
+
+      mostrarMovimientos(filtrados);
+    }
+
+    function limpiarFiltros() {
+      document.getElementById("buscar").value = "";
+      document.getElementById("filtroTipo").value = "";
+      document.getElementById("filtroFecha").value = "";
+      mostrarMovimientos(movimientosCache);
+    }
+
+    // Eventos de filtros
+    document.getElementById("buscar").addEventListener("input", aplicarFiltros);
+    document.getElementById("filtroTipo").addEventListener("change", aplicarFiltros);
+    document.getElementById("filtroFecha").addEventListener("change", aplicarFiltros);
+
+    // Cargar al abrir
+    cargarMovimientos();
+  </script>
+</body>
+</html>
