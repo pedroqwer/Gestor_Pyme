@@ -20,6 +20,28 @@ function registrarHistorial(jefe_id, accion, descripcion) {
   });
 }
 
+function registrarMovimiento(jefe_id, tipo, producto_id, cantidad, observacion = '') {
+  if (!jefe_id || !tipo || !producto_id || cantidad == null) {
+    console.error('Faltan datos para registrar el movimiento');
+    return;
+  }
+
+  const query = `
+    INSERT INTO movimientos (tipo, producto_id, cantidad, jefe_id, observacion)
+    VALUES (?, ?, ?, ?, ?)
+  `;
+
+  connection.query(query, [tipo, producto_id, cantidad, jefe_id, observacion], (err, result) => {
+    if (err) {
+      console.error('❌ Error al registrar movimiento:', err);
+      return;
+    }
+
+    /*const desc = `${tipo.toUpperCase()} de ${cantidad} unidades del producto ID ${producto_id}` +
+                 (observacion ? ` (${observacion})` : '');
+    registrarHistorial(jefe_id, `movimiento - ${tipo}`, desc);*/
+  });
+}
 // ---------- RUTAS PRINCIPALES ----------
 
 // Obtener productos por jefe_id
@@ -806,6 +828,41 @@ app.delete('/productos/:id', (req, res) => {
     res.status(500).json({ error: 'No se pudo eliminar producto (restricciones de integridad)' });
   });
 });
+
+// ===============================
+// ENDPOINT: Obtener movimientos
+// ===============================
+app.get('/movimientos', (req, res) => {
+  const jefeId = req.query.jefe_id;
+
+  if (!jefeId) {
+    return res.status(400).json({ error: 'Se requiere el id del jefe' });
+  }
+
+  const query = `
+    SELECT 
+      m.id,
+      m.tipo,
+      m.cantidad,
+      m.observacion,
+      DATE_FORMAT(m.fecha, '%Y-%m-%d %H:%i:%s') AS fecha,
+      p.nombre AS producto
+    FROM movimientos m
+    JOIN productos p ON m.producto_id = p.id
+    WHERE m.jefe_id = ?
+    ORDER BY m.fecha DESC
+  `;
+
+  connection.query(query, [jefeId], (err, results) => {
+    if (err) {
+      console.error('❌ Error al obtener movimientos:', err);
+      return res.status(500).json({ error: 'Error al obtener movimientos' });
+    }
+
+    res.json(results);
+  });
+});
+
 
 // ===============================
 // Levantar el servidor
