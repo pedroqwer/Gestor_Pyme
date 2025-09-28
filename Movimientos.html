@@ -111,11 +111,9 @@
   <table id="tablaMovimientos">
     <thead>
       <tr>
-        <th>ID</th>
         <th>Tipo</th>
         <th>Producto</th>
         <th>Cantidad</th>
-        <th>Jefe</th>
         <th>Fecha</th>
         <th>Observación</th>
       </tr>
@@ -168,11 +166,9 @@
         }
 
         fila.innerHTML = `
-          <td>${m.id}</td>
           <td class="${m.tipo}">${m.tipo}</td>
           <td>${m.producto}</td>
           <td>${m.cantidad}</td>
-          <td>${m.jefe}</td>
           <td>${fechaMovimiento.toLocaleString()}</td>
           <td>${m.observacion || ""}</td>
         `;
