@@ -120,6 +120,7 @@ app.post('/registrar/producto', (req, res) => {
       }
 
       registrarHistorial(jefe_id, 'crear producto', `Producto ${nombre} registrado por jefe ${jefe_id}`);
+      registrarMovimiento(jefe_id, 'creacion', result.insertId, cantidad, 'Producto registrado con stock inicial');
       res.status(201).json({ message: 'Producto registrado correctamente', producto_id: result.insertId });
     });
   });
@@ -166,6 +167,7 @@ app.post('/entradas/registrar', (req, res) => {
             if (err) return connection.rollback(() => res.status(500).json({ error: 'Error al confirmar transacción' }));
 
             registrarHistorial(jefe_id, 'entrada', `Entrada registrada para producto ${producto_id}`);
+            registrarMovimiento(jefe_id, 'entrada', producto_id, cantidad, `Entrada por proveedor ID ${proveedor_id}`);
             res.json({ message: 'Entrada registrada correctamente' });
           });
         });
@@ -242,6 +244,7 @@ app.post('/ventas/registrar', (req, res) => {
               if (err) return connection.rollback(() => res.status(500).json({ error: 'Error al confirmar venta' }));
 
               registrarHistorial(jefe_id, 'venta', `Venta registrada ID ${ventaId}`);
+              registrarMovimiento(jefe_id, 'venta', null, null, `Venta ID ${ventaId} registrada`);
               res.json({ message: 'Venta registrada correctamente', venta_id: ventaId });
             });
           })
@@ -492,7 +495,7 @@ app.post('/registrar/entrada', (req, res) => {
         if (err) return res.status(500).json({ error: 'Entrada registrada, pero error al actualizar stock' });
 
         registrarHistorial(jefe_id, 'crear entrada', `Entrada registrada para producto ${producto_id}, cantidad ${cantidad}`);
-
+        registrarMovimiento(jefe_id, 'entrada', producto_id, cantidad, esNuevo ? 'Entrada al registrar nuevo producto' : 'Entrada registrada');
         res.status(201).json({
           message: esNuevo
             ? '✅ Producto creado y entrada registrada correctamente'
