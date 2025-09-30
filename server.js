@@ -66,63 +66,66 @@ app.post('/registrar/producto', (req, res) => {
   const {
     nombre, descripcion, modelo, marca,
     cantidad, precio_compra, precio_venta,
-    ubicacion, fecha_ingreso, jefe_id, categoria_id
+    ubicacion, fecha_ingreso, jefe_id
   } = req.body;
 
+  // Validar campos obligatorios
   if (!nombre || cantidad == null || precio_compra == null || precio_venta == null || !jefe_id) {
     return res.status(400).json({ error: 'Faltan campos obligatorios' });
   }
 
-  // Verificar si ya existe una entrada del producto para ese jefe
-  const checkQuery = `
-    SELECT e.id 
-    FROM entradas e
-    JOIN productos p ON e.producto_id = p.id
-    WHERE p.nombre = ? 
-      AND (p.marca = ? OR ? IS NULL)
-      AND e.jefe_id = ?
-    LIMIT 1`;
+  // Insertar producto directamente
+  const insertQuery = `
+    INSERT INTO productos
+    (nombre, descripcion, modelo, marca, cantidad, precio_compra, precio_venta, ubicacion, fecha_ingreso, jefe_id)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
 
-  connection.query(checkQuery, [nombre, marca, marca, jefe_id], (err, rows) => {
+  const valores = [
+    nombre,
+    descripcion || null,
+    modelo || null,
+    marca || null,
+    cantidad,
+    precio_compra,
+    precio_venta,
+    ubicacion || null,
+    fecha_ingreso ? fecha_ingreso.slice(0, 10) : new Date().toISOString().slice(0, 10),
+    jefe_id
+  ];
+
+  connection.query(insertQuery, valores, (err, result) => {
     if (err) {
-      console.error('Error al verificar entradas:', err);
-      return res.status(500).json({ error: 'Error en la validación de entradas' });
+      console.error('Error al registrar producto:', err);
+      return res.status(500).json({ error: 'Error al registrar producto' });
     }
 
-    if (rows.length === 0) {
-      return res.status(400).json({ error: 'No puedes registrar este producto porque el jefe aún no tiene entradas de él' });
+    // Registrar historial y movimiento
+    registrarHistorial(jefe_id, 'crear producto', `Producto ${nombre} registrado por jefe ${jefe_id}`);
+    registrarMovimiento(jefe_id, 'entrada', result.insertId, cantidad, 'Producto registrado con stock inicial');
+
+    res.status(201).json({ message: 'Producto registrado correctamente', producto_id: result.insertId });
+  });
+});
+
+// Registrar inventario
+app.post('/registrar/inventario', (req, res) => {
+  const { producto_id, almacen, lote, fecha_caducidad, cantidad, en_venta } = req.body;
+
+  if (!producto_id) {
+    return res.status(400).json({ error: 'producto_id es obligatorio' });
+  }
+
+  const query = `
+    INSERT INTO inventario
+    (producto_id, almacen, lote, fecha_caducidad, cantidad, en_venta)
+    VALUES (?, ?, ?, ?, ?, ?)`;
+
+  connection.query(query, [producto_id, almacen || 'Principal', lote || null, fecha_caducidad || null, cantidad || 0, en_venta ? 1 : 0], (err, result) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).json({ error: 'Error al registrar inventario' });
     }
-
-    // Si pasa la validación -> registrar producto
-    const insertQuery = `
-      INSERT INTO productos
-      (nombre, descripcion, modelo, marca, cantidad, precio_compra, precio_venta, ubicacion, fecha_ingreso, categoria_id, jefe_id)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
-
-    const valores = [
-      nombre,
-      descripcion || null,
-      modelo || null,
-      marca || null,
-      cantidad,
-      precio_compra,
-      precio_venta,
-      ubicacion || null,
-      fecha_ingreso ? fecha_ingreso.slice(0, 10) : new Date().toISOString().slice(0, 10),
-      categoria_id || null,
-      jefe_id
-    ];
-
-    connection.query(insertQuery, valores, (err, result) => {
-      if (err) {
-        console.error('Error al registrar producto:', err);
-        return res.status(500).json({ error: 'Error al registrar producto' });
-      }
-
-      registrarHistorial(jefe_id, 'crear producto', `Producto ${nombre} registrado por jefe ${jefe_id}`);
-      registrarMovimiento(jefe_id, 'creacion', result.insertId, cantidad, 'Producto registrado con stock inicial');
-      res.status(201).json({ message: 'Producto registrado correctamente', producto_id: result.insertId });
-    });
+    res.status(201).json({ mensaje: 'Inventario registrado correctamente' });
   });
 });
 
