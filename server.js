@@ -199,36 +199,55 @@ app.post('/clientes/registrar', (req, res) => {
 app.post('/ventas/registrar', (req, res) => {
   const { cliente_id, jefe_id, productos } = req.body;
 
+  // Validar datos
   if (!cliente_id || !jefe_id || !Array.isArray(productos) || productos.length === 0) {
     return res.status(400).json({ error: 'Datos incompletos para la venta' });
   }
 
+  // Calcular total de la venta
   const total = productos.reduce((sum, item) => sum + item.precio * item.cantidad, 0);
 
   connection.beginTransaction(err => {
     if (err) return res.status(500).json({ error: 'Error al iniciar transacción' });
 
+    // Insertar venta
     connection.query(
       'INSERT INTO ventas (cliente_id, total, jefe_id) VALUES (?, ?, ?)',
-      [cliente_id, total, jefe_id],
+      [cliente_id, total, Number(jefe_id)],
       (err, resultVenta) => {
-        if (err) return connection.rollback(() => res.status(500).json({ error: 'Error al registrar venta' }));
+        if (err) {
+          return connection.rollback(() =>
+            res.status(500).json({ error: 'Error al registrar venta' })
+          );
+        }
 
         const ventaId = resultVenta.insertId;
 
+        // Procesar productos
         const tareas = productos.map(producto => {
           return new Promise((resolve, reject) => {
+            // Insertar detalle de venta
             connection.query(
               'INSERT INTO detalle_venta (venta_id, producto_id, cantidad, precio_unitario) VALUES (?, ?, ?, ?)',
               [ventaId, producto.id, producto.cantidad, producto.precio],
               err => {
                 if (err) return reject(err);
 
+                // Actualizar stock
                 connection.query(
                   'UPDATE productos SET cantidad = cantidad - ? WHERE id = ?',
                   [producto.cantidad, producto.id],
                   err => {
                     if (err) return reject(err);
+
+                    // Registrar movimiento de tipo venta
+                    registrarMovimiento(
+                      Number(jefe_id),
+                      'venta',
+                      producto.id,
+                      producto.cantidad,
+                      `Venta realizada`
+                    );
 
                     resolve();
                   }
@@ -238,23 +257,30 @@ app.post('/ventas/registrar', (req, res) => {
           });
         });
 
+        // Ejecutar todas las operaciones
         Promise.all(tareas)
           .then(() => {
             connection.commit(err => {
-              if (err) return connection.rollback(() => res.status(500).json({ error: 'Error al confirmar venta' }));
+              if (err) {
+                return connection.rollback(() =>
+                  res.status(500).json({ error: 'Error al confirmar venta' })
+                );
+              }
 
               registrarHistorial(jefe_id, 'venta', `Venta registrada ID ${ventaId}`);
-              registrarMovimiento(jefe_id, 'venta', null, null, `Venta ID ${ventaId} registrada`);
               res.json({ message: 'Venta registrada correctamente', venta_id: ventaId });
             });
           })
           .catch(err => {
-            connection.rollback(() => res.status(500).json({ error: 'Error al procesar la venta' }));
+            connection.rollback(() =>
+              res.status(500).json({ error: 'Error al procesar la venta' })
+            );
           });
       }
     );
   });
 });
+
 
 
 // ---------- LOGIN Y REGISTRO ----------
