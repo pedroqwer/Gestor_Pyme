@@ -147,6 +147,7 @@ CREATE TABLE inventario (
     lote VARCHAR(50),
     fecha_caducidad DATE,
     cantidad INT DEFAULT 0,
+    en_venta BOOLEAN, -- Indica si el producto está en venta
     FOREIGN KEY (producto_id) REFERENCES productos(id)
 );
 
