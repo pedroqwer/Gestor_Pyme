@@ -1,30 +1,33 @@
-(node server.js)
-
+-- ========================================
 -- Tabla: jefe (usuarios del sistema)
+-- ========================================
 CREATE TABLE jefe (
     id INT AUTO_INCREMENT PRIMARY KEY,
     usuario VARCHAR(50) NOT NULL UNIQUE,
     contrasena VARCHAR(255) NOT NULL -- debe guardarse hasheada
 );
 
+-- ========================================
 -- Tabla: productos (actualizada)
+-- ========================================
 CREATE TABLE productos (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(100) NOT NULL,
-    --descripcion TEXT,
-    --modelo VARCHAR(50),
-    --marca VARCHAR(50),
+    descripcion TEXT,
+    modelo VARCHAR(50),
+    marca VARCHAR(50),
     cantidad INT DEFAULT 0,
     precio_compra DECIMAL(10,2),  -- precio promedio o base de compra
-    --precio_venta DECIMAL(10,2),   -- precio de venta al cliente
-    --ubicacion VARCHAR(100),
+    precio_venta DECIMAL(10,2),   -- precio de venta al cliente
+    ubicacion VARCHAR(100),
     fecha_ingreso DATE DEFAULT CURRENT_DATE,
     jefe_id INT,
     FOREIGN KEY (jefe_id) REFERENCES jefe(id)
 );
 
-
+-- ========================================
 -- Tabla: proveedores
+-- ========================================
 CREATE TABLE proveedores (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(100) NOT NULL,
@@ -36,7 +39,9 @@ CREATE TABLE proveedores (
     FOREIGN KEY (jefe_id) REFERENCES jefe(id)
 );
 
+-- ========================================
 -- Tabla: entradas (actualizada)
+-- ========================================
 CREATE TABLE entradas (
     id INT AUTO_INCREMENT PRIMARY KEY,
     producto_id INT,
@@ -50,7 +55,9 @@ CREATE TABLE entradas (
     FOREIGN KEY (jefe_id) REFERENCES jefe(id)
 );
 
+-- ========================================
 -- Tabla: salidas
+-- ========================================
 CREATE TABLE salidas (
     id INT AUTO_INCREMENT PRIMARY KEY,
     producto_id INT,
@@ -62,7 +69,9 @@ CREATE TABLE salidas (
     FOREIGN KEY (jefe_id) REFERENCES jefe(id)
 );
 
+-- ========================================
 -- Tabla: movimientos (entradas y salidas)
+-- ========================================
 CREATE TABLE movimientos (
     id INT AUTO_INCREMENT PRIMARY KEY,
     tipo ENUM('entrada', 'salida','venta') NOT NULL,
@@ -75,7 +84,9 @@ CREATE TABLE movimientos (
     FOREIGN KEY (jefe_id) REFERENCES jefe(id)
 );
 
+-- ========================================
 -- Tabla: clientes
+-- ========================================
 CREATE TABLE clientes (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(100) NOT NULL,
@@ -86,7 +97,9 @@ CREATE TABLE clientes (
     FOREIGN KEY (jefe_id) REFERENCES jefe(id)
 );
 
+-- ========================================
 -- Tabla: ventas
+-- ========================================
 CREATE TABLE ventas (
     id INT AUTO_INCREMENT PRIMARY KEY,
     cliente_id INT,
@@ -97,7 +110,9 @@ CREATE TABLE ventas (
     FOREIGN KEY (jefe_id) REFERENCES jefe(id)
 );
 
+-- ========================================
 -- Tabla: detalle_venta
+-- ========================================
 CREATE TABLE detalle_venta (
     id INT AUTO_INCREMENT PRIMARY KEY,
     venta_id INT,
@@ -108,12 +123,65 @@ CREATE TABLE detalle_venta (
     FOREIGN KEY (producto_id) REFERENCES productos(id)
 );
 
+-- ========================================
 -- Tabla: historial (registro de acciones realizadas)
+-- ========================================
 CREATE TABLE historial (
     id INT AUTO_INCREMENT PRIMARY KEY,
     jefe_id INT NOT NULL,
     accion VARCHAR(100) NOT NULL,          -- Tipo de acción (ej. 'crear producto', 'editar proveedor', etc.)
     descripcion TEXT,                      -- Detalles sobre lo que se hizo
     fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- Fecha y hora de la acción
+    FOREIGN KEY (jefe_id) REFERENCES jefe(id)
+);
+
+-- ========================================
+-- NUEVAS TABLAS AÑADIDAS
+-- ========================================
+
+-- Tabla: inventario (control de stock detallado por lote o ubicación)
+CREATE TABLE inventario (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    producto_id INT NOT NULL,
+    almacen VARCHAR(100) DEFAULT 'Principal',
+    lote VARCHAR(50),
+    fecha_caducidad DATE,
+    cantidad INT DEFAULT 0,
+    FOREIGN KEY (producto_id) REFERENCES productos(id)
+);
+
+-- Tabla: pagos (para registrar métodos de pago en ventas y compras)
+CREATE TABLE pagos (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    tipo ENUM('venta','compra') NOT NULL,  -- identifica si el pago corresponde a una venta o a una compra
+    referencia_id INT NOT NULL,            -- id de la venta o entrada
+    metodo ENUM('efectivo','tarjeta','transferencia','credito') NOT NULL,
+    monto DECIMAL(10,2) NOT NULL,
+    fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    jefe_id INT,
+    FOREIGN KEY (jefe_id) REFERENCES jefe(id)
+);
+
+-- Tabla: servicios (si la empresa vende servicios además de productos)
+CREATE TABLE servicios (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL,
+    descripcion TEXT,
+    precio DECIMAL(10,2) NOT NULL,
+    jefe_id INT,
+    FOREIGN KEY (jefe_id) REFERENCES jefe(id)
+);
+
+-- Tabla: devoluciones (ventas y compras)
+CREATE TABLE devoluciones (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    tipo ENUM('venta','compra') NOT NULL,  -- indica si es devolución de una venta o compra
+    referencia_id INT NOT NULL,            -- id de la venta o entrada
+    producto_id INT NOT NULL,
+    cantidad INT NOT NULL,
+    motivo TEXT,
+    fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    jefe_id INT,
+    FOREIGN KEY (producto_id) REFERENCES productos(id),
     FOREIGN KEY (jefe_id) REFERENCES jefe(id)
 );
