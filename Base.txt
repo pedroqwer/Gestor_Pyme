@@ -65,7 +65,7 @@ CREATE TABLE salidas (
 -- Tabla: movimientos (entradas y salidas)
 CREATE TABLE movimientos (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    tipo ENUM('entrada', 'salida') NOT NULL,
+    tipo ENUM('entrada', 'salida','venta') NOT NULL,
     producto_id INT NOT NULL,
     cantidad INT NOT NULL,
     jefe_id INT,
