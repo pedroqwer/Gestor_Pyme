@@ -47,13 +47,14 @@ function registrarMovimiento(jefe_id, tipo, producto_id, cantidad, observacion =
 // Obtener productos por jefe_id
 app.get('/productos', (req, res) => {
   const jefeId = req.query.jefe_id;
-
   if (!jefeId) return res.status(400).json({ error: 'Se requiere el id del jefe' });
 
   const query = `
-    SELECT p.*, DATE_FORMAT(p.fecha_ingreso, '%Y-%m-%d') as fecha_ingreso
+    SELECT p.*, i.cantidad, i.en_venta, i.almacen, i.lote
     FROM productos p
-    WHERE p.jefe_id = ?`;
+    INNER JOIN inventario i ON p.id = i.producto_id
+    WHERE p.jefe_id = ? AND i.en_venta = TRUE
+  `;
 
   connection.query(query, [jefeId], (err, results) => {
     if (err) return res.status(500).json({ error: 'Error al obtener productos' });
@@ -74,24 +75,15 @@ app.post('/registrar/producto', (req, res) => {
     return res.status(400).json({ error: 'Faltan campos obligatorios' });
   }
 
-  // Insertar producto directamente
-  const insertQuery = `
-    INSERT INTO productos
-    (nombre, descripcion, modelo, marca, cantidad, precio_compra, precio_venta, ubicacion, fecha_ingreso, jefe_id)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+ // Registrar producto
+const insertQuery = `
+  INSERT INTO productos (nombre, descripcion, modelo, marca, cantidad, precio_compra, precio_venta, ubicacion, jefe_id)
+  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+`;
 
-  const valores = [
-    nombre,
-    descripcion || null,
-    modelo || null,
-    marca || null,
-    cantidad,
-    precio_compra,
-    precio_venta,
-    ubicacion || null,
-    fecha_ingreso ? fecha_ingreso.slice(0, 10) : new Date().toISOString().slice(0, 10),
-    jefe_id
-  ];
+  const valores = [nombre, descripcion || null, modelo || null, marca || null, cantidad, precio_compra, precio_venta, ubicacion || null, jefe_id];
+
+
 
   connection.query(insertQuery, valores, (err, result) => {
     if (err) {
@@ -116,17 +108,15 @@ app.post('/registrar/inventario', (req, res) => {
   }
 
   const query = `
-    INSERT INTO inventario
-    (producto_id, almacen, lote, fecha_caducidad, cantidad, en_venta)
-    VALUES (?, ?, ?, ?, ?, ?)`;
+  INSERT INTO inventario (producto_id, almacen, lote, cantidad, en_venta)
+  VALUES (?, ?, ?, ?, ?)
+`;
 
-  connection.query(query, [producto_id, almacen || 'Principal', lote || null, fecha_caducidad || null, cantidad || 0, en_venta ? 1 : 0], (err, result) => {
-    if (err) {
-      console.error(err);
-      return res.status(500).json({ error: 'Error al registrar inventario' });
-    }
-    res.status(201).json({ mensaje: 'Inventario registrado correctamente' });
-  });
+connection.query(query, [producto_id, almacen || 'Principal', lote || null, cantidad || 0, en_venta ? 1 : 0], (err, result) => {
+  if (err) return res.status(500).json({ error: 'Error al registrar inventario' });
+  res.status(201).json({ mensaje: 'Inventario registrado correctamente' });
+});
+
 });
 
 
@@ -325,33 +315,22 @@ app.post('/jefe/login', (req, res) => {
 
 app.get('/productos/venta', (req, res) => {
   const jefeId = req.query.jefe_id;
-
-  if (!jefeId) {
-    return res.status(400).json({ error: 'Se requiere el id del jefe' });
-  }
+  if (!jefeId) return res.status(400).json({ error: 'Se requiere el id del jefe' });
 
   const query = `
-    SELECT 
-      p.id, p.nombre, p.descripcion, p.modelo, p.marca, 
-      p.cantidad, p.precio_compra, p.precio_venta, p.ubicacion, 
-      DATE_FORMAT(p.fecha_ingreso, '%Y-%m-%d') AS fecha_ingreso
+    SELECT p.id, p.nombre, p.descripcion, p.modelo, p.marca, 
+           p.cantidad, p.precio_compra, p.precio_venta, p.ubicacion
     FROM productos p
     WHERE p.jefe_id = ? AND p.cantidad > 0
   `;
 
   connection.query(query, [jefeId], (err, results) => {
-    if (err) {
-      console.error('Error al obtener productos:', err);
-      return res.status(500).json({ error: 'Error en la base de datos' });
-    }
-
-    if (results.length === 0) {
-      return res.status(404).json({ message: 'No se encontraron productos disponibles para vender' });
-    }
-
+    if (err) return res.status(500).json({ error: 'Error en la base de datos' });
+    if (results.length === 0) return res.status(404).json({ message: 'No se encontraron productos disponibles para vender' });
     res.json(results);
   });
 });
+
  
 // Obtener clientes por jefe_id
 app.get('/clientes', (req, res) => {
@@ -894,6 +873,30 @@ app.get('/movimientos', (req, res) => {
     res.json(results);
   });
 });
+
+// Endpoint para obtener inventario de un jefe
+app.get('/inventario/:jefeId', (req, res) => {
+  const jefeId = req.params.jefeId;
+
+  const query = `
+    SELECT i.id, 
+           p.nombre AS producto, 
+           i.almacen, 
+           i.lote, 
+           i.fecha_ingreso AS fecha_ingreso, 
+           i.cantidad, 
+           i.en_venta
+    FROM inventario i
+    JOIN productos p ON i.producto_id = p.id
+    WHERE p.jefe_id = ?
+  `;
+
+  connection.query(query, [jefeId], (err, results) => {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json(results);
+  });
+});
+
 
 
 // ===============================
