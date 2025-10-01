@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Inventario</title>
+<style>
+    body { font-family: Arial; background: #f5f5f5; margin:0; padding:0; }
+    header { background:#007bff; color:#fff; padding:15px; text-align:center; }
+    .container { padding:20px; max-width:1200px; margin:auto; }
+    table { width:100%; border-collapse:collapse; background:#fff; box-shadow:0 0 5px rgba(0,0,0,0.1);}
+    th, td { padding:12px; border:1px solid #ddd; text-align:left; }
+    th { background:#007bff; color:#fff; }
+    tr:nth-child(even) { background:#f2f2f2; }
+    .en-venta { color:green; font-weight:bold; }
+    .no-en-venta { color:red; font-weight:bold; }
+</style>
+</head>
+<body>
+
+<header>
+    <h1>Inventario</h1>
+</header>
+
+<div class="container">
+    <table id="inventarioTable">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Producto</th>
+                <th>Almacén</th>
+                <th>Lote</th>
+                <th>Fecha Ingreso</th>
+                <th>Cantidad</th>
+                <th>En Venta</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Datos cargados con JS -->
+        </tbody>
+    </table>
+</div>
+
+<script>
+const jefeId = localStorage.getItem('jefe_id'); // ID del jefe
+const tableBody = document.querySelector('#inventarioTable tbody');
+
+fetch(`http://localhost:3000/inventario/${jefeId}`)
+    .then(res => res.json())
+    .then(data => {
+        tableBody.innerHTML = '';
+        data.forEach(item => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${item.id}</td>
+                <td>${item.producto}</td>
+                <td>${item.almacen}</td>
+                <td>${item.lote || ''}</td>
+                <td>${item.fecha_ingreso || ''}</td>
+                <td>${item.cantidad}</td>
+                <td class="${item.en_venta ? 'en-venta' : 'no-en-venta'}">${item.en_venta ? 'Sí' : 'No'}</td>
+            `;
+            tableBody.appendChild(tr);
+        });
+    })
+    .catch(err => {
+        console.error('Error al cargar inventario:', err);
+        tableBody.innerHTML = '<tr><td colspan="7">Error al cargar inventario</td></tr>';
+    });
+</script>
+
+</body>
+</html>
