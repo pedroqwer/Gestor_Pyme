@@ -20,7 +20,6 @@ CREATE TABLE productos (
     precio_compra DECIMAL(10,2),  -- precio promedio o base de compra
     precio_venta DECIMAL(10,2),   -- precio de venta al cliente
     ubicacion VARCHAR(100),
-    fecha_ingreso DATE DEFAULT CURRENT_DATE,
     jefe_id INT,
     FOREIGN KEY (jefe_id) REFERENCES jefe(id)
 );
@@ -145,7 +144,7 @@ CREATE TABLE inventario (
     producto_id INT NOT NULL,
     almacen VARCHAR(100) DEFAULT 'Principal',
     lote VARCHAR(50),
-    fecha_caducidad DATE,
+    fecha_ingreso DATE DEFAULT CURRENT_DATE,
     cantidad INT DEFAULT 0,
     en_venta BOOLEAN, -- Indica si el producto está en venta
     FOREIGN KEY (producto_id) REFERENCES productos(id)
