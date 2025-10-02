@@ -318,10 +318,11 @@ app.get('/productos/venta', (req, res) => {
   if (!jefeId) return res.status(400).json({ error: 'Se requiere el id del jefe' });
 
   const query = `
-    SELECT p.id, p.nombre, p.descripcion, p.modelo, p.marca, 
+    SELECT DISTINCT p.id, p.nombre, p.descripcion, p.modelo, p.marca, 
            p.cantidad, p.precio_compra, p.precio_venta, p.ubicacion
     FROM productos p
-    WHERE p.jefe_id = ? AND p.cantidad > 0
+    INNER JOIN inventario i ON p.id = i.producto_id
+    WHERE p.jefe_id = ? AND i.en_venta = 1 AND i.cantidad > 0
   `;
 
   connection.query(query, [jefeId], (err, results) => {
@@ -330,6 +331,7 @@ app.get('/productos/venta', (req, res) => {
     res.json(results);
   });
 });
+
 
  
 // Obtener clientes por jefe_id
