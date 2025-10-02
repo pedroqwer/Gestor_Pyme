@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Detalle Venta</title>
+</head>
+<body>
+  <h1>🛒 Detalle de la Venta</h1>
+  <div id="info"></div>
+  <h2>Productos</h2>
+  <table border="1" cellpadding="5">
+    <thead>
+      <tr>
+        <th>Producto</th>
+        <th>Cantidad</th>
+        <th>Precio Unitario</th>
+      </tr>
+    </thead>
+    <tbody id="detalle"></tbody>
+  </table>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get("id");
+
+    async function cargarVenta() {
+      const res = await fetch(`http://localhost:3000/ventas/${id}`);
+      const data = await res.json();
+
+      document.getElementById("info").innerHTML = `
+        <p><b>ID:</b> ${data.id}</p>
+        <p><b>Cliente:</b> ${data.cliente}</p>
+        <p><b>Fecha:</b> ${new Date(data.fecha).toLocaleString()}</p>
+        <p><b>Total:</b> $${data.total}</p>
+        <p><b>Jefe:</b> ${data.jefe}</p>
+      `;
+
+      const tbody = document.getElementById("detalle");
+      data.productos.forEach(p => {
+        tbody.innerHTML += `
+          <tr>
+            <td>${p.producto}</td>
+            <td>${p.cantidad}</td>
+            <td>$${p.precio_unitario}</td>
+          </tr>
+        `;
+      });
+    }
+
+    cargarVenta();
+  </script>
+</body>
+</html>
