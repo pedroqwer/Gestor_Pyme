@@ -220,7 +220,6 @@
             <th>Precio Compra</th>
             <th>Precio Venta</th>
             <th>Ubicación</th>
-            <th>Fecha Ingreso</th>
           </tr>
         </thead>
         <tbody id="productosBody"></tbody>
@@ -274,7 +273,6 @@
           <td>${producto.precio_compra}</td>
           <td>${producto.precio_venta || '-'}</td>
           <td>${producto.ubicacion || '-'}</td>
-          <td>${producto.fecha_ingreso}</td>
         `;
         tbody.appendChild(tr);
       });
