@@ -897,6 +897,19 @@ app.get('/inventario/:jefeId', (req, res) => {
   });
 });
 
+app.put('/inventario/:id/venta', (req, res) => {
+  const { id } = req.params;
+  const { en_venta } = req.body;
+
+  connection.query(
+    'UPDATE inventario SET en_venta = ? WHERE id = ?',
+    [en_venta, id],
+    (err) => {
+      if (err) return res.status(500).json({ error: 'Error al actualizar' });
+      res.json({ success: true, id, en_venta });
+    }
+  );
+});
 
 
 // ===============================
