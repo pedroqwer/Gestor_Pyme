@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Detalle Salida</title>
+</head>
+<body>
+  <h1>📤 Detalle de la Salida</h1>
+  <div id="info"></div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get("id");
+
+    async function cargarSalida() {
+      const res = await fetch(`http://localhost:3000/salidas/${id}`);
+      const data = await res.json();
+
+      document.getElementById("info").innerHTML = `
+        <p><b>ID:</b> ${data.id}</p>
+        <p><b>Producto:</b> ${data.producto}</p>
+        <p><b>Cantidad:</b> ${data.cantidad}</p>
+        <p><b>Observación:</b> ${data.observacion || "—"}</p>
+        <p><b>Fecha:</b> ${new Date(data.fecha).toLocaleString()}</p>
+        <p><b>Jefe:</b> ${data.jefe}</p>
+      `;
+    }
+
+    cargarSalida();
+  </script>
+</body>
+</html>
