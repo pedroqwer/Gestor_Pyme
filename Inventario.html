@@ -8,12 +8,46 @@
     body { font-family: Arial; background: #f5f5f5; margin:0; padding:0; }
     header { background:#007bff; color:#fff; padding:15px; text-align:center; }
     .container { padding:20px; max-width:1200px; margin:auto; }
-    table { width:100%; border-collapse:collapse; background:#fff; box-shadow:0 0 5px rgba(0,0,0,0.1);}
+    table { width:100%; border-collapse:collapse; background:#fff; box-shadow:0 0 5px rgba(0,0,0,0.1); }
     th, td { padding:12px; border:1px solid #ddd; text-align:left; }
     th { background:#007bff; color:#fff; }
     tr:nth-child(even) { background:#f2f2f2; }
-    .en-venta { color:green; font-weight:bold; }
-    .no-en-venta { color:red; font-weight:bold; }
+
+    /* Estilos del switch */
+    .switch {
+        position: relative;
+        display: inline-block;
+        width: 50px;
+        height: 24px;
+    }
+    .switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+    .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background-color: red;
+        transition: .4s;
+        border-radius: 24px;
+    }
+    .slider:before {
+        position: absolute;
+        content: "";
+        height: 18px; width: 18px;
+        left: 3px; bottom: 3px;
+        background-color: white;
+        transition: .4s;
+        border-radius: 50%;
+    }
+    input:checked + .slider {
+        background-color: green;
+    }
+    input:checked + .slider:before {
+        transform: translateX(26px);
+    }
 </style>
 </head>
 <body>
@@ -58,8 +92,33 @@ fetch(`http://localhost:3000/inventario/${jefeId}`)
                 <td>${item.lote || ''}</td>
                 <td>${item.fecha_ingreso || ''}</td>
                 <td>${item.cantidad}</td>
-                <td class="${item.en_venta ? 'en-venta' : 'no-en-venta'}">${item.en_venta ? 'Sí' : 'No'}</td>
+                <td>
+                    <label class="switch">
+                        <input type="checkbox" ${item.en_venta ? 'checked' : ''} data-id="${item.id}">
+                        <span class="slider"></span>
+                    </label>
+                </td>
             `;
+            
+            // Detectar cambios en el switch
+            const checkbox = tr.querySelector('input[type="checkbox"]');
+            checkbox.addEventListener('change', () => {
+                const estado = checkbox.checked; // true/false
+                const idInventario = checkbox.getAttribute('data-id');
+
+                // Hacer fetch para actualizar en el backend
+                fetch(`http://localhost:3000/inventario/${idInventario}/venta`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ en_venta: estado })
+                })
+                .then(r => r.json())
+                .then(resp => {
+                    console.log('✅ Actualizado en backend:', resp);
+                })
+                .catch(err => console.error('❌ Error al actualizar:', err));
+            });
+
             tableBody.appendChild(tr);
         });
     })
