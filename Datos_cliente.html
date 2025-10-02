@@ -8,55 +8,73 @@
     body {
       margin: 0;
       font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(135deg, #d0e7ff, #ffffff);
+      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
       min-height: 100vh;
       display: flex;
       flex-direction: column;
+      color: #fff;
     }
 
     /* Menú */
-    nav.menu-desplegable {
-      background-color: #333;
+     nav.menu-desplegable {
+      background-color: #2c3e50;
       padding: 0.5em 1em;
       display: flex;
       justify-content: flex-start;
       position: sticky;
       top: 0;
-      width: 100%;
       z-index: 100;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
     }
-    .dropdown { position: relative; }
+
+    .dropdown {
+      position: relative;
+    }
+
     .dropbtn {
-      background-color: #333;
-      color: white;
+      background-color: #2c3e50;
+      color: #ecf0f1;
       padding: 10px 18px;
       font-size: 1rem;
+      font-weight: 600;
       border: none;
       cursor: pointer;
-      border-radius: 6px;
-      transition: background-color 0.3s;
+      border-radius: 8px;
+      transition: background-color 0.3s, transform 0.2s;
     }
-    .dropbtn:hover { background-color: #1c80c8; }
+
+    .dropbtn:hover {
+      background-color: #1c80c8;
+      transform: scale(1.05);
+    }
+
     .dropdown-content {
       display: none;
       position: absolute;
-      background-color: #444;
-      min-width: 200px;
+      background-color: #34495e;
+      min-width: 220px;
       margin-top: 5px;
-      border-radius: 6px;
+      border-radius: 8px;
       overflow: hidden;
-      box-shadow: 0px 8px 16px rgba(0,0,0,0.25);
+      box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.25);
       z-index: 1000;
     }
+
     .dropdown-content a {
-      color: white;
+      color: #ecf0f1;
       padding: 12px 16px;
       text-decoration: none;
       display: block;
+      transition: background 0.3s;
     }
-    .dropdown-content a:hover { background-color: #1c80c8; }
-    .dropdown:hover .dropdown-content { display: block; }
+
+    .dropdown-content a:hover {
+      background-color: #1c80c8;
+    }
+
+    .dropdown:hover .dropdown-content {
+      display: block;
+    }
 
     /* Contenedor principal */
     .main-content {
@@ -71,85 +89,77 @@
 
     /* Tarjeta de datos cliente */
     .card {
-      background: white;
+      background: rgba(255,255,255,0.05);
+      backdrop-filter: blur(15px);
       padding: 2em;
       border-radius: 15px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.5);
     }
-
     .card h2 {
       margin-top: 0;
       font-size: 1.8em;
       color: #1c80c8;
-      border-bottom: 2px solid #e5e5e5;
+      border-bottom: 2px solid rgba(255,255,255,0.2);
       padding-bottom: 0.5em;
     }
-
     .info p {
       font-size: 1.1em;
       margin: 12px 0;
     }
-
-    .info strong { color: #333; }
+    .info strong { color: #fff; }
 
     /* Botones */
+    .back-btn, .edit-btn {
+      margin-top: 1em;
+      display: inline-block;
+      padding: 10px 20px;
+      font-size: 1em;
+      font-weight: 600;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: transform 0.2s ease, background 0.3s ease;
+      color: #fff;
+    }
     .back-btn {
-      margin: 1em 0;
-      display: block;
-      padding: 10px 20px;
       background: #1c80c8;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 1em;
+      margin-right: 10px;
     }
-    .back-btn:hover { background: #1560a8; }
-
+    .back-btn:hover { background: #1560a8; transform: scale(1.05); }
     .edit-btn {
-      margin: 10px 0 0 0;
-      display: block;
-      padding: 10px 20px;
-      background-color: #4CAF50;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 1em;
+      background: #4CAF50;
     }
-    .edit-btn:hover { background-color: #45a049; }
+    .edit-btn:hover { background: #45a049; transform: scale(1.05); }
 
     /* Historial */
     .historial-section h2 {
       margin: 0 0 1em 0;
       font-size: 1.6em;
-      color: #333;
+      color: #fff;
     }
-
     .historial-scroll {
       max-height: 400px;
       overflow-y: auto;
       border-radius: 10px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
     }
-
     table {
       width: 100%;
       border-collapse: collapse;
-      background: white;
+      background: rgba(255,255,255,0.05);
+      color: #fff;
     }
     th, td {
       padding: 12px 15px;
       text-align: left;
-      border-bottom: 1px solid #eee;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
     }
     th {
-      background: #4CAF50;
-      color: white;
+      background: rgba(28,128,200,0.9);
       text-transform: uppercase;
       letter-spacing: 0.05em;
     }
-    tr:hover { background: #f3f9f4; }
+    tr:hover { background: rgba(255,255,255,0.1); }
 
     @media (max-width: 900px) {
       .main-content { grid-template-columns: 1fr; }
@@ -162,16 +172,18 @@
       z-index: 2000;
       left: 0; top: 0;
       width: 100%; height: 100%;
-      background-color: rgba(0,0,0,0.5);
+      background-color: rgba(0,0,0,0.6);
       justify-content: center; align-items: center;
     }
     .modal-content {
-      background: white;
+      background: rgba(255,255,255,0.1);
+      backdrop-filter: blur(15px);
       padding: 20px;
       border-radius: 12px;
       width: 400px;
       max-width: 90%;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.5);
+      color: #fff;
     }
     .cerrar {
       float: right;
@@ -186,10 +198,26 @@
       width: 100%;
       padding: 8px;
       margin: 6px 0 12px 0;
-      border: 1px solid #ccc;
-      border-radius: 6px;
+      border: none;
+      border-radius: 8px;
       font-size: 1em;
+      background: rgba(255,255,255,0.15);
+      color: #fff;
+      outline: none;
+      transition: background 0.3s;
     }
+    .modal-content input:focus { background: rgba(255,255,255,0.3); }
+    .modal-content button {
+      background: #4CAF50;
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s ease, background 0.3s ease;
+    }
+    .modal-content button:hover { transform: scale(1.05); background: #45a049; }
   </style>
 </head>
 <body>
@@ -223,7 +251,6 @@
         <p><strong>Email:</strong> <span id="email">---</span></p>
         <p><strong>Dirección:</strong> <span id="direccion">---</span></p>
       </div>
-
       <!-- Botones -->
       <button class="back-btn" onclick="history.back()">⬅ Volver</button>
       <button class="edit-btn" onclick="abrirModal()">✎ Modificar Datos</button>
@@ -264,7 +291,7 @@
         <input type="email" id="emailInput">
         <label>Dirección:</label>
         <input type="text" id="direccionInput">
-        <button type="submit" class="edit-btn">Guardar cambios</button>
+        <button type="submit">Guardar cambios</button>
       </form>
     </div>
   </div>
@@ -277,13 +304,11 @@
       alert("No se encontró cliente o sesión.");
       window.location.href = "Clientes.html";
     } else {
-      // Mostrar datos del cliente
       document.getElementById('nombre').textContent = cliente.nombre;
       document.getElementById('telefono').textContent = cliente.telefono || "—";
       document.getElementById('email').textContent = cliente.email || "—";
       document.getElementById('direccion').textContent = cliente.direccion || "—";
 
-      // Historial
       fetch(`http://localhost:3000/clientes/${cliente.id}/historial?jefe_id=${jefeId}`)
         .then(res => res.ok ? res.json() : Promise.reject("Error al obtener historial"))
         .then(historial => {
@@ -311,10 +336,7 @@
       document.getElementById("emailInput").value = cliente.email || "";
       document.getElementById("direccionInput").value = cliente.direccion || "";
     }
-
-    function cerrarModal() {
-      document.getElementById("modalActualizar").style.display = "none";
-    }
+    function cerrarModal() { document.getElementById("modalActualizar").style.display = "none"; }
 
     document.getElementById("formActualizar").addEventListener("submit", function(e) {
       e.preventDefault();
@@ -335,7 +357,6 @@
       .then(data => {
         if(data.error) return alert('Error: ' + data.error);
 
-        // Actualizar UI y localStorage
         document.getElementById('nombre').textContent = updatedCliente.nombre;
         document.getElementById('telefono').textContent = updatedCliente.telefono;
         document.getElementById('email').textContent = updatedCliente.email;
@@ -356,10 +377,7 @@
       });
     });
 
-    // Logout limpio
-    document.getElementById('logoutLink').addEventListener('click', () => {
-      localStorage.clear();
-    });
+    document.getElementById('logoutLink').addEventListener('click', () => { localStorage.clear(); });
   </script>
 </body>
 </html>

@@ -5,31 +5,115 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Inventario</title>
 <style>
-    body { font-family: Arial; background: #f5f5f5; margin:0; padding:0; }
-    header { background:#007bff; color:#fff; padding:15px; text-align:center; }
-    .container { padding:20px; max-width:1200px; margin:auto; }
-    table { width:100%; border-collapse:collapse; background:#fff; box-shadow:0 0 5px rgba(0,0,0,0.1); }
-    th, td { padding:12px; border:1px solid #ddd; text-align:left; }
-    th { background:#007bff; color:#fff; }
-    tr:nth-child(even) { background:#f2f2f2; }
+    /* ===== BODY Y TIPOGRAFÍA ===== */
+    body { 
+        font-family: 'Arial', sans-serif; 
+        background: #f5f7fa; 
+        margin:0; padding:0; 
+    }
+    header { 
+        background:#007bff; 
+        color:#fff; 
+        padding:15px; 
+        text-align:center; 
+        font-size: 1.8rem;
+        box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+    }
+    .container { 
+        padding:20px; 
+        max-width:1200px; 
+        margin:auto; 
+    }
 
-    /* Estilos del switch */
+    /* ===== TABLA MODERNA ===== */
+    table {
+        width:100%; 
+        border-collapse: collapse; 
+        background:#fff; 
+        border-radius: 8px; 
+        overflow: hidden; 
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    th, td {
+        padding:12px 15px; 
+        text-align:left; 
+    }
+    th {
+        background:#007bff; 
+        color:#fff; 
+        text-transform: uppercase; 
+        font-weight: 600;
+    }
+    tr {
+        border-bottom: 1px solid #e0e0e0;
+        transition: background 0.2s;
+    }
+    tr:hover {
+        background: #f1f9ff;
+    }
+    td:last-child {
+        text-align: center;
+    }
+
+    /* ===== MENÚ DESPLEGABLE MODERNO ===== */
+    nav.menu-desplegable {
+        background-color: #2c3e50;
+        padding: 0.5em 1em;
+        display: flex;
+        justify-content: flex-start;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+        flex-wrap: wrap;
+    }
+    .dropdown { position: relative; }
+    .dropbtn {
+        background-color: #2c3e50;
+        color: #ecf0f1;
+        padding: 10px 18px;
+        font-size: 1rem;
+        font-weight: 600;
+        border: none;
+        cursor: pointer;
+        border-radius: 8px;
+        transition: background-color 0.3s, transform 0.2s;
+    }
+    .dropbtn:hover { background-color: #1c80c8; transform: scale(1.05); }
+    .dropdown-content {
+        display: none;
+        position: absolute;
+        background-color: #34495e;
+        min-width: 180px;
+        margin-top: 5px;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.25);
+        z-index: 1000;
+    }
+    .dropdown-content a {
+        color: #ecf0f1;
+        padding: 12px 16px;
+        text-decoration: none;
+        display: block;
+        transition: background 0.3s;
+    }
+    .dropdown-content a:hover { background-color: #1c80c8; }
+    .dropdown:hover .dropdown-content { display: block; }
+
+    /* ===== SWITCH MODERNO ===== */
     .switch {
         position: relative;
         display: inline-block;
         width: 50px;
         height: 24px;
     }
-    .switch input {
-        opacity: 0;
-        width: 0;
-        height: 0;
-    }
+    .switch input { display: none; }
     .slider {
         position: absolute;
         cursor: pointer;
         top: 0; left: 0; right: 0; bottom: 0;
-        background-color: red;
+        background-color: #e74c3c;
         transition: .4s;
         border-radius: 24px;
     }
@@ -41,20 +125,54 @@
         background-color: white;
         transition: .4s;
         border-radius: 50%;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
     }
-    input:checked + .slider {
-        background-color: green;
-    }
-    input:checked + .slider:before {
-        transform: translateX(26px);
+    input:checked + .slider { background-color: #2ecc71; }
+    input:checked + .slider:before { transform: translateX(26px); }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 768px) {
+        table, thead, tbody, th, td, tr { display: block; }
+        thead tr { display: none; }
+        td {
+            padding-left: 50%;
+            position: relative;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        td::before {
+            position: absolute;
+            left: 15px;
+            top: 12px;
+            white-space: nowrap;
+            font-weight: 600;
+            content: attr(data-label);
+        }
     }
 </style>
 </head>
 <body>
 
-<header>
-    <h1>Inventario</h1>
-</header>
+<nav class="menu-desplegable">
+    <div class="dropdown">
+      <button class="dropbtn">☰ Menú</button>
+      <div class="dropdown-content">
+        <a href="Inventario.html">Inventario</a>
+        <a href="Clientes.html">Clientes</a>
+        <a href="Productos.html">Productos</a>
+        <a href="Top_Ventas.html">Más vendidos</a>
+        <a href="Ventas.html">Ventas</a>
+        <a href="Registrar_Entrada.html">Registrar Entrada</a>
+        <a href="Proveedores.html">Proveedores</a>
+        <a href="historial.html">Historial</a>
+        <a href="Salidas.html">Salidas</a>
+        <a href="Movimientos.html">Movimientos</a>
+        <a href="Login.html" id="logoutLink">Cerrar sesión</a>
+      </div>
+    </div>
+</nav>
+
+<header>Inventario</header>
 
 <div class="container">
     <table id="inventarioTable">
@@ -76,7 +194,7 @@
 </div>
 
 <script>
-const jefeId = localStorage.getItem('jefe_id'); // ID del jefe
+const jefeId = localStorage.getItem('jefe_id');
 const tableBody = document.querySelector('#inventarioTable tbody');
 
 fetch(`http://localhost:3000/inventario/${jefeId}`)
@@ -86,37 +204,34 @@ fetch(`http://localhost:3000/inventario/${jefeId}`)
         data.forEach(item => {
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td>${item.id}</td>
-                <td>${item.producto}</td>
-                <td>${item.almacen}</td>
-                <td>${item.lote || ''}</td>
-                <td>${item.fecha_ingreso || ''}</td>
-                <td>${item.cantidad}</td>
-                <td>
+                <td data-label="ID">${item.id}</td>
+                <td data-label="Producto">${item.producto}</td>
+                <td data-label="Almacén">${item.almacen}</td>
+                <td data-label="Lote">${item.lote || ''}</td>
+                <td data-label="Fecha Ingreso">${item.fecha_ingreso || ''}</td>
+                <td data-label="Cantidad">${item.cantidad}</td>
+                <td data-label="En Venta">
                     <label class="switch">
                         <input type="checkbox" ${item.en_venta ? 'checked' : ''} data-id="${item.id}">
                         <span class="slider"></span>
                     </label>
                 </td>
             `;
-            
-            // Detectar cambios en el switch
+
+            // Switch toggle
             const checkbox = tr.querySelector('input[type="checkbox"]');
             checkbox.addEventListener('change', () => {
-                const estado = checkbox.checked; // true/false
-                const idInventario = checkbox.getAttribute('data-id');
+                const estado = checkbox.checked;
+                const idInventario = checkbox.dataset.id;
 
-                // Hacer fetch para actualizar en el backend
                 fetch(`http://localhost:3000/inventario/${idInventario}/venta`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ en_venta: estado })
                 })
                 .then(r => r.json())
-                .then(resp => {
-                    console.log('✅ Actualizado en backend:', resp);
-                })
-                .catch(err => console.error('❌ Error al actualizar:', err));
+                .then(resp => console.log('✅ Actualizado:', resp))
+                .catch(err => console.error('❌ Error:', err));
             });
 
             tableBody.appendChild(tr);

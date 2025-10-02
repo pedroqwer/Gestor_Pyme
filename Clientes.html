@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Clientes</title>
   <style>
+    
     body {
       font-family: Arial, sans-serif;
       margin: 0;
@@ -105,7 +106,7 @@
 
     button {
       padding: 10px 20px;
-      background: #4CAF50;
+      background: #1a17ad;
       color: white;
       border: none;
       border-radius: 5px;
@@ -143,7 +144,7 @@
     }
 
     th {
-      background-color: #4CAF50;
+      background-color: #1c3d5a;
       color: white;
       text-transform: uppercase;
       letter-spacing: 0.05em;
@@ -154,7 +155,7 @@
     }
 
     tbody tr:hover {
-      background-color: #e3f4ea;
+      background-color: #d6e4f0;
       cursor: pointer;
       transition: background-color 0.3s ease;
     }
@@ -244,7 +245,7 @@
       }
     }
 
-    /* Fondo animado */
+    /* Fondo animado estilo Login */
     #backgroundCanvas {
       position: fixed;
       top: 0;
@@ -253,8 +254,16 @@
       height: 100vh;
       z-index: 0;
       pointer-events: none;
-      background: linear-gradient(135deg, #d0e7ff, #ffffff);
+      background: #0f2027;
     }
+    #lista {
+    color: #64ffda;       /* Verde turquesa brillante */
+    text-align: center;
+    font-size: 2.2em;
+    font-weight: 700;
+    margin: 20px 0;
+    text-shadow: 0px 0px 8px rgba(100, 255, 218, 0.5); /* Brillo sutil */
+  }
   </style>
 
   <!-- jsPDF para PDF -->
@@ -287,7 +296,7 @@
 
   <div class="container">
     <div class="encabezado">
-      <h1>Lista de Clientes</h1>
+      <h1 id="lista">Lista de Clientes</h1>
       <input type="text" id="filtroNombre" class="cuadro-texto" placeholder="Escribe un nombre de cliente" />
     </div>
 
@@ -300,9 +309,7 @@
           <th>Dirección</th>
         </tr>
       </thead>
-      <tbody id="clientesBody">
-        <!-- Los clientes se cargan con JS -->
-      </tbody>
+      <tbody id="clientesBody"></tbody>
     </table>
   </div>
 
@@ -340,9 +347,7 @@
     function cargarClientes() {
       fetch(`http://localhost:3000/clientes?jefe_id=${encodeURIComponent(jefeId)}`)
         .then(response => {
-          if (!response.ok) {
-            throw new Error(`Error en la respuesta del servidor: ${response.status}`);
-          }
+          if (!response.ok) throw new Error(`Error en la respuesta del servidor: ${response.status}`);
           return response.json();
         })
         .then(data => {
@@ -366,7 +371,6 @@
           <td>${cliente.direccion}</td>
         `;
         tr.addEventListener('click', () => {
-          // Guardamos el objeto completo en localStorage
           localStorage.setItem('clienteSeleccionado', JSON.stringify(cliente));
           window.location.href = 'Datos_cliente.html';
         });
@@ -391,7 +395,6 @@
       localStorage.removeItem('usuario');
     });
 
-    // Mostrar modal de descarga
     document.getElementById('Downloand').addEventListener('click', () => {
       document.getElementById('descargaModal').style.display = 'flex';
     });
@@ -437,13 +440,10 @@
       }
     });
 
-    // --------------------
-    // Fondo animado - partículas
-    // --------------------
+    // Fondo animado estilo Login
     const canvas = document.getElementById('backgroundCanvas');
     const ctx = canvas.getContext('2d');
     let width, height;
-    let particles = [];
 
     function resize() {
       width = window.innerWidth;
@@ -451,65 +451,83 @@
       canvas.width = width;
       canvas.height = height;
     }
-
     window.addEventListener('resize', resize);
     resize();
 
-    class Particle {
-      constructor() {
+    class Shape {
+      constructor() { this.reset(); }
+      reset() {
         this.x = Math.random() * width;
         this.y = Math.random() * height;
-        this.vx = (Math.random() - 0.5) * 0.3;
-        this.vy = (Math.random() - 0.5) * 0.3;
-        this.radius = 2 + Math.random() * 2;
+        this.size = 50 + Math.random() * 80;
+        this.speedX = (Math.random() * 0.3 + 0.05) * (Math.random() < 0.5 ? 1 : -1);
+        this.speedY = (Math.random() * 0.2 + 0.03) * (Math.random() < 0.5 ? 1 : -1);
+        this.opacity = 0.05 + Math.random() * 0.15;
+        this.color = `rgba(0, 140, 186, ${this.opacity})`;
+        this.type = Math.floor(Math.random() * 3);
+        this.rotation = Math.random() * 2 * Math.PI;
+        this.rotationSpeed = (Math.random() - 0.5) * 0.002;
       }
-      move() {
-        this.x += this.vx;
-        this.y += this.vy;
-        if (this.x < 0 || this.x > width) this.vx = -this.vx;
-        if (this.y < 0 || this.y > height) this.vy = -this.vy;
+      draw(ctx) {
+        ctx.save();
+        ctx.translate(this.x, this.y);
+        ctx.rotate(this.rotation);
+        ctx.fillStyle = this.color;
+        switch (this.type) {
+          case 0:
+            ctx.beginPath();
+            ctx.arc(0, 0, this.size / 2, 0, Math.PI * 2);
+            ctx.fill();
+            break;
+          case 1:
+            ctx.beginPath();
+            ctx.moveTo(0, -this.size / 1.5);
+            ctx.lineTo(this.size / 1.3, this.size / 2);
+            ctx.lineTo(-this.size / 1.3, this.size / 2);
+            ctx.closePath();
+            ctx.fill();
+            break;
+          case 2:
+            const r = this.size / 5;
+            ctx.beginPath();
+            ctx.moveTo(-this.size / 2 + r, -this.size / 2);
+            ctx.lineTo(this.size / 2 - r, -this.size / 2);
+            ctx.quadraticCurveTo(this.size / 2, -this.size / 2, this.size / 2, -this.size / 2 + r);
+            ctx.lineTo(this.size / 2, this.size / 2 - r);
+            ctx.quadraticCurveTo(this.size / 2, this.size / 2, this.size / 2 - r, this.size / 2);
+            ctx.lineTo(-this.size / 2 + r, this.size / 2);
+            ctx.quadraticCurveTo(-this.size / 2, this.size / 2, -this.size / 2, this.size / 2 - r);
+            ctx.lineTo(-this.size / 2, -this.size / 2 + r);
+            ctx.quadraticCurveTo(-this.size / 2, -this.size / 2, -this.size / 2 + r, -this.size / 2);
+            ctx.closePath();
+            ctx.fill();
+            break;
+        }
+        ctx.restore();
       }
-      draw() {
-        ctx.beginPath();
-        ctx.fillStyle = 'rgba(30, 144, 255, 0.6)';
-        ctx.shadowColor = 'rgba(30, 144, 255, 0.7)';
-        ctx.shadowBlur = 5;
-        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.shadowBlur = 0;
+      update() {
+        this.x += this.speedX;
+        this.y += this.speedY;
+        this.rotation += this.rotationSpeed;
+        if (this.x > width + this.size) this.x = -this.size;
+        else if (this.x < -this.size) this.x = width + this.size;
+        if (this.y > height + this.size) this.y = -this.size;
+        else if (this.y < -this.size) this.y = height + this.size;
       }
     }
 
-    function initParticles(num = 80) {
-      particles = [];
-      for (let i = 0; i < num; i++) {
-        particles.push(new Particle());
-      }
-    }
+    const shapes = [];
+    const maxShapes = 35;
+    for (let i = 0; i < maxShapes; i++) shapes.push(new Shape());
 
     function animate() {
       ctx.clearRect(0, 0, width, height);
-      for (let i = 0; i < particles.length; i++) {
-        let p1 = particles[i];
-        p1.move();
-        p1.draw();
-        for (let j = i + 1; j < particles.length; j++) {
-          let p2 = particles[j];
-          const dist = Math.hypot(p1.x - p2.x, p1.y - p2.y);
-          if (dist < 130) {
-            ctx.strokeStyle = `rgba(30, 144, 255, ${(130 - dist) / 130 / 2})`;
-            ctx.lineWidth = 1;
-            ctx.beginPath();
-            ctx.moveTo(p1.x, p1.y);
-            ctx.lineTo(p2.x, p2.y);
-            ctx.stroke();
-          }
-        }
+      for (let shape of shapes) {
+        shape.update();
+        shape.draw(ctx);
       }
       requestAnimationFrame(animate);
     }
-
-    initParticles();
     animate();
   </script>
 

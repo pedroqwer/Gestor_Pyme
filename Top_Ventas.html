@@ -6,6 +6,67 @@
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
+    /* ==== MENÚ DESPLEGABLE ESTILO MODERNO ==== */
+nav.menu-desplegable {
+  background-color: #2c3e50;   /* Azul oscuro */
+  padding: 0.5em 1em;
+  display: flex;
+  justify-content: flex-start;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+}
+
+.dropdown {
+  position: relative;
+}
+
+.dropbtn {
+  background-color: #2c3e50;
+  color: #ecf0f1;
+  padding: 10px 18px;
+  font-size: 1rem;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: background-color 0.3s, transform 0.2s;
+}
+
+.dropbtn:hover {
+  background-color: #1c80c8;  /* Azul acento en hover */
+  transform: scale(1.05);
+}
+
+.dropdown-content {
+  display: none;
+  position: absolute;
+  background-color: #34495e; /* Fondo gris-azulado */
+  min-width: 220px;
+  margin-top: 5px;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.25);
+  z-index: 1000;
+}
+
+.dropdown-content a {
+  color: #ecf0f1;
+  padding: 12px 16px;
+  text-decoration: none;
+  display: block;
+  transition: background 0.3s;
+}
+
+.dropdown-content a:hover {
+  background-color: #1c80c8; /* Azul acento en hover */
+}
+
+.dropdown:hover .dropdown-content {
+  display: block;
+}
+
     html, body {
       height: 100%;
       overflow: hidden; /* Evita que toda la página se desplace */
@@ -126,6 +187,24 @@
     }
   </style>
 </head>
+ <nav class="menu-desplegable">
+    <div class="dropdown">
+      <button class="dropbtn">☰ Menú</button>
+      <div class="dropdown-content">
+        <a href="Inventario.html">Inventario</a>
+        <a href="Clientes.html">Clientes</a>
+        <a href="Productos.html">Productos</a>
+        <a href="Top_Ventas.html">Más vendidos</a>
+        <a href="Ventas.html">Ventas</a>
+        <a href="Registrar_Entrada.html">Registrar Entrada nuevo producto</a>
+        <a href="Proveedores.html">Proveedores</a>
+        <a href="historial.html">Historial</a>
+        <a href="Salidas.html">Salidas</a>
+        <a href="Movimientos.html">Movimientos</a>
+        <a href="Login.html" id="logoutLink">Cerrar sesión</a>
+      </div>
+    </div>
+  </nav>
 <body>
   <!-- Contenido desplazable -->
   <div class="scroll-container">

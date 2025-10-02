@@ -7,15 +7,20 @@
   <style>
     * {
       box-sizing: border-box;
+      margin: 0;
+      padding: 0;
     }
 
     body {
-      font-family: Arial, sans-serif;
-      background-color: #f5f6fa;
-      padding: 20px;
-      margin: 0;
+      font-family: 'Poppins', Arial, sans-serif;
+      background-color: #0f2027;
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      overflow: hidden;
       position: relative;
-      z-index: 1;
     }
 
     canvas#backgroundCanvas {
@@ -26,70 +31,94 @@
       height: 100vh;
       z-index: 0;
       pointer-events: none;
-      background: linear-gradient(135deg, #e0f7e9, #b2d8b2);
+      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
     }
 
     .form-container {
-      background: #fff;
-      padding: 20px 30px;
-      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(15px);
+      border-radius: 15px;
+      padding: 40px 30px;
       max-width: 500px;
-      margin: auto;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      width: 90%;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
       position: relative;
       z-index: 2;
+      border: 1px solid rgba(255,255,255,0.2);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .form-container:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 40px rgba(0,0,0,0.6);
     }
 
     h2 {
       text-align: center;
-      color: #2f3640;
+      margin-bottom: 30px;
+      font-size: 28px;
+      color: #e0e0e0;
     }
 
     label {
       display: block;
       margin-top: 15px;
-      font-weight: bold;
+      font-weight: 600;
+      color: #d1d1d1;
+      font-size: 14px;
     }
 
     input, textarea {
       width: 100%;
-      padding: 8px;
+      padding: 12px;
       margin-top: 5px;
-      border: 1px solid #dcdde1;
-      border-radius: 5px;
-      font-size: 14px;
-    }
-
-    button {
-      margin-top: 20px;
-      padding: 10px;
-      background-color: #44bd32;
-      color: white;
       border: none;
-      border-radius: 5px;
-      font-size: 16px;
-      cursor: pointer;
-      width: 100%;
+      border-radius: 8px;
+      background: rgba(255,255,255,0.1);
+      color: #fff;
+      font-size: 14px;
+      outline: none;
+      transition: background 0.3s ease;
     }
 
-    button:hover {
-      background-color: #4cd137;
+    input:focus, textarea:focus {
+      background: rgba(255,255,255,0.2);
     }
+
+   button {
+  margin-top: 25px;
+  padding: 12px;
+  background: linear-gradient(135deg, #1e3c72, #2a5298); /* Degradado azul */
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  width: 100%;
+  transition: background 0.3s ease, transform 0.2s ease;
+}
+
+button:hover {
+  background: linear-gradient(135deg, #2a5298, #1e3c72); /* Inverso en hover */
+  transform: scale(1.03);
+}
 
     .success {
-      color: green;
+      color: #2ecc71;
       margin-top: 15px;
+      font-weight: 600;
     }
 
     .error {
-      color: red;
+      color: #e74c3c;
       margin-top: 15px;
+      font-weight: 600;
     }
   </style>
 </head>
 <body>
 
-  <!-- Fondo animado -->
   <canvas id="backgroundCanvas"></canvas>
 
   <div class="form-container">
@@ -117,14 +146,11 @@
     </form>
   </div>
 
-  <!-- Script para formulario -->
   <script>
     const form = document.getElementById('proveedorForm');
     const message = document.getElementById('message');
 
-    // Obtener jefe_id desde localStorage y asignarlo
     const jefeId = localStorage.getItem('jefe_id');
-    console.log('jefeId:', jefeId);
     if (jefeId) {
       document.getElementById('jefe_id').value = jefeId;
     }
@@ -162,7 +188,6 @@
     });
   </script>
 
-  <!-- Fondo animado -->
   <script>
     const canvas = document.getElementById('backgroundCanvas');
     const ctx = canvas.getContext('2d');
@@ -174,56 +199,51 @@
       canvas.width = width;
       canvas.height = height;
     }
-
     window.addEventListener('resize', resize);
     resize();
 
-    class Particle {
+    class Shape {
       constructor() { this.reset(); }
       reset() {
         this.x = Math.random() * width;
         this.y = Math.random() * height;
-        this.radius = 1 + Math.random() * 3;
-        this.speedX = (Math.random() - 0.5) * 0.4;
-        this.speedY = (Math.random() - 0.5) * 0.4;
-        this.alpha = 0.1 + Math.random() * 0.3;
-      }
-      update() {
-        this.x += this.speedX;
-        this.y += this.speedY;
-        if (this.x < 0 || this.x > width) this.speedX *= -1;
-        if (this.y < 0 || this.y > height) this.speedY *= -1;
+        this.size = 30 + Math.random() * 70;
+        this.speedX = (Math.random() * 0.5 + 0.05) * (Math.random() < 0.5 ? 1 : -1);
+        this.speedY = (Math.random() * 0.3 + 0.03) * (Math.random() < 0.5 ? 1 : -1);
+        this.opacity = 0.03 + Math.random() * 0.1;
+        this.color = `rgba(255,255,255,${this.opacity})`;
+        this.type = Math.floor(Math.random() * 3);
+        this.rotation = Math.random() * 2 * Math.PI;
+        this.rotationSpeed = (Math.random() - 0.5) * 0.003;
       }
       draw(ctx) {
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
-        ctx.fillStyle = `rgba(76, 175, 80, ${this.alpha})`;
-        ctx.fill();
+        ctx.save();
+        ctx.translate(this.x, this.y);
+        ctx.rotate(this.rotation);
+        ctx.fillStyle = this.color;
+        switch (this.type) {
+          case 0: ctx.beginPath(); ctx.arc(0,0,this.size/2,0,Math.PI*2); ctx.fill(); break;
+          case 1: ctx.beginPath(); ctx.moveTo(0,-this.size/1.5); ctx.lineTo(this.size/1.3,this.size/2); ctx.lineTo(-this.size/1.3,this.size/2); ctx.closePath(); ctx.fill(); break;
+          case 2: const r=this.size/5; ctx.beginPath(); ctx.moveTo(-this.size/2+r,-this.size/2); ctx.lineTo(this.size/2-r,-this.size/2); ctx.quadraticCurveTo(this.size/2,-this.size/2,this.size/2,-this.size/2+r); ctx.lineTo(this.size/2,this.size/2-r); ctx.quadraticCurveTo(this.size/2,this.size/2,this.size/2-r,this.size/2); ctx.lineTo(-this.size/2+r,this.size/2); ctx.quadraticCurveTo(-this.size/2,this.size/2,-this.size/2,this.size/2-r); ctx.lineTo(-this.size/2,-this.size/2+r); ctx.quadraticCurveTo(-this.size/2,-this.size/2,-this.size/2+r,-this.size/2); ctx.closePath(); ctx.fill(); break;
+        }
+        ctx.restore();
+      }
+      update() {
+        this.x += this.speedX; this.y += this.speedY; this.rotation += this.rotationSpeed;
+        if(this.x>width+this.size)this.x=-this.size; else if(this.x<-this.size)this.x=width+this.size;
+        if(this.y>height+this.size)this.y=-this.size; else if(this.y<-this.size)this.y=height+this.size;
       }
     }
 
-    const particles = Array.from({ length: 100 }, () => new Particle());
+    const shapes = [];
+    const maxShapes = 50;
+    for(let i=0;i<maxShapes;i++)shapes.push(new Shape());
 
-    function animate() {
-      ctx.clearRect(0, 0, width, height);
-      particles.forEach(p1 => {
-        p1.update();
-        p1.draw(ctx);
-        particles.forEach(p2 => {
-          const dist = Math.hypot(p1.x - p2.x, p1.y - p2.y);
-          if (dist < 120) {
-            ctx.strokeStyle = `rgba(76, 175, 80, ${(120 - dist) / 300})`;
-            ctx.lineWidth = 0.7;
-            ctx.beginPath();
-            ctx.moveTo(p1.x, p1.y);
-            ctx.lineTo(p2.x, p2.y);
-            ctx.stroke();
-          }
-        });
-      });
+    function animate(){
+      ctx.clearRect(0,0,width,height);
+      for(let shape of shapes){ shape.update(); shape.draw(ctx); }
       requestAnimationFrame(animate);
     }
-
     animate();
   </script>
 </body>
