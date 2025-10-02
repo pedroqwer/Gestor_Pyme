@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Movimientos de Inventario</title>
   <style>
-    /* ==== BODY Y TIPOGRAFÍA ==== */
     body {
       font-family: Arial, sans-serif;
       background: #f7f7f7;
@@ -16,194 +15,41 @@
       text-align: center;
       margin: 20px 0;
     }
+    nav.menu-desplegable { background-color: #2c3e50; padding: 0.5em 1em; display: flex; justify-content: flex-start; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25); flex-wrap: wrap; }
+    .dropdown { position: relative; }
+    .dropbtn { background-color: #2c3e50; color: #ecf0f1; padding: 10px 18px; font-size: 1rem; font-weight: 600; border: none; cursor: pointer; border-radius: 8px; transition: background-color 0.3s, transform 0.2s; }
+    .dropbtn:hover { background-color: #1c80c8; transform: scale(1.05); }
+    .dropdown-content { display: none; position: absolute; background-color: #34495e; min-width: 180px; margin-top: 5px; border-radius: 8px; overflow: hidden; box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.25); z-index: 1000; }
+    .dropdown-content a { color: #ecf0f1; padding: 12px 16px; text-decoration: none; display: block; transition: background 0.3s; }
+    .dropdown-content a:hover { background-color: #1c80c8; }
+    .dropdown:hover .dropdown-content { display: block; }
 
-    /* ==== MENÚ DESPLEGABLE ESTILO MODERNO ==== */
-    nav.menu-desplegable {
-      background-color: #2c3e50;   /* Azul oscuro */
-      padding: 0.5em 1em;
-      display: flex;
-      justify-content: flex-start;
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
-      flex-wrap: wrap; /* Ajustable en pantallas pequeñas */
-    }
+    .acciones { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; margin: 15px 20px; gap: 10px; }
+    .acciones input, .acciones select { padding: 8px; border: 1px solid #ccc; border-radius: 5px; }
+    .acciones input[type="text"] { flex: 1; min-width: 200px; }
+    button { padding: 8px 15px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; transition: 0.2s ease; }
+    button:hover { opacity: 0.85; }
+    .btn-refresh { background: #007bff; color: #fff; }
+    .btn-clear { background: #6c757d; color: #fff; }
+    .btn-export { background: #28a745; color: #fff; }
 
-    .dropdown {
-      position: relative;
-    }
-
-    .dropbtn {
-      background-color: #2c3e50;
-      color: #ecf0f1;
-      padding: 10px 18px;
-      font-size: 1rem;
-      font-weight: 600;
-      border: none;
-      cursor: pointer;
-      border-radius: 8px;
-      transition: background-color 0.3s, transform 0.2s;
-    }
-
-    .dropbtn:hover {
-      background-color: #1c80c8;  /* Azul acento en hover */
-      transform: scale(1.05);
-    }
-
-    .dropdown-content {
-      display: none;
-      position: absolute;
-      background-color: #34495e; /* Fondo gris-azulado */
-      min-width: 180px;
-      margin-top: 5px;
-      border-radius: 8px;
-      overflow: hidden;
-      box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.25);
-      z-index: 1000;
-    }
-
-    .dropdown-content a {
-      color: #ecf0f1;
-      padding: 12px 16px;
-      text-decoration: none;
-      display: block;
-      transition: background 0.3s;
-    }
-
-    .dropdown-content a:hover {
-      background-color: #1c80c8; /* Azul acento en hover */
-    }
-
-    .dropdown:hover .dropdown-content {
-      display: block;
-    }
-
-    /* ==== ACCIONES (FILTROS Y BOTONES) ==== */
-    .acciones {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: space-between;
-      align-items: center;
-      margin: 15px 20px;
-      gap: 10px;
-    }
-
-    .acciones input, .acciones select {
-      padding: 8px;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-    }
-
-    .acciones input[type="text"] {
-      flex: 1;
-      min-width: 200px;
-    }
-
-    button {
-      padding: 8px 15px;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      font-weight: bold;
-      transition: 0.2s ease;
-    }
-
-    button:hover {
-      opacity: 0.85;
-    }
-
-    .btn-refresh {
-      background: #007bff;
-      color: #fff;
-    }
-
-    .btn-clear {
-      background: #6c757d;
-      color: #fff;
-    }
-
-    .btn-export {
-      background: #28a745;
-      color: #fff;
-    }
-
-    /* ==== TABLA ==== */
-    table {
-      width: 95%;
-      margin: auto;
-      border-collapse: collapse;
-      background: #fff;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      border-radius: 8px;
-      overflow: hidden;
-    }
-
-    thead {
-      background: #f0f0f0;
-    }
-
-    th, td {
-      padding: 10px;
-      text-align: left;
-      border-bottom: 1px solid #ddd;
-    }
-
-    tr:hover {
-      background: #f9f9f9;
-    }
-
-    .entrada {
-      color: green;
-      font-weight: bold;
-    }
-
-    .salida {
-      color: red;
-      font-weight: bold;
-    }
-
-    .venta {
-      color: blue;
-      font-weight: bold;
-    }
-
-    /* ==== RESPONSIVE PARA TABLA ==== */
+    table { width: 95%; margin: auto; border-collapse: collapse; background: #fff; box-shadow: 0 2px 6px rgba(0,0,0,0.1); border-radius: 8px; overflow: hidden; }
+    thead { background: #f0f0f0; }
+    th, td { padding: 10px; text-align: left; border-bottom: 1px solid #ddd; }
+    tr:hover { background: #e0f7ff; cursor: pointer; }
+    .entrada { color: green; font-weight: bold; }
+    .salida { color: red; font-weight: bold; }
+    .venta { color: blue; font-weight: bold; }
     @media (max-width: 768px) {
-      .acciones {
-        flex-direction: column;
-        align-items: stretch;
-      }
-
-      table, thead, tbody, th, td, tr {
-        display: block;
-      }
-
-      thead tr {
-        display: none;
-      }
-
-      td {
-        position: relative;
-        padding-left: 50%;
-        border: none;
-        border-bottom: 1px solid #ccc;
-        text-align: left;
-      }
-
-      td::before {
-        position: absolute;
-        left: 10px;
-        top: 10px;
-        white-space: nowrap;
-        font-weight: bold;
-        content: attr(data-label);
-      }
+      .acciones { flex-direction: column; align-items: stretch; }
+      table, thead, tbody, th, td, tr { display: block; }
+      thead tr { display: none; }
+      td { position: relative; padding-left: 50%; border: none; border-bottom: 1px solid #ccc; text-align: left; }
+      td::before { position: absolute; left: 10px; top: 10px; white-space: nowrap; font-weight: bold; content: attr(data-label); }
     }
   </style>
 </head>
 <body>
-  <!-- MENÚ DESPLEGABLE -->
   <nav class="menu-desplegable">
     <div class="dropdown">
       <button class="dropbtn">☰ Menú</button>
@@ -266,10 +112,7 @@
     async function cargarMovimientos() {
       try {
         const jefeId = localStorage.getItem("jefe_id");
-        if (!jefeId) {
-          alert("⚠️ No se encontró jefe_id en el almacenamiento local.");
-          return;
-        }
+        if (!jefeId) { alert("⚠️ No se encontró jefe_id."); return; }
 
         const res = await fetch(`http://localhost:3000/movimientos?jefe_id=${jefeId}`);
         if (!res.ok) throw new Error("Error al obtener movimientos");
@@ -277,7 +120,7 @@
         movimientosCache = await res.json();
         aplicarFiltros();
       } catch (error) {
-        console.error("❌ Error cargando movimientos:", error);
+        console.error(error);
         document.querySelector("#tablaMovimientos tbody").innerHTML =
           `<tr><td colspan="5" style="text-align:center; color:red;">Error al cargar movimientos</td></tr>`;
       }
@@ -294,13 +137,7 @@
 
       lista.forEach(m => {
         const fila = document.createElement("tr");
-
         const fechaMovimiento = new Date(m.fecha);
-        const now = new Date();
-        if ((now - fechaMovimiento) / (1000 * 60 * 60) < 24) {
-          fila.style.backgroundColor = "#e6f7ff";
-        }
-
         fila.innerHTML = `
           <td class="${m.tipo}" data-label="Tipo">${m.tipo}</td>
           <td data-label="Producto">${m.producto}</td>
@@ -308,6 +145,16 @@
           <td data-label="Fecha">${fechaMovimiento.toLocaleString()}</td>
           <td data-label="Observación">${m.observacion || ""}</td>
         `;
+
+        // Redirección al hacer clic según tipo
+        fila.addEventListener("click", () => {
+          let url = "";
+          if (m.tipo === "venta") url = `detalle_venta.html?id=${m.id}`;
+          else if (m.tipo === "entrada") url = `detalle_entrada.html?id=${m.id}`;
+          else if (m.tipo === "salida") url = `detalle_salida.html?id=${m.id}`;
+          window.location.href = url;
+        });
+
         tbody.appendChild(fila);
       });
 
@@ -320,21 +167,9 @@
       const fecha = document.getElementById("filtroFecha").value;
 
       let filtrados = movimientosCache;
-
-      if (texto) {
-        filtrados = filtrados.filter(m =>
-          m.producto.toLowerCase().includes(texto) ||
-          (m.observacion && m.observacion.toLowerCase().includes(texto))
-        );
-      }
-
-      if (tipo) {
-        filtrados = filtrados.filter(m => m.tipo === tipo);
-      }
-
-      if (fecha) {
-        filtrados = filtrados.filter(m => m.fecha.startsWith(fecha));
-      }
+      if (texto) filtrados = filtrados.filter(m => m.producto.toLowerCase().includes(texto) || (m.observacion && m.observacion.toLowerCase().includes(texto)));
+      if (tipo) filtrados = filtrados.filter(m => m.tipo === tipo);
+      if (fecha) filtrados = filtrados.filter(m => m.fecha.startsWith(fecha));
 
       mostrarMovimientos(filtrados);
     }
@@ -350,17 +185,12 @@
       const totalEntradas = lista.filter(m => m.tipo === 'entrada').reduce((a,b) => a+b.cantidad, 0);
       const totalSalidas = lista.filter(m => m.tipo === 'salida').reduce((a,b) => a+b.cantidad, 0);
       const totalVentas = lista.filter(m => m.tipo === 'venta').reduce((a,b) => a+b.cantidad, 0);
-
-      document.getElementById("totales").innerHTML =
+      document.getElementById("totales").innerText =
         `Totales: Entradas: ${totalEntradas} | Salidas: ${totalSalidas} | Ventas: ${totalVentas}`;
     }
 
     function exportarCSV() {
-      if (movimientosCache.length === 0) {
-        alert("No hay movimientos para exportar.");
-        return;
-      }
-
+      if (movimientosCache.length === 0) { alert("No hay movimientos para exportar."); return; }
       const lista = movimientosCache.map(m => ({
         ID: m.id,
         Tipo: m.tipo,
@@ -370,20 +200,13 @@
         Fecha: new Date(m.fecha).toLocaleString(),
         Observacion: m.observacion || ""
       }));
-
-      const csv = [
-        Object.keys(lista[0]).join(','), 
-        ...lista.map(row => Object.values(row).map(v => `"${v}"`).join(','))
-      ].join('\n');
-
+      const csv = [Object.keys(lista[0]).join(','), ...lista.map(r => Object.values(r).map(v => `"${v}"`).join(','))].join('\n');
       const blob = new Blob([csv], { type: 'text/csv' });
-      const url = URL.createObjectURL(blob);
-
       const a = document.createElement('a');
-      a.href = url;
+      a.href = URL.createObjectURL(blob);
       a.download = `movimientos_${new Date().toISOString().slice(0,10)}.csv`;
       a.click();
-      URL.revokeObjectURL(url);
+      URL.revokeObjectURL(a.href);
     }
 
     document.getElementById("buscar").addEventListener("input", aplicarFiltros);
