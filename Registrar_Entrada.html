@@ -186,7 +186,6 @@
   <div class="form-group"><label for="fecha">Fecha:</label><input type="date" id="fecha" name="fecha"></div>
   <div class="form-group"><label for="almacen">Almacén:</label><input type="text" id="almacen" name="almacen" value="Principal"></div>
   <div class="form-group"><label for="lote">Lote:</label><input type="text" id="lote" name="lote"></div>
-  <div class="form-group"><label for="fecha_caducidad">Fecha de Caducidad:</label><input type="date" id="fecha_caducidad" name="fecha_caducidad"></div>
   <div class="form-group"><label for="en_venta">Disponible en venta:</label>
     <select id="en_venta" name="en_venta">
       <option value="true" selected>Sí</option>
@@ -259,7 +258,7 @@
         producto_id,
         almacen: form.almacen.value.trim() || 'Principal',
         lote: form.lote.value.trim() || null,
-        fecha_caducidad: form.fecha_caducidad.value || null,
+        fecha: form.fecha.value || null,
         cantidad: parseInt(form.cantidad.value) || 0,
         en_venta: form.en_venta.value === 'true'
       };
