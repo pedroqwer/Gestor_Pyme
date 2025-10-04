@@ -455,6 +455,7 @@ app.post('/registrar/entrada', (req, res) => {
     cantidad, precio_compra, proveedor_id, fecha, jefe_id
   } = req.body;
 
+  // Validación de campos obligatorios
   if (!nombre || cantidad == null || precio_compra == null || !jefe_id) {
     return res.status(400).json({ error: 'Faltan campos obligatorios' });
   }
@@ -462,7 +463,10 @@ app.post('/registrar/entrada', (req, res) => {
   const checkProducto = `SELECT id FROM productos WHERE nombre = ? AND jefe_id = ? LIMIT 1`;
 
   connection.query(checkProducto, [nombre, jefe_id], (err, rows) => {
-    if (err) return res.status(500).json({ error: 'Error al verificar producto' });
+    if (err) {
+      console.log('ERROR SQL al verificar producto:', err);
+      return res.status(500).json({ error: 'Error al verificar producto' });
+    }
 
     if (rows.length > 0) {
       const producto_id = rows[0].id;
@@ -470,15 +474,18 @@ app.post('/registrar/entrada', (req, res) => {
     } else {
       const insertProducto = `
         INSERT INTO productos 
-        (nombre, descripcion, modelo, marca, precio_venta, ubicacion, cantidad, precio_compra, jefe_id, fecha_ingreso)
-        VALUES (?, ?, ?, ?, ?, ?, 0, ?, ?, ?)
+        (nombre, descripcion, modelo, marca, precio_venta, ubicacion, cantidad, precio_compra, jefe_id)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
       `;
-      const fecha_ingreso = fecha ? fecha.slice(0, 10) : new Date().toISOString().slice(0, 10);
 
+      // fecha_ingreso no se inserta en productos, solo se usa para entradas/inventario
       connection.query(insertProducto,
-        [nombre, descripcion, modelo, marca, precio_venta, ubicacion, precio_compra, jefe_id, fecha_ingreso],
+        [nombre, descripcion, modelo, marca, precio_venta, ubicacion, cantidad, precio_compra, jefe_id],
         (err, result) => {
-          if (err) return res.status(500).json({ error: 'Error al registrar producto' });
+          if (err) {
+            console.log('ERROR SQL al registrar producto:', err);
+            return res.status(500).json({ error: 'Error al registrar producto' });
+          }
           const producto_id = result.insertId;
           registrarEntrada(producto_id, true);
         }
@@ -491,21 +498,33 @@ app.post('/registrar/entrada', (req, res) => {
       INSERT INTO entradas (producto_id, cantidad, precio_compra, proveedor_id, fecha, jefe_id)
       VALUES (?, ?, ?, ?, ?, ?)
     `;
+
     const valores = [
-      producto_id, cantidad, precio_compra, proveedor_id || null,
+      producto_id,
+      cantidad,
+      precio_compra,
+      proveedor_id || null,
       fecha ? fecha.slice(0, 10) : new Date().toISOString().slice(0, 10),
       jefe_id
     ];
 
     connection.query(insertEntrada, valores, (err, result) => {
-      if (err) return res.status(500).json({ error: 'Error al registrar entrada' });
+      if (err) {
+        console.log('ERROR SQL al registrar entrada:', err);
+        return res.status(500).json({ error: 'Error al registrar entrada' });
+      }
 
       const updateStock = `UPDATE productos SET cantidad = cantidad + ? WHERE id = ?`;
       connection.query(updateStock, [cantidad, producto_id], (err) => {
-        if (err) return res.status(500).json({ error: 'Entrada registrada, pero error al actualizar stock' });
+        if (err) {
+          console.log('ERROR SQL al actualizar stock:', err);
+          return res.status(500).json({ error: 'Entrada registrada, pero error al actualizar stock' });
+        }
 
+        // Registrar historial y movimiento (asumiendo que tus funciones existen)
         registrarHistorial(jefe_id, 'crear entrada', `Entrada registrada para producto ${producto_id}, cantidad ${cantidad}`);
         registrarMovimiento(jefe_id, 'entrada', producto_id, cantidad, esNuevo ? 'Entrada al registrar nuevo producto' : 'Entrada registrada');
+
         res.status(201).json({
           message: esNuevo
             ? '✅ Producto creado y entrada registrada correctamente'
@@ -912,6 +931,136 @@ app.put('/inventario/:id/venta', (req, res) => {
     }
   );
 });
+
+// ==========================
+// 📋 Ruta: Obtener detalle de una entrada
+// ==========================
+app.get("/entradas/:id", (req, res) => {
+  const { id } = req.params;
+
+  const query = `
+    SELECT 
+      e.id AS entrada_id,
+      e.cantidad AS cantidad_entrada,
+      e.precio_compra,
+      e.fecha AS fecha_entrada,
+
+      p.nombre AS producto,
+      p.modelo,
+      p.marca,
+      p.descripcion AS producto_descripcion,
+      p.ubicacion AS ubicacion_producto,
+
+      pr.nombre AS proveedor,
+      pr.contacto AS proveedor_contacto,
+      pr.telefono AS proveedor_telefono,
+      pr.email AS proveedor_email,
+      pr.direccion AS proveedor_direccion,
+
+      j.usuario AS jefe,
+
+      i.lote,
+      i.almacen,
+      i.cantidad AS stock_inventario
+    FROM entradas e
+    LEFT JOIN productos p ON e.producto_id = p.id
+    LEFT JOIN proveedores pr ON e.proveedor_id = pr.id
+    LEFT JOIN jefe j ON e.jefe_id = j.id
+    LEFT JOIN inventario i ON i.producto_id = e.producto_id
+    WHERE e.id = ?
+    LIMIT 1
+  `;
+
+  connection.query(query, [id], (err, results) => {
+    if (err) return res.status(500).json({ error: "Error al obtener la entrada", details: err });
+    if (!results.length) return res.status(404).json({ error: `Entrada con ID ${id} no encontrada` });
+
+    const data = results[0];
+    res.json({
+      id: data.entrada_id,
+      cantidad: data.cantidad_entrada,
+      precio_compra: Number(data.precio_compra) || 0,
+      fecha: data.fecha_entrada,
+      producto: {
+        nombre: data.producto || "Sin especificar",
+        modelo: data.modelo || "—",
+        marca: data.marca || "—",
+        descripcion: data.producto_descripcion || "—",
+        ubicacion: data.ubicacion_producto || "—"
+      },
+      proveedor: {
+        nombre: data.proveedor || "N/A",
+        contacto: data.proveedor_contacto || "—",
+        telefono: data.proveedor_telefono || "—",
+        email: data.proveedor_email || "—",
+        direccion: data.proveedor_direccion || "—"
+      },
+      jefe: data.jefe || "Desconocido",
+      inventario: {
+        lote: data.lote || "—",
+        almacen: data.almacen || "—",
+        stock: data.stock_inventario || 0
+      },
+      observacion: "—" // si quieres, puedes añadir campo observacion en la tabla entradas
+    });
+  });
+});
+
+// ==========================
+// 📦 Ruta: Salidas (opcional para futuro detalle)
+// ==========================
+app.get("/salidas/:id", async (req, res) => {
+  const { id } = req.params;
+  try {
+    const [rows] = await db.query(`
+      SELECT 
+        s.id,
+        p.nombre AS producto,
+        s.cantidad,
+        s.fecha,
+        s.observacion,
+        j.usuario AS jefe
+      FROM salidas s
+      LEFT JOIN productos p ON s.producto_id = p.id
+      LEFT JOIN jefe j ON s.jefe_id = j.id
+      WHERE s.id = ?
+    `, [id]);
+
+    if (!rows.length) return res.status(404).json({ error: "Salida no encontrada" });
+    res.json(rows[0]);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Error al obtener la salida" });
+  }
+});
+
+// ==========================
+// 💰 Ruta: Ventas (opcional para detalle de venta)
+// ==========================
+app.get("/ventas/:id", async (req, res) => {
+  const { id } = req.params;
+  try {
+    const [rows] = await db.query(`
+      SELECT 
+        v.id,
+        c.nombre AS cliente,
+        v.total,
+        v.fecha,
+        j.usuario AS jefe
+      FROM ventas v
+      LEFT JOIN clientes c ON v.cliente_id = c.id
+      LEFT JOIN jefe j ON v.jefe_id = j.id
+      WHERE v.id = ?
+    `, [id]);
+
+    if (!rows.length) return res.status(404).json({ error: "Venta no encontrada" });
+    res.json(rows[0]);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Error al obtener la venta" });
+  }
+});
+
 
 
 // ===============================
