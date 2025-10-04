@@ -248,21 +248,27 @@ nav.menu-desplegable {
     const jefeId = localStorage.getItem('jefe_id');
     const form = e.target;
 
-    const productoData = {
-      nombre: form.nombre.value.trim(),
-      descripcion: form.descripcion.value.trim(),
-      modelo: form.modelo.value.trim(),
-      marca: form.marca.value.trim(),
-      cantidad: parseInt(form.cantidad.value),
-      precio_compra: parseFloat(form.precio_compra.value),
-      precio_venta: parseFloat(form.precio_venta.value) || 0,
-      ubicacion: form.ubicacion.value.trim() || null,
-      jefe_id: parseInt(jefeId)
-    };
-
     try{
-      // 1️⃣ Registrar producto
-      const resProducto = await fetch('http://localhost:3000/registrar/producto', {
+      // Validar proveedor
+      const proveedorId = parseInt(form.proveedor_id.value);
+      if (isNaN(proveedorId)) throw new Error('Debe seleccionar un proveedor válido');
+
+      // 1️⃣ Datos del producto
+      const productoData = {
+        nombre: form.nombre.value.trim(),
+        descripcion: form.descripcion.value.trim(),
+        modelo: form.modelo.value.trim(),
+        marca: form.marca.value.trim(),
+        cantidad: parseInt(form.cantidad.value),
+        precio_compra: parseFloat(form.precio_compra.value),
+        precio_venta: parseFloat(form.precio_venta.value) || 0,
+        ubicacion: form.ubicacion.value.trim() || null,
+        proveedor_id: proveedorId, // ✅ ahora se envía correctamente
+        jefe_id: parseInt(jefeId)
+      };
+
+      // Registrar producto/entrada
+      const resProducto = await fetch('http://localhost:3000/registrar/entrada', {
         method:'POST',
         headers:{'Content-Type':'application/json'},
         body: JSON.stringify(productoData)
@@ -289,6 +295,7 @@ nav.menu-desplegable {
       const inventarioResult = await resInventario.json();
       if(!resInventario.ok) throw new Error(inventarioResult.error || 'Error al registrar inventario');
 
+      // Mensaje de éxito
       const mensaje = document.getElementById('mensaje');
       mensaje.style.color = 'green';
       mensaje.textContent = "✅ Producto registrado y añadido al inventario correctamente";
@@ -337,6 +344,7 @@ nav.menu-desplegable {
   }
   animate();
 </script>
+
 
 </body>
 </html>
