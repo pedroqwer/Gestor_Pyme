@@ -1,512 +1,376 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Proveedores</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 0;
-      background-color: #f5f5f5;
-      position: relative;
-      z-index: 1;
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Proveedores</title>
+<style>
+  * { box-sizing: border-box; margin:0; padding:0; }
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    min-height: 100vh;
+    background: #0f2027;
+    color: #333;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ==== MENÚ DESPLEGABLE MODERNO ==== */
+  nav.menu-desplegable {
+    background-color: #2c3e50;
+    padding: 0.5em 1em;
+    display: flex;
+    justify-content: flex-start;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+  }
+  .dropdown { position: relative; }
+  .dropbtn {
+    background-color: #2c3e50;
+    color: #ecf0f1;
+    padding: 10px 18px;
+    font-size: 1rem;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: background-color 0.3s, transform 0.2s;
+  }
+  .dropbtn:hover { background-color: #1c80c8; transform: scale(1.05); }
+  .dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #34495e;
+    min-width: 220px;
+    margin-top: 5px;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0px 8px 16px rgba(0,0,0,0.25);
+    z-index: 1000;
+  }
+  .dropdown-content a {
+    color: #ecf0f1;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+    transition: background 0.3s;
+  }
+  .dropdown-content a:hover { background-color: #1c80c8; }
+  .dropdown:hover .dropdown-content { display: block; }
+
+  /* ==== CONTENEDOR ==== */
+  .container {
+    padding: 2em;
+    position: relative;
+    z-index: 5;
+    max-width: 1400px;
+    margin: 50px auto;
+  }
+  .encabezado {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-bottom: 1em;
+  }
+  .cuadro-texto {
+    width: 100%;
+    max-width: 400px;
+    padding: 10px;
+    font-size: 16px;
+    border: 2px solid #c4c4c4;
+    border-radius: 8px;
+    transition: border-color 0.3s;
+  }
+  .cuadro-texto:focus { border-color: #1c80c8; outline: none; }
+
+  /* ==== TABLA MODERNA ==== */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1em;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    background-color: rgba(255,255,255,0.95);
+  }
+  th, td {
+    padding: 12px 15px;
+    border-bottom: 1px solid #e0e0e0;
+    font-size: 0.95em;
+    text-align: left;
+  }
+  th {
+    background-color: #1c80c8;
+    color: white;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  tbody tr:nth-child(even) { background-color: #f1f1f1; }
+  tbody tr:hover { background-color: #d0e7ff; cursor: pointer; transition: background-color 0.3s ease; }
+
+  /* ==== BOTONES MODERNOS ==== */
+  .botonesDiv {
+    position: fixed;
+    bottom: 10px;
+    right: 10px;
+    display: flex;
+    gap: 15px;
+    z-index: 10;
+  }
+  button {
+    padding: 12px 20px;
+    background-color: #1c80c8;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 3px 8px rgba(28,128,200,0.5);
+    transition: background-color 0.3s, box-shadow 0.3s, transform 0.2s;
+  }
+  button:hover { background-color: #145f91; box-shadow: 0 5px 15px rgba(20,95,145,0.7); transform: scale(1.03); }
+
+  /* ==== MODAL ==== */
+  .modal {
+    display: none;
+    position: fixed;
+    inset:0;
+    background-color: rgba(0,0,0,0.4);
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+  .modal-content {
+    background-color: rgba(255,255,255,0.95);
+    padding: 25px;
+    border-radius: 12px;
+    text-align: center;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+  }
+  .modal-content button {
+    margin: 10px;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    background-color: #1c80c8;
+    color: white;
+    font-weight: 600;
+    box-shadow: 0 3px 8px rgba(28,128,200,0.5);
+    transition: background-color 0.3s, box-shadow 0.3s, transform 0.2s;
+  }
+  .modal-content button:hover { background-color: #145f91; box-shadow: 0 5px 15px rgba(20,95,145,0.7); transform: scale(1.03); }
+
+  /* ==== RESPONSIVE ==== */
+  @media (max-width:600px){
+    .cuadro-texto { width: 100%; }
+    table, thead, tbody, th, td, tr { display:block; }
+    th { display:none; }
+    td { position: relative; padding-left:50%; border:none; border-bottom:1px solid #ccc; }
+    td::before {
+      position: absolute; left:10px; top:8px; font-weight:bold; white-space: nowrap;
     }
+    td:nth-of-type(1)::before { content:"Nombre"; }
+    td:nth-of-type(2)::before { content:"Email"; }
+    td:nth-of-type(3)::before { content:"Teléfono"; }
+    td:nth-of-type(4)::before { content:"Contacto"; }
+    td:nth-of-type(5)::before { content:"Dirección"; }
+  }
 
-    /* ==== MENÚ DESPLEGABLE ==== */
-    nav.menu-desplegable {
-      background-color: #2c3e50;
-      padding: 0.5em 1em;
-      display: flex;
-      justify-content: flex-start;
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
-    }
+  /* ==== FONDO ANIMADO ==== */
+  #backgroundCanvas {
+    position: fixed;
+    top:0; left:0;
+    width:100vw; height:100vh;
+    z-index:0;
+    pointer-events:none;
+  }
+</style>
 
-    .dropdown {
-      position: relative;
-    }
-
-    .dropbtn {
-      background-color: #2c3e50;
-      color: #ecf0f1;
-      padding: 10px 18px;
-      font-size: 1rem;
-      font-weight: 600;
-      border: none;
-      cursor: pointer;
-      border-radius: 8px;
-      transition: background-color 0.3s, transform 0.2s;
-    }
-
-    .dropbtn:hover {
-      background-color: #1c80c8;
-      transform: scale(1.05);
-    }
-
-    .dropdown-content {
-      display: none;
-      position: absolute;
-      background-color: #34495e;
-      min-width: 220px;
-      margin-top: 5px;
-      border-radius: 8px;
-      overflow: hidden;
-      box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.25);
-      z-index: 1000;
-    }
-
-    .dropdown-content a {
-      color: #ecf0f1;
-      padding: 12px 16px;
-      text-decoration: none;
-      display: block;
-      transition: background 0.3s;
-    }
-
-    .dropdown-content a:hover {
-      background-color: #1c80c8;
-    }
-
-    .dropdown:hover .dropdown-content {
-      display: block;
-    }
-
-    /* ==== CONTENEDOR ==== */
-    .container {
-      padding: 2em;
-      position: relative;
-      z-index: 10;
-    }
-
-    .encabezado {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 1em;
-      flex-wrap: wrap;
-    }
-
-    .cuadro-texto {
-      width: 100%;
-      max-width: 400px;
-      padding: 10px;
-      font-size: 16px;
-      border: 2px solid #ccc;
-      border-radius: 8px;
-    }
-
-    /* ==== TABLA ==== */
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 1em;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-      overflow: hidden;
-      border-radius: 10px;
-      background-color: white;
-    }
-
-    th,
-    td {
-      padding: 12px 15px;
-      border-bottom: 1px solid #e0e0e0;
-      text-align: left;
-      font-size: 0.95em;
-    }
-
-    th {
-      background-color: #4CAF50;
-      color: white;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-
-    tbody tr:nth-child(even) {
-      background-color: #f9f9f9;
-    }
-
-    tbody tr:hover {
-      background-color: #e3f4ea;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-    }
-
-    /* ==== BOTONES ==== */
-    .botonesDiv {
-      position: fixed;
-      bottom: 10px;
-      right: 10px;
-      display: flex;
-      gap: 15px;
-      z-index: 10;
-    }
-
-    button {
-      padding: 10px 20px;
-      background: #4CAF50;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      font-size: 1em;
-      transition: background-color 0.3s ease;
-      width: auto;
-    }
-
-    .butons:hover {
-      background-color: #000000;
-    }
-
-    /* ==== MODAL ==== */
-    .modal {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background-color: rgba(0, 0, 0, 0.4);
-      justify-content: center;
-      align-items: center;
-      z-index: 1000;
-    }
-
-    .modal-content {
-      background-color: white;
-      padding: 20px;
-      border-radius: 10px;
-      text-align: center;
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-    }
-
-    .modal-content button {
-      margin: 10px;
-      padding: 10px 15px;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      background-color: #4CAF50;
-      color: white;
-    }
-
-    /* ==== RESPONSIVE ==== */
-    @media (max-width: 600px) {
-      .cuadro-texto {
-        width: 100%;
-      }
-
-      table,
-      thead,
-      tbody,
-      th,
-      td,
-      tr {
-        display: block;
-      }
-
-      th {
-        display: none;
-      }
-
-      td {
-        position: relative;
-        padding-left: 50%;
-        border: none;
-        border-bottom: 1px solid #ccc;
-      }
-
-      td::before {
-        position: absolute;
-        left: 10px;
-        top: 8px;
-        white-space: nowrap;
-        font-weight: bold;
-      }
-
-      td:nth-of-type(1)::before {
-        content: "Nombre";
-      }
-
-      td:nth-of-type(2)::before {
-        content: "Email";
-      }
-
-      td:nth-of-type(3)::before {
-        content: "Teléfono";
-      }
-
-      td:nth-of-type(4)::before {
-        content: "Contacto";
-      }
-
-      td:nth-of-type(5)::before {
-        content: "Dirección";
-      }
-    }
-
-    /* ==== FONDO ANIMADO ==== */
-    #backgroundCanvas {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      z-index: 0;
-      pointer-events: none;
-      background: linear-gradient(135deg, #d0e7ff, #ffffff);
-    }
-  </style>
-
-  <!-- Librerías para PDF y Excel -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<!-- Librerías para PDF y Excel -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
-
 <body>
-  <!-- MENÚ -->
-  <nav class="menu-desplegable">
-    <div class="dropdown">
-      <button class="dropbtn">☰ Menú</button>
-      <div class="dropdown-content">
-        <a href="Inventario.html">Inventario</a>
-        <a href="Clientes.html">Clientes</a>
-        <a href="Productos.html">Productos</a>
-        <a href="Top_Ventas.html">Más vendidos</a>
-        <a href="Ventas.html">Ventas</a>
-        <a href="Registrar_Entrada.html">Registrar Entrada nuevo producto</a>
-        <a href="Proveedores.html">Proveedores</a>
-        <a href="historial.html">Historial</a>
-        <a href="Salidas.html">Salidas</a>
-        <a href="Movimientos.html">Movimientos</a>
-        <a href="Login.html" id="logoutLink">Cerrar sesión</a>
-      </div>
-    </div>
-  </nav>
 
-  <!-- CONTENIDO -->
-  <div class="container">
-    <div class="encabezado">
-      <h1>Lista de Proveedores</h1>
-      <input type="text" id="filtroProveedor" class="cuadro-texto" placeholder="Buscar proveedor por nombre o contacto..." />
-    </div>
-
-    <table>
-      <thead>
-        <tr>
-          <th>Nombre</th>
-          <th>Email</th>
-          <th>Teléfono</th>
-          <th>Contacto</th>
-          <th>Dirección</th>
-        </tr>
-      </thead>
-      <tbody id="proveedoresBody"></tbody>
-    </table>
-  </div>
-
-  <div class="botonesDiv">
-    <button class="butons" id="AddProveedorBtn">Agregar proveedor</button>
-    <button class="butons" id="Downloand">Descargar</button>
-  </div>
-
-  <!-- MODAL DESCARGA -->
-  <div class="modal" id="descargaModal">
-    <div class="modal-content">
-      <p>Selecciona una opción de descarga:</p>
-      <button onclick="seleccionarOpcionDescarga('pdf')">Descargar como PDF</button>
-      <button onclick="seleccionarOpcionDescarga('excel')">Descargar como Excel</button>
-      <button onclick="cerrarModal()">Cancelar</button>
+<nav class="menu-desplegable">
+  <div class="dropdown">
+    <button class="dropbtn">☰ Menú</button>
+    <div class="dropdown-content">
+      <a href="Inventario.html">Inventario</a>
+      <a href="Clientes.html">Clientes</a>
+      <a href="Productos.html">Productos</a>
+      <a href="Top_Ventas.html">Más vendidos</a>
+      <a href="Ventas.html">Ventas</a>
+      <a href="Registrar_Entrada.html">Registrar Entrada nuevo producto</a>
+      <a href="Proveedores.html">Proveedores</a>
+      <a href="historial.html">Historial</a>
+      <a href="Salidas.html">Salidas</a>
+      <a href="Movimientos.html">Movimientos</a>
+      <a href="Login.html" id="logoutLink">Cerrar sesión</a>
     </div>
   </div>
+</nav>
 
-  <canvas id="backgroundCanvas"></canvas>
+<div class="container">
+  <div class="encabezado">
+    <h1>Lista de Proveedores</h1>
+    <input type="text" id="filtroProveedor" class="cuadro-texto" placeholder="Buscar proveedor por nombre o contacto..." />
+  </div>
 
-  <script>
-    const tbody = document.getElementById('proveedoresBody');
-    const filtro = document.getElementById('filtroProveedor');
-    let proveedores = [];
+  <table>
+    <thead>
+      <tr>
+        <th>Nombre</th>
+        <th>Email</th>
+        <th>Teléfono</th>
+        <th>Contacto</th>
+        <th>Dirección</th>
+      </tr>
+    </thead>
+    <tbody id="proveedoresBody"></tbody>
+  </table>
+</div>
 
-    const jefeId = localStorage.getItem('jefe_id');
-    if (!jefeId || jefeId.trim() === '') {
-      alert('No hay sesión iniciada. Por favor, inicia sesión.');
-      window.location.href = 'Login.html';
-    } else {
-      cargarProveedores();
-    }
+<div class="botonesDiv">
+  <button id="AddProveedorBtn">Agregar proveedor</button>
+  <button id="Downloand">Descargar</button>
+</div>
 
-    function cargarProveedores() {
-      fetch(`http://localhost:3000/proveedores/?jefe_id=${encodeURIComponent(jefeId)}`)
-        .then(res => res.json())
-        .then(data => {
-          proveedores = Array.isArray(data) ? data : [];
-          mostrarProveedores(proveedores);
-        })
-        .catch(err => {
-          console.error("Error al cargar proveedores:", err);
-          alert("Error al cargar proveedores.");
-        });
-    }
+<div class="modal" id="descargaModal">
+  <div class="modal-content">
+    <p>Selecciona una opción de descarga:</p>
+    <button onclick="seleccionarOpcionDescarga('pdf')">PDF</button>
+    <button onclick="seleccionarOpcionDescarga('excel')">Excel</button>
+    <button onclick="cerrarModal()">Cancelar</button>
+  </div>
+</div>
 
-    function mostrarProveedores(lista) {
-      tbody.innerHTML = '';
-      lista.forEach(proveedor => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td>${proveedor.nombre}</td>
-          <td>${proveedor.email || ''}</td>
-          <td>${proveedor.telefono || ''}</td>
-          <td>${proveedor.contacto || ''}</td>
-          <td>${proveedor.direccion || ''}</td>
-        `;
+<canvas id="backgroundCanvas"></canvas>
 
-        tr.addEventListener('click', () => {
-          window.location.href = `Datos_Proveedor.html?id=${proveedor.id}&jefe_id=${jefeId}`;
-        });
+<script>
+const tbody = document.getElementById('proveedoresBody');
+const filtro = document.getElementById('filtroProveedor');
+let proveedores = [];
 
-        tbody.appendChild(tr);
-      });
-    }
+const jefeId = localStorage.getItem('jefe_id');
+if (!jefeId || jefeId.trim() === '') {
+  alert('No hay sesión iniciada. Por favor, inicia sesión.');
+  window.location.href = 'Login.html';
+} else {
+  cargarProveedores();
+}
 
-    filtro.addEventListener('input', () => {
-      const texto = filtro.value.toLowerCase();
-      const filtrados = proveedores.filter(proveedor =>
-        proveedor.nombre.toLowerCase().includes(texto) ||
-        (proveedor.contacto || '').toLowerCase().includes(texto)
-      );
-      mostrarProveedores(filtrados);
+function cargarProveedores() {
+  fetch(`http://localhost:3000/proveedores/?jefe_id=${encodeURIComponent(jefeId)}`)
+    .then(res => res.json())
+    .then(data => {
+      proveedores = Array.isArray(data) ? data : [];
+      mostrarProveedores(proveedores);
+    })
+    .catch(err => { console.error("Error:", err); alert("Error al cargar proveedores."); });
+}
+
+function mostrarProveedores(lista) {
+  tbody.innerHTML = '';
+  lista.forEach(proveedor => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${proveedor.nombre}</td>
+      <td>${proveedor.email || ''}</td>
+      <td>${proveedor.telefono || ''}</td>
+      <td>${proveedor.contacto || ''}</td>
+      <td>${proveedor.direccion || ''}</td>
+    `;
+    tr.addEventListener('click', () => {
+      window.location.href = `Datos_Proveedor.html?id=${proveedor.id}&jefe_id=${jefeId}`;
     });
+    tbody.appendChild(tr);
+  });
+}
 
-    document.getElementById('AddProveedorBtn').addEventListener('click', () => {
-      window.location.href = `AgregarProveedor.html?jefeId=${jefeId}`;
+filtro.addEventListener('input', () => {
+  const texto = filtro.value.toLowerCase();
+  const filtrados = proveedores.filter(p =>
+    p.nombre.toLowerCase().includes(texto) ||
+    (p.contacto || '').toLowerCase().includes(texto)
+  );
+  mostrarProveedores(filtrados);
+});
+
+document.getElementById('AddProveedorBtn').addEventListener('click', () => {
+  window.location.href = `AgregarProveedor.html?jefeId=${jefeId}`;
+});
+
+document.getElementById('logoutLink').addEventListener('click', () => {
+  localStorage.removeItem('jefe_id');
+  localStorage.removeItem('usuario');
+});
+
+document.getElementById('Downloand').addEventListener('click', () => {
+  document.getElementById('descargaModal').style.display = 'flex';
+});
+
+function cerrarModal() { document.getElementById('descargaModal').style.display = 'none'; }
+
+async function seleccionarOpcionDescarga(tipo) {
+  if(tipo==='pdf'){
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    doc.setFontSize(18);
+    doc.text("Lista de Proveedores",14,22);
+    doc.setFontSize(12);
+    let y=30;
+    proveedores.forEach((p,i)=>{
+      const text = `${i+1}. ${p.nombre} | ${p.email||''} | ${p.telefono||''} | ${p.contacto||''} | ${p.direccion||''}`;
+      doc.text(text,14,y); y+=10;
+      if(y>280){doc.addPage(); y=20;}
     });
+    doc.save("proveedores.pdf");
+  } else if(tipo==='excel'){
+    const worksheet = XLSX.utils.json_to_sheet(proveedores);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Proveedores");
+    XLSX.writeFile(workbook, "proveedores.xlsx");
+  }
+  cerrarModal();
+}
 
-    document.getElementById('logoutLink').addEventListener('click', () => {
-      localStorage.removeItem('jefe_id');
-      localStorage.removeItem('usuario');
-    });
+window.addEventListener('click', e => {
+  if(e.target===document.getElementById('descargaModal')) cerrarModal();
+});
 
-    document.getElementById('Downloand').addEventListener('click', () => {
-      document.getElementById('descargaModal').style.display = 'flex';
-    });
+/* ==== Fondo animado ==== */
+const canvas = document.getElementById('backgroundCanvas');
+const ctx = canvas.getContext('2d');
+let width,height;
+let particles = [];
 
-    function cerrarModal() {
-      document.getElementById('descargaModal').style.display = 'none';
+function resize() { width=window.innerWidth;height=window.innerHeight;canvas.width=width;canvas.height=height; }
+window.addEventListener('resize', resize);
+resize();
+
+class Particle{
+  constructor(){ this.x=Math.random()*width; this.y=Math.random()*height; this.vx=(Math.random()-0.5)*0.4; this.vy=(Math.random()-0.5)*0.4; this.radius=2+Math.random()*2; }
+  move(){ this.x+=this.vx; this.y+=this.vy; if(this.x<0||this.x>width)this.vx*=-1; if(this.y<0||this.y>height)this.vy*=-1; }
+  draw(){ ctx.beginPath(); ctx.fillStyle='rgba(28,128,200,0.6)'; ctx.shadowColor='rgba(28,128,200,0.7)'; ctx.shadowBlur=5; ctx.arc(this.x,this.y,this.radius,0,Math.PI*2); ctx.fill(); ctx.shadowBlur=0; }
+}
+function initParticles(num=100){ particles=[]; for(let i=0;i<num;i++) particles.push(new Particle()); }
+function animate(){
+  ctx.clearRect(0,0,width,height);
+  for(let i=0;i<particles.length;i++){
+    let p1=particles[i]; p1.move(); p1.draw();
+    for(let j=i+1;j<particles.length;j++){
+      let p2=particles[j]; const dist=Math.hypot(p1.x-p2.x,p1.y-p2.y);
+      if(dist<120){ ctx.strokeStyle=`rgba(28,128,200,${(120-dist)/300})`; ctx.lineWidth=0.7; ctx.beginPath(); ctx.moveTo(p1.x,p1.y); ctx.lineTo(p2.x,p2.y); ctx.stroke(); }
     }
-
-    async function seleccionarOpcionDescarga(tipo) {
-      if (tipo === 'pdf') {
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
-        doc.setFontSize(18);
-        doc.text("Lista de Proveedores", 14, 22);
-        doc.setFontSize(12);
-
-        let y = 30;
-        proveedores.forEach((p, index) => {
-          const text = `${index + 1}. ${p.nombre} | ${p.email || ''} | ${p.telefono || ''} | ${p.contacto || ''} | ${p.direccion || ''}`;
-          doc.text(text, 14, y);
-          y += 10;
-          if (y > 280) {
-            doc.addPage();
-            y = 20;
-          }
-        });
-
-        doc.save("proveedores.pdf");
-
-      } else if (tipo === 'excel') {
-        const worksheet = XLSX.utils.json_to_sheet(proveedores);
-        const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, "Proveedores");
-        XLSX.writeFile(workbook, "proveedores.xlsx");
-      }
-      cerrarModal();
-    }
-
-    window.addEventListener('click', function (event) {
-      const modal = document.getElementById('descargaModal');
-      if (event.target === modal) {
-        cerrarModal();
-      }
-    });
-
-    // ==== Fondo animado ====
-    const canvas = document.getElementById('backgroundCanvas');
-    const ctx = canvas.getContext('2d');
-    let width, height;
-    let particles = [];
-
-    function resize() {
-      width = window.innerWidth;
-      height = window.innerHeight;
-      canvas.width = width;
-      canvas.height = height;
-    }
-
-    window.addEventListener('resize', resize);
-    resize();
-
-    class Particle {
-      constructor() {
-        this.x = Math.random() * width;
-        this.y = Math.random() * height;
-        this.vx = (Math.random() - 0.5) * 0.3;
-        this.vy = (Math.random() - 0.5) * 0.3;
-        this.radius = 2 + Math.random() * 2;
-      }
-      move() {
-        this.x += this.vx;
-        this.y += this.vy;
-        if (this.x < 0 || this.x > width) this.vx = -this.vx;
-        if (this.y < 0 || this.y > height) this.vy = -this.vy;
-      }
-      draw() {
-        ctx.beginPath();
-        ctx.fillStyle = 'rgba(30, 144, 255, 0.6)';
-        ctx.shadowColor = 'rgba(30, 144, 255, 0.7)';
-        ctx.shadowBlur = 5;
-        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.shadowBlur = 0;
-      }
-    }
-
-    function initParticles(num = 80) {
-      particles = [];
-      for (let i = 0; i < num; i++) {
-        particles.push(new Particle());
-      }
-    }
-
-    function animate() {
-      ctx.clearRect(0, 0, width, height);
-      for (let i = 0; i < particles.length; i++) {
-        let p1 = particles[i];
-        p1.move();
-        p1.draw();
-        for (let j = i + 1; j < particles.length; j++) {
-          let p2 = particles[j];
-          const dist = Math.hypot(p1.x - p2.x, p1.y - p2.y);
-          if (dist < 130) {
-            ctx.strokeStyle = `rgba(30, 144, 255, ${(130 - dist) / 130 / 2})`;
-            ctx.lineWidth = 1;
-            ctx.beginPath();
-            ctx.moveTo(p1.x, p1.y);
-            ctx.lineTo(p2.x, p2.y);
-            ctx.stroke();
-          }
-        }
-      }
-      requestAnimationFrame(animate);
-    }
-
-    initParticles();
-    animate();
-  </script>
+  }
+  requestAnimationFrame(animate);
+}
+initParticles(); animate();
+</script>
 </body>
 </html>

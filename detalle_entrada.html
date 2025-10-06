@@ -1,84 +1,134 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Detalle de Entrada</title>
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
   <style>
     body {
       font-family: 'Roboto', sans-serif;
-      background: #f0f2f5;
       margin: 0;
-      padding: 20px;
-      color: #333;
+      padding: 0;
+      background-color: #0f2027;
+      color: #fff;
+      position: relative;
+      z-index: 1;
+    }
+
+    nav.menu-desplegable {
+      background-color: rgba(44, 62, 80, 0.9);
+      padding: 0.5em 1em;
+      display: flex;
+      justify-content: flex-start;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+    }
+
+    .dropdown {
+      position: relative;
+    }
+
+    .dropbtn {
+      background-color: rgba(44, 62, 80, 0.9);
+      color: #ecf0f1;
+      padding: 10px 18px;
+      font-size: 1rem;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      border-radius: 8px;
+      transition: background-color 0.3s, transform 0.2s;
+    }
+
+    .dropbtn:hover {
+      background-color: #1c80c8;
+      transform: scale(1.05);
+    }
+
+    .dropdown-content {
+      display: none;
+      position: absolute;
+      background-color: #34495e;
+      min-width: 220px;
+      margin-top: 5px;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.25);
+      z-index: 1000;
+    }
+
+    .dropdown-content a {
+      color: #ecf0f1;
+      padding: 12px 16px;
+      text-decoration: none;
+      display: block;
+      transition: background 0.3s;
+    }
+
+    .dropdown-content a:hover {
+      background-color: #1c80c8;
+    }
+
+    .dropdown:hover .dropdown-content {
+      display: block;
+    }
+
+    .container {
+      padding: 2em;
+      position: relative;
+      z-index: 10;
+      max-width: 900px;
+      margin: 0 auto;
     }
 
     h1 {
       text-align: center;
-      color: #2c3e50;
+      color: #64ffda;
       margin-bottom: 30px;
       font-weight: 700;
+      text-shadow: 0px 0px 12px rgba(100,255,218,0.7);
     }
 
     .detalle {
-      background: #fff;
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      background: rgba(0,0,0,0.6);
+      border-radius: 15px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.4);
       padding: 30px 25px;
-      max-width: 700px;
-      margin: 0 auto 40px;
-      transition: transform 0.2s, box-shadow 0.2s;
+      margin-bottom: 40px;
+      transition: transform 0.3s, box-shadow 0.3s;
+      backdrop-filter: blur(8px);
     }
 
     .detalle:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+      transform: translateY(-3px);
+      box-shadow: 0 12px 25px rgba(0,0,0,0.5);
     }
 
     .detalle p {
       margin: 12px 0;
       font-size: 1rem;
-      line-height: 1.5;
-    }
-
-    .detalle b {
-      color: #1c80c8;
+      line-height: 1.6;
+      color: #ccc;
     }
 
     .section-title {
-      font-weight: 500;
-      font-size: 1.1rem;
-      margin-top: 20px;
-      margin-bottom: 10px;
-      color: #2c3e50;
-      border-bottom: 1px solid #e0e0e0;
-      padding-bottom: 4px;
-    }
-
-    .volver {
-      display: block;
-      width: fit-content;
-      margin: 0 auto;
-      background: #1c80c8;
-      color: white;
-      padding: 12px 25px;
-      border-radius: 8px;
-      text-decoration: none;
-      font-weight: 500;
-      text-align: center;
-      transition: 0.3s;
-    }
-
-    .volver:hover {
-      background: #155a91;
-      transform: translateY(-2px);
+      font-weight: 700;
+      font-size: 1.2rem;
+      margin-top: 25px;
+      margin-bottom: 15px;
+      color: #64ffda;
+      border-bottom: 2px solid rgba(100,255,218,0.5);
+      padding-bottom: 6px;
+      text-shadow: 0 0 6px rgba(100,255,218,0.4);
     }
 
     .info-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 12px 20px;
+      gap: 15px 20px;
     }
 
     @media (max-width: 600px) {
@@ -89,22 +139,93 @@
 
     .label {
       font-weight: 500;
-      color: #555;
+      color: #a0e7e5;
     }
 
     .value {
-      color: #333;
+      color: #fff;
+      font-weight: 500;
+    }
+
+    .info-grid div {
+      background: rgba(255,255,255,0.05);
+      padding: 12px 15px;
+      border-radius: 10px;
+      transition: background 0.3s;
+    }
+
+    .info-grid div:hover {
+      background: rgba(100,255,218,0.1);
+    }
+
+    .volver {
+      display: block;
+      width: fit-content;
+      margin: 0 auto;
+      background: #1c80c8;
+      color: white;
+      padding: 12px 25px;
+      border-radius: 10px;
+      text-decoration: none;
+      font-weight: 500;
+      text-align: center;
+      transition: 0.3s;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+
+    .volver:hover {
+      background: #64ffda;
+      color: #0f2027;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 15px rgba(100,255,218,0.6);
+    }
+
+    /* Fondo animado */
+    #backgroundCanvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 0;
+      pointer-events: none;
+      background: #0f2027;
     }
   </style>
 </head>
 <body>
-  <h1>📥 Detalle de la Entrada</h1>
 
-  <div id="info" class="detalle">
-    <p style="text-align:center; color:#777;">Cargando datos...</p>
+  <!-- MENÚ -->
+  <nav class="menu-desplegable">
+    <div class="dropdown">
+      <button class="dropbtn">☰ Menú</button>
+      <div class="dropdown-content">
+        <a href="Inventario.html">Inventario</a>
+        <a href="Clientes.html">Clientes</a>
+        <a href="Productos.html">Productos</a>
+        <a href="Top_Ventas.html">Más vendidos</a>
+        <a href="Ventas.html">Ventas</a>
+        <a href="Registrar_Entrada.html">Registrar Entrada</a>
+        <a href="Proveedores.html">Proveedores</a>
+        <a href="historial.html">Historial</a>
+        <a href="Salidas.html">Salidas</a>
+        <a href="Movimientos.html">Movimientos</a>
+        <a href="Login.html" id="logoutLink">Cerrar sesión</a>
+      </div>
+    </div>
+  </nav>
+
+  <canvas id="backgroundCanvas"></canvas>
+
+  <div class="container">
+    <h1>📥 Detalle de la Entrada</h1>
+
+    <div id="info" class="detalle">
+      <p style="text-align:center; color:#ccc;">Cargando datos...</p>
+    </div>
+
+    <a href="Movimientos.html" class="volver">⬅ Volver a Movimientos</a>
   </div>
-
-  <a href="Movimientos.html" class="volver">⬅ Volver a Movimientos</a>
 
   <script>
     const params = new URLSearchParams(window.location.search);
@@ -170,6 +291,54 @@
     }
 
     cargarEntrada();
+
+    // Fondo animado
+    const canvas = document.getElementById('backgroundCanvas');
+    const ctx = canvas.getContext('2d');
+    let width, height;
+    function resize() { width = window.innerWidth; height = window.innerHeight; canvas.width = width; canvas.height = height; }
+    window.addEventListener('resize', resize); resize();
+
+    class Shape {
+      constructor(){ this.reset(); }
+      reset(){
+        this.x = Math.random() * width;
+        this.y = Math.random() * height;
+        this.size = 50 + Math.random() * 80;
+        this.speedX = (Math.random()*0.3 +0.05)*(Math.random()<0.5?1:-1);
+        this.speedY = (Math.random()*0.2 +0.03)*(Math.random()<0.5?1:-1);
+        this.opacity = 0.05 + Math.random()*0.15;
+        this.color = `rgba(0,140,186,${this.opacity})`;
+        this.type = Math.floor(Math.random()*3);
+        this.rotation = Math.random()*2*Math.PI;
+        this.rotationSpeed = (Math.random()-0.5)*0.002;
+      }
+      draw(ctx){
+        ctx.save(); ctx.translate(this.x,this.y); ctx.rotate(this.rotation); ctx.fillStyle=this.color;
+        switch(this.type){
+          case 0: ctx.beginPath(); ctx.arc(0,0,this.size/2,0,Math.PI*2); ctx.fill(); break;
+          case 1: ctx.beginPath(); ctx.moveTo(0,-this.size/1.5); ctx.lineTo(this.size/1.3,this.size/2); ctx.lineTo(-this.size/1.3,this.size/2); ctx.closePath(); ctx.fill(); break;
+          case 2:
+            const r=this.size/5; ctx.beginPath();
+            ctx.moveTo(-this.size/2+r,-this.size/2); ctx.lineTo(this.size/2-r,-this.size/2);
+            ctx.quadraticCurveTo(this.size/2,-this.size/2,this.size/2,-this.size/2+r);
+            ctx.lineTo(this.size/2,this.size/2-r); ctx.quadraticCurveTo(this.size/2,this.size/2,this.size/2-r,this.size/2);
+            ctx.lineTo(-this.size/2+r,this.size/2); ctx.quadraticCurveTo(-this.size/2,this.size/2,-this.size/2,this.size/2-r);
+            ctx.lineTo(-this.size/2,-this.size/2+r); ctx.quadraticCurveTo(-this.size/2,-this.size/2,-this.size/2+r,-this.size/2);
+            ctx.closePath(); ctx.fill(); break;
+        }
+        ctx.restore();
+      }
+      update(){
+        this.x+=this.speedX; this.y+=this.speedY; this.rotation+=this.rotationSpeed;
+        if(this.x>width+this.size)this.x=-this.size; else if(this.x<-this.size)this.x=width+this.size;
+        if(this.y>height+this.size)this.y=-this.size; else if(this.y<-this.size)this.y=height+this.size;
+      }
+    }
+    const shapes=[]; for(let i=0;i<35;i++) shapes.push(new Shape());
+    function animate(){ ctx.clearRect(0,0,width,height); shapes.forEach(s=>{s.update();s.draw(ctx);}); requestAnimationFrame(animate);}
+    animate();
   </script>
+
 </body>
 </html>

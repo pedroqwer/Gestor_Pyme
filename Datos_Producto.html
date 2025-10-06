@@ -8,107 +8,185 @@
     body {
       margin: 0;
       font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(135deg, #d0e7ff, #ffffff);
+      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
       min-height: 100vh;
+      color: #fff;
       display: flex;
       flex-direction: column;
     }
 
     /* Menú */
     nav.menu-desplegable {
-      background-color: #333;
+      background-color: #2c3e50;
       padding: 0.5em 1em;
       display: flex;
       justify-content: flex-start;
       position: sticky;
       top: 0;
-      width: 100%;
       z-index: 100;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
     }
-    .dropdown { position: relative; }
+
+    .dropdown {
+      position: relative;
+    }
+
     .dropbtn {
-      background-color: #333;
-      color: white;
+      background-color: #2c3e50;
+      color: #ecf0f1;
       padding: 10px 18px;
       font-size: 1rem;
+      font-weight: 600;
       border: none;
       cursor: pointer;
-      border-radius: 6px;
-      transition: background-color 0.3s;
+      border-radius: 8px;
+      transition: background-color 0.3s, transform 0.2s;
     }
-    .dropbtn:hover { background-color: #1c80c8; }
+
+    .dropbtn:hover {
+      background-color: #1c80c8;
+      transform: scale(1.05);
+    }
+
     .dropdown-content {
       display: none;
       position: absolute;
-      background-color: #444;
-      min-width: 200px;
+      background-color: #34495e;
+      min-width: 220px;
       margin-top: 5px;
-      border-radius: 6px;
+      border-radius: 8px;
       overflow: hidden;
-      box-shadow: 0px 8px 16px rgba(0,0,0,0.25);
+      box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.25);
       z-index: 1000;
     }
+
     .dropdown-content a {
-      color: white;
+      color: #ecf0f1;
       padding: 12px 16px;
       text-decoration: none;
       display: block;
+      transition: background 0.3s;
     }
-    .dropdown-content a:hover { background-color: #1c80c8; }
-    .dropdown:hover .dropdown-content { display: block; }
+
+    .dropdown-content a:hover {
+      background-color: #1c80c8;
+    }
+
+    .dropdown:hover .dropdown-content {
+      display: block;
+    }
 
     /* Contenido principal */
-    .container {
+    .main-content {
       padding: 2em;
-      max-width: 800px;
+      max-width: 1000px;
       margin: auto;
       width: 100%;
     }
 
     .card {
-      background: white;
-      padding: 2em;
-      border-radius: 15px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      background: rgba(255,255,255,0.05);
+      backdrop-filter: blur(15px);
+      padding: 2em 3em;
+      border-radius: 18px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.5);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
-    .card h2 {
-      margin-top: 0;
-      font-size: 1.8em;
-      color: #1c80c8;
-      border-bottom: 2px solid #e5e5e5;
+
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 12px 30px rgba(0,0,0,0.6);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      border-bottom: 2px solid rgba(255,255,255,0.2);
       padding-bottom: 0.5em;
+      margin-bottom: 1.5em;
     }
-    .info p {
+
+    .card-header img {
+      width: 70px;
+      height: 70px;
+      object-fit: cover;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+    }
+
+    .card-header h2 {
+      margin: 0;
+      font-size: 2em;
+      color: #1c80c8;
+    }
+
+    /* Info producto */
+    .info {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.2em 2em;
+    }
+
+    .info-item {
+      background: rgba(255,255,255,0.08);
+      padding: 1em;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+      transition: transform 0.2s ease, background 0.3s ease;
+    }
+
+    .info-item:hover {
+      transform: scale(1.02);
+      background: rgba(255,255,255,0.15);
+    }
+
+    .info-item strong {
+      display: block;
+      font-size: 0.9em;
+      color: #1c80c8;
+      margin-bottom: 5px;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    .info-item span {
       font-size: 1.1em;
-      margin: 12px 0;
+      color: #fff;
     }
-    .info strong { color: #333; }
 
     /* Botones */
     .acciones {
-      margin-top: 20px;
+      margin-top: 2em;
       display: flex;
+      justify-content: flex-end;
       flex-wrap: wrap;
-      gap: 10px;
+      gap: 12px;
     }
+
     .acciones button {
       padding: 10px 20px;
-      background: #1c80c8;
-      color: white;
       border: none;
-      border-radius: 6px;
+      border-radius: 8px;
       cursor: pointer;
       font-size: 1em;
-      transition: background-color 0.3s;
+      font-weight: 600;
+      color: #fff;
+      transition: transform 0.2s ease, background 0.3s ease;
     }
-    .acciones button:hover { background: #1560a8; }
+
+    .acciones button:hover {
+      transform: scale(1.05);
+    }
+
+    .btn-volver { background: #1c80c8; }
+    .btn-volver:hover { background: #1560a8; }
+
+    .btn-actualizar { background: #4CAF50; }
+    .btn-actualizar:hover { background: #45a049; }
 
     .btn-borrar { background: #e74c3c; }
     .btn-borrar:hover { background: #c0392b; }
-
-    .btn-actualizar { background: #27ae60; }
-    .btn-actualizar:hover { background: #1e8449; }
 
     /* Modal */
     .modal {
@@ -117,33 +195,63 @@
       z-index: 2000;
       left: 0; top: 0;
       width: 100%; height: 100%;
-      background-color: rgba(0,0,0,0.5);
+      background-color: rgba(0,0,0,0.6);
       justify-content: center; align-items: center;
     }
+
     .modal-content {
-      background: white;
+      background: rgba(255,255,255,0.1);
+      backdrop-filter: blur(15px);
       padding: 20px;
       border-radius: 12px;
       width: 400px;
       max-width: 90%;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.5);
+      color: #fff;
     }
+
     .cerrar {
       float: right;
       font-size: 1.5em;
       cursor: pointer;
     }
+
     .modal-content h2 {
       margin-top: 0;
       color: #1c80c8;
     }
+
     .modal-content input {
       width: 100%;
       padding: 8px;
       margin: 6px 0 12px 0;
-      border: 1px solid #ccc;
-      border-radius: 6px;
+      border: none;
+      border-radius: 8px;
       font-size: 1em;
+      background: rgba(255,255,255,0.15);
+      color: #fff;
+      outline: none;
+      transition: background 0.3s;
+    }
+
+    .modal-content input:focus { background: rgba(255,255,255,0.3); }
+
+    .modal-content button {
+      background: #4CAF50;
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s ease, background 0.3s ease;
+    }
+
+    .modal-content button:hover { transform: scale(1.05); background: #45a049; }
+
+    @media (max-width: 700px) {
+      .info { grid-template-columns: 1fr; }
+      .card { padding: 1.5em; }
     }
   </style>
 </head>
@@ -154,7 +262,7 @@
     <div class="dropdown">
       <button class="dropbtn">☰ Menú</button>
       <div class="dropdown-content">
-         <a href="Inventario.html">Inventario</a>
+        <a href="Inventario.html">Inventario</a>
         <a href="Clientes.html">Clientes</a>
         <a href="Productos.html">Productos</a>
         <a href="Top_Ventas.html">Más vendidos</a>
@@ -170,14 +278,17 @@
   </nav>
 
   <!-- Contenido -->
-  <div class="container">
+  <div class="main-content">
     <div class="card">
-      <h2 id="nombreProducto">Producto</h2>
-      <div class="info" id="infoProducto">
-        <!-- Aquí se generan dinámicamente los datos -->
+      <div class="card-header">
+        <img src="https://cdn-icons-png.flaticon.com/512/679/679922.png" alt="Producto">
+        <h2 id="nombreProducto">Producto</h2>
       </div>
+
+      <div class="info" id="infoProducto"></div>
+
       <div class="acciones">
-        <button onclick="volver()">⬅ Volver</button>
+        <button class="btn-volver" onclick="volver()">⬅ Volver</button>
         <button class="btn-actualizar" onclick="abrirModal()">✏️ Actualizar</button>
         <button class="btn-borrar" onclick="borrarProducto()">🗑 Eliminar</button>
       </div>
@@ -190,8 +301,8 @@
       <span class="cerrar" onclick="cerrarModal()">&times;</span>
       <h2>Actualizar producto</h2>
       <form id="formActualizar">
-        <div id="camposActualizar"><!-- Inputs dinámicos --></div>
-        <button type="submit" class="btn-actualizar">Guardar cambios</button>
+        <div id="camposActualizar"></div>
+        <button type="submit">Guardar cambios</button>
       </form>
     </div>
   </div>
@@ -206,22 +317,23 @@
       window.location.href = "Productos.html";
     }
 
-    // Campos que NO se deben mostrar/editar
     const camposBloqueados = ["id", "jefe_id", "fecha_ingreso", "categoria_id"];
 
-    // Cargar datos producto
     fetch(`http://localhost:3000/productos/${productoId}?jefe_id=${jefeId}`)
       .then(res => res.json())
       .then(p => {
         document.getElementById("nombreProducto").textContent = p.nombre;
         window.productoActual = p;
-
         const infoDiv = document.getElementById("infoProducto");
         infoDiv.innerHTML = "";
 
         for (const key in p) {
           if (!camposBloqueados.includes(key)) {
-            infoDiv.innerHTML += `<p><strong>${key}:</strong> ${p[key]}</p>`;
+            infoDiv.innerHTML += `
+              <div class="info-item">
+                <strong>${key.replace(/_/g, ' ')}:</strong>
+                <span>${p[key] ?? "—"}</span>
+              </div>`;
           }
         }
       })
@@ -243,12 +355,9 @@
         if (!camposBloqueados.includes(key)) {
           let valor = window.productoActual[key] ?? "";
           let tipo = "text";
-
-          if (typeof valor === "number") tipo = "number";
-          if (key.toLowerCase().includes("precio")) tipo = "number";
-
+          if (typeof valor === "number" || key.toLowerCase().includes("precio")) tipo = "number";
           camposDiv.innerHTML += `
-            <label for="${key}">${key}:</label>
+            <label for="${key}">${key.replace(/_/g, ' ')}:</label>
             <input type="${tipo}" id="${key}" name="${key}" value="${valor}" required>
           `;
         }
@@ -261,14 +370,11 @@
 
     document.getElementById("formActualizar").addEventListener("submit", function(e) {
       e.preventDefault();
-
       const data = {};
       for (const key in window.productoActual) {
         if (!camposBloqueados.includes(key)) {
           const input = document.getElementById(key);
-          if (input) {
-            data[key] = input.value;
-          }
+          if (input) data[key] = input.value;
         }
       }
 
@@ -293,9 +399,7 @@
 
     function borrarProducto() {
       if (confirm("¿Seguro que deseas borrar este producto?")) {
-        fetch(`http://localhost:3000/productos/${productoId}?jefe_id=${jefeId}`, {
-          method: "DELETE"
-        })
+        fetch(`http://localhost:3000/productos/${productoId}?jefe_id=${jefeId}`, { method: "DELETE" })
           .then(res => {
             if (res.ok) {
               alert("Producto borrado correctamente");

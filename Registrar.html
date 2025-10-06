@@ -1,109 +1,151 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Registrar</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Registrar Usuario</title>
   <style>
+    /* === RESET BÁSICO === */
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
     }
 
-    body,
-    html {
-      height: 100%;
-      font-family: sans-serif;
-      overflow: hidden;
-      background: #0f2027;
-      position: relative;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-
-    .register-container {
-      position: relative;
-      z-index: 10;
-      background: rgba(255, 255, 255, 0.95);
-      padding: 2em;
-      border-radius: 10px;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-      width: 300px;
-    }
-
-    h2 {
-      text-align: center;
-      margin-bottom: 1em;
-      color: #0f2027;
-    }
-
-    input {
-      width: 100%;
-      padding: 10px;
-      margin-top: 10px;
-      box-sizing: border-box;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-      font-size: 1em;
-    }
-
-    button {
-      width: 100%;
-      padding: 10px;
-      margin-top: 15px;
-      background: #4CAF50;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      font-size: 1em;
-      transition: background-color 0.3s ease;
-    }
-
-    button:hover {
-      background-color: #000000;
-    }
-
-    #btnVolver {
-      background: #008CBA;
-      margin-top: 10px;
-    }
-
-    #btnVolver:hover {
-      background-color: #000000;
-    }
-
-    .error {
-      color: red;
-      margin-top: 10px;
-      font-size: 0.9em;
-    }
-
+    /* === FONDO ANIMADO === */
     #backgroundCanvas {
       position: fixed;
       top: 0;
       left: 0;
       width: 100vw;
       height: 100vh;
-      z-index: 1;
+      z-index: 0;
       pointer-events: none;
-      background: #0f2027;
+      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+    }
+
+    html, body {
+      height: 100%;
+      font-family: 'Segoe UI', sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+      color: #fff;
+      position: relative;
+    }
+
+    /* === CONTENEDOR PRINCIPAL === */
+    .register-container {
+      position: relative;
+      z-index: 10;
+      background: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(15px);
+      color: #fff;
+      padding: 2.5em 2em;
+      border-radius: 15px;
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+      width: 340px;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .register-container:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+    }
+
+    /* === TITULO === */
+    h2 {
+      text-align: center;
+      margin-bottom: 1.5em;
+      font-size: 1.8em;
+      color: #e0e0e0;
+    }
+
+    /* === INPUTS === */
+    input {
+      display: block;
+      width: 100%;
+      padding: 0.85em;
+      margin-bottom: 1em;
+      border: none;
+      border-radius: 10px;
+      font-size: 1em;
+      background: rgba(255,255,255,0.15);
+      color: #fff;
+      outline: none;
+      transition: background 0.3s ease;
+    }
+
+    input::placeholder {
+      color: #ddd;
+    }
+
+    input:focus {
+      background: rgba(255,255,255,0.25);
+    }
+
+    /* === GRUPO DE BOTONES === */
+    .button-group {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 1em;
+    }
+
+    button {
+      width: 100%;
+      padding: 0.85em;
+      font-size: 1em;
+      font-weight: 600;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: transform 0.2s ease, background 0.3s ease;
+    }
+
+    #Registrar {
+      background: linear-gradient(135deg, #1e90ff, #00bfff);
+      color: #fff;
+    }
+
+    #Registrar:hover {
+      background: linear-gradient(135deg, #00bfff, #1e90ff);
+      transform: scale(1.03);
+    }
+
+    #Volver {
+      background: linear-gradient(135deg, #ff4d4d, #ff1a1a);
+      color: #fff;
+    }
+
+    #Volver:hover {
+      background: linear-gradient(135deg, #ff1a1a, #ff4d4d);
+      transform: scale(1.03);
+    }
+
+    /* === MENSAJE DE ERROR === */
+    .error {
+      color: #ff7b7b;
+      margin-top: 10px;
+      font-size: 0.9em;
+      text-align: center;
     }
   </style>
 </head>
 
 <body>
+
   <div class="register-container">
     <h2>Registrar nuevo usuario</h2>
     <form id="registerForm">
       <input type="text" id="usuario" placeholder="Usuario" required />
       <input type="password" id="contrasena" placeholder="Contraseña" required />
       <input type="password" id="confirmarContrasena" placeholder="Confirmar contraseña" required />
-      <button type="submit">Registrar</button>
-      <button type="button" id="btnVolver">Volver</button>
+      <div class="button-group">
+        <button type="submit" id="Registrar">Registrar</button>
+        <button type="button" id="Volver">Volver</button>
+      </div>
       <p id="mensaje-error" class="error"></p>
     </form>
   </div>
@@ -111,7 +153,7 @@
   <canvas id="backgroundCanvas"></canvas>
 
   <script>
-    // Validación y navegación
+    // === VALIDACIÓN Y ENVÍO DEL FORMULARIO ===
     document.getElementById('registerForm').addEventListener('submit', async function (e) {
       e.preventDefault();
       const usuario = document.getElementById('usuario').value.trim();
@@ -140,17 +182,18 @@
         }
 
         alert(`Usuario ${usuario} registrado exitosamente.`);
-        window.location.href = 'login.html';
+        window.location.href = 'Login.html';
       } catch (error) {
         mensajeError.textContent = 'Error de conexión con el servidor';
       }
     });
 
-    document.getElementById('btnVolver').addEventListener('click', function () {
-      window.location.href = 'login.html';
+    // === BOTÓN VOLVER ===
+    document.getElementById('Volver').addEventListener('click', function () {
+      window.location.href = 'Login.html';
     });
 
-    // Animación fondo canvas
+    // === FONDO ANIMADO ===
     const canvas = document.getElementById('backgroundCanvas');
     const ctx = canvas.getContext('2d');
     let width, height;
@@ -165,9 +208,7 @@
     resize();
 
     class Shape {
-      constructor() {
-        this.reset();
-      }
+      constructor() { this.reset(); }
       reset() {
         this.x = Math.random() * width;
         this.y = Math.random() * height;
@@ -175,7 +216,7 @@
         this.speedX = (Math.random() * 0.3 + 0.05) * (Math.random() < 0.5 ? 1 : -1);
         this.speedY = (Math.random() * 0.2 + 0.03) * (Math.random() < 0.5 ? 1 : -1);
         this.opacity = 0.05 + Math.random() * 0.15;
-        this.color = `rgba(0, 140, 186, ${this.opacity})`;
+        this.color = `rgba(255, 255, 255, ${this.opacity})`;
         this.type = Math.floor(Math.random() * 3);
         this.rotation = Math.random() * 2 * Math.PI;
         this.rotationSpeed = (Math.random() - 0.5) * 0.002;
@@ -185,14 +226,13 @@
         ctx.translate(this.x, this.y);
         ctx.rotate(this.rotation);
         ctx.fillStyle = this.color;
-
         switch (this.type) {
-          case 0: // Círculo
+          case 0:
             ctx.beginPath();
             ctx.arc(0, 0, this.size / 2, 0, Math.PI * 2);
             ctx.fill();
             break;
-          case 1: // Triángulo
+          case 1:
             ctx.beginPath();
             ctx.moveTo(0, -this.size / 1.5);
             ctx.lineTo(this.size / 1.3, this.size / 2);
@@ -200,7 +240,7 @@
             ctx.closePath();
             ctx.fill();
             break;
-          case 2: // Rectángulo redondeado
+          case 2:
             const r = this.size / 5;
             ctx.beginPath();
             ctx.moveTo(-this.size / 2 + r, -this.size / 2);
@@ -222,30 +262,23 @@
         this.x += this.speedX;
         this.y += this.speedY;
         this.rotation += this.rotationSpeed;
-
         if (this.x > width + this.size) this.x = -this.size;
         else if (this.x < -this.size) this.x = width + this.size;
-
         if (this.y > height + this.size) this.y = -this.size;
         else if (this.y < -this.size) this.y = height + this.size;
       }
     }
 
     const shapes = [];
-    for (let i = 0; i < 35; i++) {
-      shapes.push(new Shape());
-    }
+    const maxShapes = 35;
+    for (let i = 0; i < maxShapes; i++) shapes.push(new Shape());
 
     function animate() {
       ctx.clearRect(0, 0, width, height);
-      for (let shape of shapes) {
-        shape.update();
-        shape.draw(ctx);
-      }
+      for (let shape of shapes) { shape.update(); shape.draw(ctx); }
       requestAnimationFrame(animate);
     }
     animate();
   </script>
 </body>
-
 </html>

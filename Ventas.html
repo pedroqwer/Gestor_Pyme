@@ -11,88 +11,90 @@
       font-family: 'Segoe UI', sans-serif;
       margin: 0;
       padding: 0;
-      background-color: #f5f5f5;
+      background-color: #0f2027;
+      overflow: hidden;
+      position: relative;
+      z-index: 1;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
     }
 
     /* ==== MENÚ DESPLEGABLE ==== */
-    /* ==== MENÚ DESPLEGABLE ESTILO MODERNO ==== */
-nav.menu-desplegable {
-  background-color: #2c3e50;   /* Azul oscuro */
-  padding: 0.5em 1em;
-  display: flex;
-  justify-content: flex-start;
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
-}
+    nav.menu-desplegable {
+      background-color: #2c3e50;
+      padding: 0.5em 1em;
+      display: flex;
+      justify-content: flex-start;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+    }
 
-.dropdown {
-  position: relative;
-}
+    .dropdown { position: relative; }
 
-.dropbtn {
-  background-color: #2c3e50;
-  color: #ecf0f1;
-  padding: 10px 18px;
-  font-size: 1rem;
-  font-weight: 600;
-  border: none;
-  cursor: pointer;
-  border-radius: 8px;
-  transition: background-color 0.3s, transform 0.2s;
-}
+    .dropbtn {
+      background-color: #2c3e50;
+      color: #ecf0f1;
+      padding: 10px 18px;
+      font-size: 1rem;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      border-radius: 8px;
+      transition: background-color 0.3s, transform 0.2s;
+    }
 
-.dropbtn:hover {
-  background-color: #1c80c8;  /* Azul acento en hover */
-  transform: scale(1.05);
-}
+    .dropbtn:hover {
+      background-color: #1c80c8;
+      transform: scale(1.05);
+    }
 
-.dropdown-content {
-  display: none;
-  position: absolute;
-  background-color: #34495e; /* Fondo gris-azulado */
-  min-width: 220px;
-  margin-top: 5px;
-  border-radius: 8px;
-  overflow: hidden;
-  box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.25);
-  z-index: 1000;
-}
+    .dropdown-content {
+      display: none;
+      position: absolute;
+      background-color: #34495e;
+      min-width: 220px;
+      margin-top: 5px;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.25);
+      z-index: 1000;
+    }
 
-.dropdown-content a {
-  color: #ecf0f1;
-  padding: 12px 16px;
-  text-decoration: none;
-  display: block;
-  transition: background 0.3s;
-}
+    .dropdown-content a {
+      color: #ecf0f1;
+      padding: 12px 16px;
+      text-decoration: none;
+      display: block;
+      transition: background 0.3s;
+    }
 
-.dropdown-content a:hover {
-  background-color: #1c80c8; /* Azul acento en hover */
-}
+    .dropdown-content a:hover { background-color: #1c80c8; }
 
-.dropdown:hover .dropdown-content {
-  display: block;
-}
+    .dropdown:hover .dropdown-content { display: block; }
 
-
+    /* === CONTENEDOR PRINCIPAL === */
     .container {
+      flex: 1;
       display: flex;
       flex-direction: row;
       height: calc(100vh - 60px);
-      padding: 1em;
+      padding: 1.2em;
       gap: 1em;
+      z-index: 10;
+      overflow: hidden;
     }
 
     .products, .cart {
-      background-color: white;
-      border-radius: 10px;
+      background-color: rgba(255, 255, 255, 0.95);
+      border-radius: 12px;
       padding: 1.5em;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-      overflow-y: auto;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
       display: flex;
       flex-direction: column;
+      overflow: hidden;
     }
 
     .products { flex: 3; }
@@ -100,8 +102,8 @@ nav.menu-desplegable {
 
     h2 {
       margin-top: 0;
-      margin-bottom: 1em;
-      color: #4CAF50;
+      color: #1c3d5a;
+      text-align: center;
     }
 
     #searchInput {
@@ -111,13 +113,19 @@ nav.menu-desplegable {
       border-radius: 6px;
       border: 1px solid #ccc;
       width: 100%;
-      max-width: 400px;
       transition: border-color 0.3s ease;
     }
 
     #searchInput:focus {
-      border-color: #4caf50;
+      border-color: #1c80c8;
       outline: none;
+    }
+
+    .tabla-container {
+      flex: 1;
+      overflow-y: auto;
+      max-height: calc(100vh - 250px);
+      border-radius: 10px;
     }
 
     table {
@@ -133,76 +141,78 @@ nav.menu-desplegable {
     }
 
     th {
-      background-color: #4CAF50;
+      background-color: #1c3d5a;
       color: white;
       text-transform: uppercase;
+      position: sticky;
+      top: 0;
+      z-index: 5;
     }
 
-    tbody tr:hover {
-      background-color: #e3f4ea;
-    }
+    tbody tr:nth-child(even) { background-color: #f9f9f9; }
+    tbody tr:hover { background-color: #d6e4f0; }
 
     button {
-      padding: 6px 12px;
-      background: #4CAF50;
+      padding: 8px 14px;
+      background: #1c80c8;
       color: white;
       border: none;
-      border-radius: 5px;
+      border-radius: 8px;
       cursor: pointer;
-      font-size: 0.9em;
-      transition: background-color 0.3s ease;
+      font-size: 0.95em;
+      transition: background-color 0.3s ease, transform 0.2s;
     }
 
     button:hover {
-      background-color: #388e3c;
+      background-color: #145f91;
+      transform: scale(1.05);
     }
 
+    .generate-invoice-btn {
+      margin-top: auto;
+      padding: 14px;
+      font-weight: 700;
+      font-size: 1em;
+      border-radius: 8px;
+      background-color: #1c3d5a;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+    }
+
+    .generate-invoice-btn:hover { background-color: #000; }
+
     .cart-list {
+      flex: 1;
+      overflow-y: auto;
       margin-top: 1em;
       display: flex;
       flex-direction: column;
       gap: 10px;
-      flex: 1;
-      overflow-y: auto;
     }
 
     .cart-item {
       display: flex;
       justify-content: space-between;
-      background-color: #f9f9f9;
+      align-items: center;
+      background-color: #f1f1f1;
       border: 1px solid #ddd;
       border-radius: 8px;
       padding: 10px 15px;
-      align-items: center;
     }
 
-    .generate-invoice-btn {
-      margin-top: auto;
-      padding: 12px;
-      font-weight: 700;
-      font-size: 1em;
-      border-radius: 8px;
-      box-shadow: 0 2px 6px rgba(0, 128, 0, 0.3);
-    }
-
-    /* Modal de selección de cliente */
     .modal-overlay {
       position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
+      top: 0; left: 0; right: 0; bottom: 0;
       background: rgba(0, 0, 0, 0.5);
       display: flex;
       justify-content: center;
       align-items: center;
-      z-index: 1000;
+      z-index: 2000;
     }
 
     .modal-content {
       background: white;
       padding: 20px;
-      border-radius: 8px;
+      border-radius: 10px;
       width: 90%;
       max-width: 400px;
     }
@@ -214,6 +224,16 @@ nav.menu-desplegable {
       margin-top: 20px;
     }
 
+    #backgroundCanvas {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 0;
+      pointer-events: none;
+      background: #0f2027;
+    }
+
     @media (max-width: 768px) {
       .container {
         flex-direction: column;
@@ -223,8 +243,6 @@ nav.menu-desplegable {
   </style>
 </head>
 <body>
-
-  <!-- MENÚ DESPLEGABLE -->
   <nav class="menu-desplegable">
     <div class="dropdown">
       <button class="dropbtn">☰ Menú</button>
@@ -245,345 +263,253 @@ nav.menu-desplegable {
   </nav>
 
   <div class="container">
-    <!-- Productos -->
     <div class="products">
-      <h2>Productos Disponibles</h2>
+      <h2>🛍️ Productos Disponibles</h2>
       <input type="text" id="searchInput" placeholder="Buscar producto..." />
-      <table>
-        <thead>
-          <tr>
-            <th>Nombre</th>
-            <th>Precio Venta</th>
-            <th>Acción</th>
-          </tr>
-        </thead>
-        <tbody id="productTable">
-          <!-- Se cargan desde JavaScript -->
-        </tbody>
-      </table>
+      <div class="tabla-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Nombre</th>
+              <th>Precio Venta</th>
+              <th>Acción</th>
+            </tr>
+          </thead>
+          <tbody id="productTable"></tbody>
+        </table>
+      </div>
     </div>
 
-    <!-- Carrito -->
     <div class="cart">
-      <h2>Productos Seleccionados</h2>
-      <div id="cartList" class="cart-list">
-        <!-- Se llena desde JavaScript -->
-      </div>
+      <h2>🧾 Productos Seleccionados</h2>
+      <div id="cartList" class="cart-list"></div>
       <button class="generate-invoice-btn" onclick="generarFactura()">Generar Factura</button>
     </div>
   </div>
 
-  <!-- Importamos jsPDF desde CDN -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  
-  <script>
-    const { jsPDF } = window.jspdf;
+  <canvas id="backgroundCanvas"></canvas>
 
-    // Elementos del DOM
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+  <script>
+    /* ===== FONDO ANIMADO ===== */
+    const canvas = document.getElementById('backgroundCanvas');
+    const ctx = canvas.getContext('2d');
+    let width, height;
+    function resize() {
+      width = window.innerWidth;
+      height = window.innerHeight;
+      canvas.width = width;
+      canvas.height = height;
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    class Shape {
+      constructor() { this.reset(); }
+      reset() {
+        this.x = Math.random() * width;
+        this.y = Math.random() * height;
+        this.size = 50 + Math.random() * 80;
+        this.speedX = (Math.random() * 0.3 + 0.05) * (Math.random() < 0.5 ? 1 : -1);
+        this.speedY = (Math.random() * 0.2 + 0.03) * (Math.random() < 0.5 ? 1 : -1);
+        this.opacity = 0.05 + Math.random() * 0.15;
+        this.color = `rgba(0, 140, 186, ${this.opacity})`;
+        this.rotation = Math.random() * Math.PI * 2;
+        this.rotationSpeed = (Math.random() - 0.5) * 0.002;
+        this.type = Math.floor(Math.random() * 3);
+      }
+      draw(ctx) {
+        ctx.save();
+        ctx.translate(this.x, this.y);
+        ctx.rotate(this.rotation);
+        ctx.fillStyle = this.color;
+        if (this.type === 0) {
+          ctx.beginPath();
+          ctx.arc(0, 0, this.size / 2, 0, Math.PI * 2);
+          ctx.fill();
+        } else if (this.type === 1) {
+          ctx.beginPath();
+          ctx.moveTo(0, -this.size / 1.5);
+          ctx.lineTo(this.size / 1.3, this.size / 2);
+          ctx.lineTo(-this.size / 1.3, this.size / 2);
+          ctx.closePath();
+          ctx.fill();
+        } else {
+          const r = this.size / 5;
+          ctx.beginPath();
+          ctx.moveTo(-this.size / 2 + r, -this.size / 2);
+          ctx.lineTo(this.size / 2 - r, -this.size / 2);
+          ctx.quadraticCurveTo(this.size / 2, -this.size / 2, this.size / 2, -this.size / 2 + r);
+          ctx.lineTo(this.size / 2, this.size / 2 - r);
+          ctx.quadraticCurveTo(this.size / 2, this.size / 2, this.size / 2 - r, this.size / 2);
+          ctx.lineTo(-this.size / 2 + r, this.size / 2);
+          ctx.quadraticCurveTo(-this.size / 2, this.size / 2, -this.size / 2, this.size / 2 - r);
+          ctx.lineTo(-this.size / 2, -this.size / 2 + r);
+          ctx.quadraticCurveTo(-this.size / 2, -this.size / 2, -this.size / 2 + r, -this.size / 2);
+          ctx.closePath();
+          ctx.fill();
+        }
+        ctx.restore();
+      }
+      update() {
+        this.x += this.speedX;
+        this.y += this.speedY;
+        this.rotation += this.rotationSpeed;
+        if (this.x > width + this.size) this.x = -this.size;
+        else if (this.x < -this.size) this.x = width + this.size;
+        if (this.y > height + this.size) this.y = -this.size;
+        else if (this.y < -this.size) this.y = height + this.size;
+      }
+    }
+
+    const shapes = Array.from({ length: 35 }, () => new Shape());
+    function animate() {
+      ctx.clearRect(0, 0, width, height);
+      shapes.forEach(s => { s.update(); s.draw(ctx); });
+      requestAnimationFrame(animate);
+    }
+    animate();
+  </script>
+
+  <script>
+    /* ===== SCRIPT COMPLETO DE VENTAS ===== */
+    const { jsPDF } = window.jspdf;
     const productTable = document.getElementById("productTable");
     const cartList = document.getElementById("cartList");
     const searchInput = document.getElementById("searchInput");
     const logoutLink = document.getElementById("logoutLink");
-    
-    // Variables globales
     const carrito = [];
     let productosGlobal = [];
     let clientesGlobal = [];
-
-    // Obtener ID del jefe desde localStorage
     const jefeId = localStorage.getItem('jefe_id');
 
-    // Verificar sesión al cargar
     if (!jefeId) {
       alert("No has iniciado sesión.");
       window.location.href = "Login.html";
     }
 
-    // Evento para cerrar sesión
     logoutLink.addEventListener('click', () => {
       localStorage.removeItem('jefe_id');
       localStorage.removeItem('usuario');
     });
 
-    // Función para obtener productos del servidor
     async function obtenerProductos() {
       try {
         const res = await fetch(`http://localhost:3000/productos/venta?jefe_id=${jefeId}`);
-        
-        if (!res.ok) {
-          throw new Error(`Error HTTP: ${res.status}`);
-        }
-        
-        const productos = await res.json();
-        productosGlobal = productos;
+        if (!res.ok) throw new Error(`Error HTTP: ${res.status}`);
+        productosGlobal = await res.json();
         renderProductos(productosGlobal);
       } catch (error) {
-        console.error("Error al obtener productos:", error);
-        alert("Error al cargar productos. Por favor intente más tarde.");
+        console.error(error);
+        alert("Error al cargar productos.");
       }
     }
 
-    // Función para obtener clientes del servidor
     async function obtenerClientes() {
       try {
         const res = await fetch(`http://localhost:3000/clientes?jefe_id=${jefeId}`);
-        
-        if (!res.ok) {
-          throw new Error(`Error HTTP: ${res.status}`);
-        }
-        
+        if (!res.ok) throw new Error(`Error HTTP: ${res.status}`);
         clientesGlobal = await res.json();
       } catch (error) {
-        console.error("Error al obtener clientes:", error);
-        alert("No se pudieron cargar los clientes. La venta continuará sin asignar cliente.");
+        console.error(error);
+        alert("No se pudieron cargar los clientes.");
       }
     }
 
-    // Función para renderizar productos en la tabla
     function renderProductos(productos) {
       productTable.innerHTML = "";
-      
       if (productos.length === 0) {
-        const fila = document.createElement("tr");
-        fila.innerHTML = `<td colspan="3" style="text-align: center;">No hay productos disponibles</td>`;
-        productTable.appendChild(fila);
+        productTable.innerHTML = `<tr><td colspan="3" style="text-align:center;">No hay productos disponibles</td></tr>`;
         return;
       }
-      
-      productos.forEach(producto => {
+      productos.forEach(p => {
         const fila = document.createElement("tr");
-        fila.innerHTML = `
-          <td>${producto.nombre}</td>
-          <td>$${parseFloat(producto.precio_venta).toFixed(2)}</td>
-          <td><button onclick="agregarAlCarrito(${producto.id}, '${producto.nombre}', ${producto.precio_venta})">Agregar</button></td>
-        `;
+        fila.innerHTML = `<td>${p.nombre}</td><td>$${parseFloat(p.precio_venta).toFixed(2)}</td><td><button onclick="agregarAlCarrito(${p.id},'${p.nombre}',${p.precio_venta})">Agregar</button></td>`;
         productTable.appendChild(fila);
       });
     }
 
-    // Función para agregar producto al carrito
     function agregarAlCarrito(id, nombre, precio_venta) {
       const productoExistente = carrito.find(item => item.id === id);
-      
-      if (productoExistente) {
-        productoExistente.cantidad++;
-      } else {
-        carrito.push({
-          id,
-          nombre,
-          precio: parseFloat(precio_venta),
-          cantidad: 1
-        });
-      }
-      
+      if (productoExistente) productoExistente.cantidad++;
+      else carrito.push({id, nombre, precio: parseFloat(precio_venta), cantidad:1});
       renderCarrito();
     }
 
-    // Función para eliminar producto del carrito
     function eliminarDelCarrito(index) {
       carrito.splice(index, 1);
       renderCarrito();
     }
 
-    // Función para renderizar el carrito
     function renderCarrito() {
       cartList.innerHTML = "";
-      
       if (carrito.length === 0) {
         cartList.innerHTML = "<p style='text-align: center;'>El carrito está vacío</p>";
         return;
       }
-      
-      carrito.forEach((producto, index) => {
-        const subtotal = producto.precio * producto.cantidad;
-        
+      carrito.forEach((p,i) => {
+        const subtotal = p.precio * p.cantidad;
         const item = document.createElement("div");
         item.className = "cart-item";
-        item.innerHTML = `
-          <span>${producto.nombre} - $${producto.precio.toFixed(2)} x ${producto.cantidad} = $${subtotal.toFixed(2)}</span>
-          <button onclick="eliminarDelCarrito(${index})">Eliminar</button>
-        `;
+        item.innerHTML = `<span>${p.nombre} - $${p.precio.toFixed(2)} x ${p.cantidad} = $${subtotal.toFixed(2)}</span><button onclick="eliminarDelCarrito(${i})">Eliminar</button>`;
         cartList.appendChild(item);
       });
     }
 
-    // Función para seleccionar cliente (modal)
     function seleccionarCliente() {
       return new Promise((resolve) => {
-        if (clientesGlobal.length === 0) {
-          alert("No hay clientes registrados. Se registrará la venta sin cliente.");
-          resolve(null);
-          return;
-        }
-
-        // Crear overlay del modal
+        if (clientesGlobal.length === 0) { alert("No hay clientes."); resolve(null); return; }
         const overlay = document.createElement("div");
         overlay.className = "modal-overlay";
-
-        // Crear contenido del modal
         const modal = document.createElement("div");
         modal.className = "modal-content";
-        modal.innerHTML = `
-          <h3>Selecciona un cliente</h3>
-          <select id="clienteSelect" style="width: 100%; padding: 8px; margin: 15px 0;">
-            ${clientesGlobal.map(c => `<option value="${c.id}">${c.nombre}</option>`).join('')}
-          </select>
-          <div class="modal-buttons">
-            <button id="btnCancelar">Cancelar</button>
-            <button id="btnAceptar">Aceptar</button>
-          </div>
-        `;
-
-        // Eventos de los botones
+        modal.innerHTML = `<h3>Selecciona un cliente</h3><select id="clienteSelect" style="width: 100%; padding: 8px; margin: 15px 0;">${clientesGlobal.map(c=>`<option value="${c.id}">${c.nombre}</option>`).join('')}</select><div class="modal-buttons"><button id="btnCancelar">Cancelar</button><button id="btnAceptar">Aceptar</button></div>`;
         document.body.appendChild(overlay);
         overlay.appendChild(modal);
-
-        document.getElementById("btnAceptar").onclick = () => {
-          const select = document.getElementById("clienteSelect");
-          const clienteId = parseInt(select.value);
-          document.body.removeChild(overlay);
-          resolve(clienteId);
-        };
-
-        document.getElementById("btnCancelar").onclick = () => {
-          document.body.removeChild(overlay);
-          resolve(null);
-        };
+        document.getElementById("btnAceptar").onclick = () => { const select=document.getElementById("clienteSelect"); const clienteId=parseInt(select.value); document.body.removeChild(overlay); resolve(clienteId); };
+        document.getElementById("btnCancelar").onclick = () => { document.body.removeChild(overlay); resolve(null); };
       });
     }
 
-    // Función para generar factura
     async function generarFactura() {
-      if (carrito.length === 0) {
-        alert("El carrito está vacío. Agrega productos para generar la factura.");
-        return;
-      }
-
+      if (carrito.length === 0) { alert("El carrito está vacío."); return; }
       const clienteId = await seleccionarCliente();
-      
-      if (clienteId === null && clientesGlobal.length > 0) {
-        alert("Debe seleccionar un cliente para continuar.");
-        return;
-      }
-
-      // Preparar datos para la venta
-      const venta = {
-        cliente_id: clienteId,
-        jefe_id: jefeId,
-        productos: carrito.map(p => ({
-          id: p.id,
-          cantidad: p.cantidad,
-          precio: p.precio
-        }))
-      };
-
+      if (clienteId===null && clientesGlobal.length>0){ alert("Debe seleccionar un cliente."); return; }
+      const venta = { cliente_id:clienteId, jefe_id:jefeId, productos: carrito.map(p=>({id:p.id,cantidad:p.cantidad,precio:p.precio})) };
       try {
-        // Registrar la venta en el servidor
-        const res = await fetch("http://localhost:3000/ventas/registrar", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify(venta)
-        });
-
-        if (!res.ok) {
-          const errorData = await res.json();
-          throw new Error(errorData.error || "Error al registrar la venta");
-        }
-
-        // Generar PDF de la factura
+        const res = await fetch("http://localhost:3000/ventas/registrar",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(venta)});
+        if (!res.ok) { const errorData=await res.json(); throw new Error(errorData.error || "Error al registrar la venta"); }
         generarPDFFactura(clienteId);
-        
-        // Vaciar carrito después de la venta
-        carrito.length = 0;
-        renderCarrito();
-        
+        carrito.length=0; renderCarrito();
         alert("Venta registrada con éxito!");
-
-      } catch (error) {
-        console.error("Error al registrar venta:", error);
-        alert("Error al registrar la venta: " + error.message);
-      }
+      } catch(error) { console.error(error); alert("Error al registrar la venta: "+error.message); }
     }
 
-    // Función para generar PDF de la factura
     function generarPDFFactura(clienteId) {
-      const cliente = clientesGlobal.find(c => c.id === clienteId) || { nombre: "Cliente no especificado" };
+      const cliente = clientesGlobal.find(c=>c.id===clienteId)||{nombre:"Cliente no especificado"};
       const fecha = new Date().toLocaleDateString();
       const doc = new jsPDF();
-
-      // Encabezado
-      doc.setFontSize(20);
-      doc.setTextColor(0, 0, 0);
-      doc.text("FACTURA DE VENTA", 105, 20, { align: "center" });
-
-      // Información del cliente
-      doc.setFontSize(12);
-      doc.text(`Cliente: ${cliente.nombre}`, 14, 30);
-      doc.text(`Fecha: ${fecha}`, 150, 30);
-
-      // Tabla de productos
+      doc.setFontSize(20); doc.setTextColor(0,0,0); doc.text("FACTURA DE VENTA",105,20,{align:"center"});
+      doc.setFontSize(12); doc.text(`Cliente: ${cliente.nombre}`,14,30); doc.text(`Fecha: ${fecha}`,150,30);
       let yPos = 40;
-      const columnas = {
-        producto: 14,
-        cantidad: 90,
-        precio: 120,
-        subtotal: 150
-      };
-
-      // Encabezados de tabla
-      doc.setFontSize(14);
-      doc.text("Producto", columnas.producto, yPos);
-      doc.text("Cant.", columnas.cantidad, yPos);
-      doc.text("Precio", columnas.precio, yPos);
-      doc.text("Subtotal", columnas.subtotal, yPos);
-      yPos += 6;
-
-      // Línea separadora
-      doc.setLineWidth(0.5);
-      doc.line(14, yPos, 196, yPos);
-      yPos += 10;
-
-      // Productos
-      doc.setFontSize(12);
-      let total = 0;
-
-      carrito.forEach(producto => {
-        const subtotal = producto.precio * producto.cantidad;
-        total += subtotal;
-
-        doc.text(producto.nombre, columnas.producto, yPos);
-        doc.text(String(producto.cantidad), columnas.cantidad, yPos);
-        doc.text(`$${producto.precio.toFixed(2)}`, columnas.precio, yPos);
-        doc.text(`$${subtotal.toFixed(2)}`, columnas.subtotal, yPos);
-        yPos += 8;
-      });
-
-      // Línea final
-      doc.line(14, yPos, 196, yPos);
-      yPos += 10;
-
-      // Total
-      doc.setFontSize(16);
-      doc.setTextColor(0, 128, 0);
-      doc.text(`TOTAL: $${total.toFixed(2)}`, columnas.subtotal, yPos);
-
-      // Guardar PDF
-      doc.save(`Factura_${cliente.nombre.replace(/\s+/g, '_')}_${fecha.replace(/\//g, '-')}.pdf`);
+      const columnas = {producto:14,cantidad:90,precio:120,subtotal:150};
+      doc.setFontSize(14); doc.text("Producto",columnas.producto,yPos); doc.text("Cant.",columnas.cantidad,yPos); doc.text("Precio",columnas.precio,yPos); doc.text("Subtotal",columnas.subtotal,yPos);
+      yPos+=6; doc.setLineWidth(0.5); doc.line(14,yPos,196,yPos); yPos+=10;
+      doc.setFontSize(12); let total=0;
+      carrito.forEach(p=>{ const subtotal=p.precio*p.cantidad; total+=subtotal; doc.text(p.nombre,columnas.producto,yPos); doc.text(String(p.cantidad),columnas.cantidad,yPos); doc.text(`$${p.precio.toFixed(2)}`,columnas.precio,yPos); doc.text(`$${subtotal.toFixed(2)}`,columnas.subtotal,yPos); yPos+=8; });
+      doc.line(14,yPos,196,yPos); yPos+=10;
+      doc.setFontSize(16); doc.setTextColor(0,128,0); doc.text(`TOTAL: $${total.toFixed(2)}`,columnas.subtotal,yPos);
+      doc.save(`Factura_${cliente.nombre.replace(/\s+/g,'_')}_${fecha.replace(/\//g,'-')}.pdf`);
     }
 
-    // Búsqueda de productos
-    searchInput.addEventListener("input", () => {
-      const filtro = searchInput.value.toLowerCase();
-      const productosFiltrados = productosGlobal.filter(p => 
-        p.nombre.toLowerCase().includes(filtro)
-      );
+    searchInput.addEventListener("input",()=>{
+      const filtro=searchInput.value.toLowerCase();
+      const productosFiltrados=productosGlobal.filter(p=>p.nombre.toLowerCase().includes(filtro));
       renderProductos(productosFiltrados);
     });
 
-    // Inicializar la página
-    document.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener('DOMContentLoaded',()=>{
       obtenerProductos();
       obtenerClientes();
     });

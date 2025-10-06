@@ -5,32 +5,31 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Registrar Entrada</title>
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+  * { box-sizing: border-box; margin:0; padding:0; }
   body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     min-height: 100vh;
-    background: linear-gradient(135deg, #e0f7e9, #b2d8b2);
+    background: #0f2027;
+    color: #333;
     display: flex;
     flex-direction: column;
     position: relative;
     z-index: 1;
   }
 
- /* ==== MENÚ DESPLEGABLE ESTILO MODERNO ==== */
+  /* ==== MENÚ DESPLEGABLE MODERNO ==== */
 nav.menu-desplegable {
-  background-color: #2c3e50;   /* Azul oscuro */
+  background-color: #2c3e50;
   padding: 0.5em 1em;
   display: flex;
   justify-content: flex-start;
   position: sticky;
   top: 0;
   z-index: 100;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.25);
 }
 
-.dropdown {
-  position: relative;
-}
+.dropdown { position: relative; }
 
 .dropbtn {
   background-color: #2c3e50;
@@ -43,21 +42,20 @@ nav.menu-desplegable {
   border-radius: 8px;
   transition: background-color 0.3s, transform 0.2s;
 }
-
 .dropbtn:hover {
-  background-color: #1c80c8;  /* Azul acento en hover */
+  background-color: #1c80c8;
   transform: scale(1.05);
 }
 
 .dropdown-content {
   display: none;
   position: absolute;
-  background-color: #34495e; /* Fondo gris-azulado */
+  background-color: #34495e;
   min-width: 220px;
   margin-top: 5px;
   border-radius: 8px;
   overflow: hidden;
-  box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.25);
+  box-shadow: 0px 8px 16px rgba(0,0,0,0.25);
   z-index: 1000;
 }
 
@@ -68,104 +66,101 @@ nav.menu-desplegable {
   display: block;
   transition: background 0.3s;
 }
+.dropdown-content a:hover { background-color: #1c80c8; }
+.dropdown:hover .dropdown-content { display: block; }
 
-.dropdown-content a:hover {
-  background-color: #1c80c8; /* Azul acento en hover */
+  /* ==== FORMULARIO ESTILO MODERNO ==== */
+form {
+  background: rgba(255,255,255,0.95);
+  padding: 30px 40px;
+  border-radius: 12px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+  max-width: 1400px;
+  width: 95%;
+  margin: 50px auto;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  align-items: flex-start;
+  position: relative;
+  z-index: 5;
 }
 
-.dropdown:hover .dropdown-content {
-  display: block;
+form h2 {
+  width: 100%;
+  text-align: center;
+  color: #1c3d5a;
+  margin-bottom: 20px;
 }
 
-  form {
-    background: white;
-    padding: 30px 40px;
-    border-radius: 12px;
-    box-shadow: 0 6px 20px rgba(0,0,0,0.1);
-    max-width: 1400px;
-    width: 95%;
-    margin: 50px auto;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 20px;
-    align-items: flex-start;
-    position: relative;
-    z-index: 5;
-  }
-  form h2 {
-    width: 100%;
-    text-align: center;
-    color: #2f6627;
-    margin-bottom: 20px;
-  }
-  .form-group {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    width: calc(50% - 10px);
-  }
-  .form-group label {
-    flex: 1;
-    margin-right: 10px;
-    font-weight: 600;
-    color: #444;
-    white-space: nowrap;
-  }
-  .form-group input,
-  .form-group select {
-    flex: 2;
-    padding: 10px 12px;
-    border: 1.5px solid #c4c4c4;
-    border-radius: 6px;
-    font-size: 1rem;
-    transition: border-color 0.3s ease;
-  }
-  .form-group input:focus,
-  .form-group select:focus { border-color: #4CAF50; outline: none; }
+.form-group {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  width: calc(50% - 10px);
+}
+.form-group label {
+  flex: 1;
+  margin-right: 10px;
+  font-weight: 600;
+  color: #444;
+  white-space: nowrap;
+}
+.form-group input,
+.form-group select {
+  flex: 2;
+  padding: 10px 12px;
+  border: 1.5px solid #c4c4c4;
+  border-radius: 6px;
+  font-size: 1rem;
+  transition: border-color 0.3s ease;
+}
+.form-group input:focus,
+.form-group select:focus {
+  border-color: #1c80c8;
+  outline: none;
+}
 
-  button {
-    width: 100%;
-    padding: 14px;
-    background-color: #4CAF50;
-    color: white;
-    font-size: 1.1rem;
-    font-weight: 700;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    box-shadow: 0 3px 8px rgba(76, 175, 80, 0.5);
-    transition: background-color 0.3s ease, box-shadow 0.3s ease;
-  }
-  button:hover {
-    background-color: #3b8b3b;
-    box-shadow: 0 5px 15px rgba(59,139,59,0.7);
-  }
+button {
+  width: 100%;
+  padding: 14px;
+  background-color: #1c80c8;
+  color: white;
+  font-size: 1.1rem;
+  font-weight: 700;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: 0 3px 8px rgba(28,128,200,0.5);
+  transition: background-color 0.3s ease, box-shadow 0.3s ease, transform 0.2s;
+}
+button:hover {
+  background-color: #145f91;
+  box-shadow: 0 5px 15px rgba(20,95,145,0.7);
+  transform: scale(1.03);
+}
 
-  .mensaje {
-    width: 100%;
-    text-align: center;
-    font-weight: 600;
-    margin-top: 12px;
-  }
+.mensaje {
+  width: 100%;
+  text-align: center;
+  font-weight: 600;
+  margin-top: 12px;
+}
 
-  #backgroundCanvas {
-    position: fixed;
-    top:0; left:0;
-    width: 100vw; height: 100vh;
-    z-index: 0;
-    pointer-events: none;
-  }
+#backgroundCanvas {
+  position: fixed;
+  top:0; left:0;
+  width: 100vw; height: 100vh;
+  z-index: 0;
+  pointer-events: none;
+}
 
-  @media(max-width: 1200px){
-    .form-group { width: calc(50% - 10px); }
-  }
-  @media(max-width: 900px){
-    .form-group { width: 100%; }
-    .form-group label { margin-bottom: 5px; }
-    .form-group { flex-direction: column; align-items: flex-start; }
-    .form-group input,
-    .form-group select { width: 100%; }
-  }
+@media(max-width:1200px){ .form-group { width: calc(50% - 10px); } }
+@media(max-width:900px){
+  .form-group { width: 100%; flex-direction: column; align-items: flex-start; }
+  .form-group label { margin-bottom: 5px; }
+  .form-group input, .form-group select { width: 100%; }
+}
 </style>
 </head>
 <body>
@@ -192,7 +187,6 @@ nav.menu-desplegable {
 <form id="entradaForm">
   <h2>Registrar Entrada</h2>
 
-  <!-- Campos del formulario -->
   <div class="form-group"><label for="nombre">Nombre del Producto:</label><input type="text" id="nombre" name="nombre" required></div>
   <div class="form-group"><label for="descripcion">Descripción:</label><input type="text" id="descripcion" name="descripcion"></div>
   <div class="form-group"><label for="modelo">Modelo:</label><input type="text" id="modelo" name="modelo"></div>
@@ -242,18 +236,14 @@ nav.menu-desplegable {
   }
   cargarProveedores();
 
-  // ==== REGISTRAR PRODUCTO Y LUEGO INVENTARIO ====
+  // ==== REGISTRAR PRODUCTO ====
   document.getElementById('entradaForm').addEventListener('submit', async e=>{
     e.preventDefault();
     const jefeId = localStorage.getItem('jefe_id');
     const form = e.target;
-
     try{
-      // Validar proveedor
       const proveedorId = parseInt(form.proveedor_id.value);
-      if (isNaN(proveedorId)) throw new Error('Debe seleccionar un proveedor válido');
-
-      // 1️⃣ Datos del producto
+      if(isNaN(proveedorId)) throw new Error('Debe seleccionar un proveedor válido');
       const productoData = {
         nombre: form.nombre.value.trim(),
         descripcion: form.descripcion.value.trim(),
@@ -263,12 +253,10 @@ nav.menu-desplegable {
         precio_compra: parseFloat(form.precio_compra.value),
         precio_venta: parseFloat(form.precio_venta.value) || 0,
         ubicacion: form.ubicacion.value.trim() || null,
-        proveedor_id: proveedorId, // ✅ ahora se envía correctamente
+        proveedor_id: proveedorId,
         jefe_id: parseInt(jefeId)
       };
-
-      // Registrar producto/entrada
-      const resProducto = await fetch('http://localhost:3000/registrar/entrada', {
+      const resProducto = await fetch('http://localhost:3000/registrar/entrada',{
         method:'POST',
         headers:{'Content-Type':'application/json'},
         body: JSON.stringify(productoData)
@@ -277,8 +265,6 @@ nav.menu-desplegable {
       if(!resProducto.ok) throw new Error(productoResult.error || 'Error al registrar producto');
 
       const producto_id = productoResult.producto_id;
-
-      // 2️⃣ Registrar inventario
       const inventarioData = {
         producto_id,
         almacen: form.almacen.value.trim() || 'Principal',
@@ -287,7 +273,7 @@ nav.menu-desplegable {
         cantidad: parseInt(form.cantidad.value) || 0,
         en_venta: form.en_venta.value === 'true'
       };
-      const resInventario = await fetch('http://localhost:3000/registrar/inventario', {
+      const resInventario = await fetch('http://localhost:3000/registrar/inventario',{
         method:'POST',
         headers:{'Content-Type':'application/json'},
         body: JSON.stringify(inventarioData)
@@ -295,12 +281,10 @@ nav.menu-desplegable {
       const inventarioResult = await resInventario.json();
       if(!resInventario.ok) throw new Error(inventarioResult.error || 'Error al registrar inventario');
 
-      // Mensaje de éxito
       const mensaje = document.getElementById('mensaje');
-      mensaje.style.color = 'green';
+      mensaje.style.color='green';
       mensaje.textContent = "✅ Producto registrado y añadido al inventario correctamente";
-      window.location.href = "Productos.html";
-
+      window.location.href="Productos.html";
     }catch(err){
       console.error(err);
       const mensaje = document.getElementById('mensaje');
@@ -315,7 +299,7 @@ nav.menu-desplegable {
     localStorage.removeItem('usuario');
   });
 
-  // ==== FONDO ANIMADO ====
+  // ==== FONDO ANIMADO MODERNO ====
   const canvas=document.getElementById('backgroundCanvas');
   const ctx=canvas.getContext('2d');
   let width,height;
@@ -323,28 +307,40 @@ nav.menu-desplegable {
   window.addEventListener('resize',resize);
   resize();
 
-  class Particle{
+  class Shape{
     constructor(){this.reset();}
-    reset(){this.x=Math.random()*width;this.y=Math.random()*height;this.radius=1+Math.random()*3;this.speedX=(Math.random()-0.5)*0.4;this.speedY=(Math.random()-0.5)*0.4;this.alpha=0.1+Math.random()*0.3;}
-    update(){this.x+=this.speedX;this.y+=this.speedY;if(this.x<0||this.x>width)this.speedX*=-1;if(this.y<0||this.y>height)this.speedY*=-1;}
-    draw(ctx){ctx.beginPath();ctx.arc(this.x,this.y,this.radius,0,2*Math.PI);ctx.fillStyle=`rgba(76,175,80,${this.alpha})`;ctx.fill();}
+    reset(){this.x=Math.random()*width; this.y=Math.random()*height; this.size=50+Math.random()*80;
+      this.speedX=(Math.random()*0.3+0.05)*(Math.random()<0.5?1:-1);
+      this.speedY=(Math.random()*0.2+0.03)*(Math.random()<0.5?1:-1);
+      this.opacity=0.05+Math.random()*0.15;
+      this.color=`rgba(28,128,200,${this.opacity})`;
+      this.rotation=Math.random()*Math.PI*2;
+      this.rotationSpeed=(Math.random()-0.5)*0.002;
+      this.type=Math.floor(Math.random()*3);}
+    draw(ctx){
+      ctx.save(); ctx.translate(this.x,this.y); ctx.rotate(this.rotation); ctx.fillStyle=this.color;
+      if(this.type===0){ctx.beginPath();ctx.arc(0,0,this.size/2,0,Math.PI*2);ctx.fill();}
+      else if(this.type===1){ctx.beginPath();ctx.moveTo(0,-this.size/1.5);ctx.lineTo(this.size/1.3,this.size/2);
+        ctx.lineTo(-this.size/1.3,this.size/2);ctx.closePath();ctx.fill();}
+      else{const r=this.size/5;ctx.beginPath();ctx.moveTo(-this.size/2+r,-this.size/2);
+        ctx.lineTo(this.size/2-r,-this.size/2);ctx.quadraticCurveTo(this.size/2,-this.size/2,this.size/2,-this.size/2+r);
+        ctx.lineTo(this.size/2,this.size/2-r);ctx.quadraticCurveTo(this.size/2,this.size/2,this.size/2-r,this.size/2);
+        ctx.lineTo(-this.size/2+r,this.size/2);ctx.quadraticCurveTo(-this.size/2,this.size/2,-this.size/2,this.size/2-r);
+        ctx.lineTo(-this.size/2,-this.size/2+r);ctx.quadraticCurveTo(-this.size/2,-this.size/2,-this.size/2+r,-this.size/2);
+        ctx.closePath();ctx.fill();}
+      ctx.restore();
+    }
+    update(){this.x+=this.speedX; this.y+=this.speedY; this.rotation+=this.rotationSpeed;
+      if(this.x>width+this.size)this.x=-this.size; else if(this.x<-this.size)this.x=width+this.size;
+      if(this.y>height+this.size)this.y=-this.size; else if(this.y<-this.size)this.y=height+this.size;}
   }
-  const particles=Array.from({length:100},()=>new Particle());
+  const shapes=Array.from({length:35},()=>new Shape());
   function animate(){
     ctx.clearRect(0,0,width,height);
-    particles.forEach(p1=>{
-      p1.update();
-      p1.draw(ctx);
-      particles.forEach(p2=>{
-        const dist=Math.hypot(p1.x-p2.x,p1.y-p2.y);
-        if(dist<120){ctx.strokeStyle=`rgba(76,175,80,${(120-dist)/300})`;ctx.lineWidth=0.7;ctx.beginPath();ctx.moveTo(p1.x,p1.y);ctx.lineTo(p2.x,p2.y);ctx.stroke();}
-      });
-    });
+    shapes.forEach(s=>{s.update();s.draw(ctx);});
     requestAnimationFrame(animate);
   }
   animate();
 </script>
-
-
 </body>
 </html>
