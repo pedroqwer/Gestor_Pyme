@@ -1006,61 +1006,128 @@ app.get("/entradas/:id", (req, res) => {
   });
 });
 
-// ==========================
-// 📦 Ruta: Salidas (opcional para futuro detalle)
-// ==========================
-app.get("/salidas/:id", async (req, res) => {
+app.get("/movimiento/:id/venta", (req, res) => {
   const { id } = req.params;
-  try {
-    const [rows] = await db.query(`
-      SELECT 
-        s.id,
-        p.nombre AS producto,
-        s.cantidad,
-        s.fecha,
-        s.observacion,
-        j.usuario AS jefe
-      FROM salidas s
-      LEFT JOIN productos p ON s.producto_id = p.id
-      LEFT JOIN jefe j ON s.jefe_id = j.id
-      WHERE s.id = ?
-    `, [id]);
 
-    if (!rows.length) return res.status(404).json({ error: "Salida no encontrada" });
-    res.json(rows[0]);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Error al obtener la salida" });
-  }
+  // 1️⃣ Obtener el movimiento
+  const queryMovimiento = `SELECT * FROM movimientos WHERE id = ? AND tipo='venta'`;
+  connection.query(queryMovimiento, [id], (err, movRes) => {
+    if (err) return res.status(500).json({ error: "Error al obtener el movimiento" });
+    if (!movRes.length) return res.status(404).json({ error: "No existe un movimiento de venta con ese ID" });
+
+    const movimiento = movRes[0];
+
+    // 2️⃣ Buscar la venta en detalle_venta
+    const queryDetalleVenta = `
+      SELECT dv.venta_id
+      FROM detalle_venta dv
+      WHERE dv.producto_id = ? AND dv.cantidad = ?
+      LIMIT 1
+    `;
+
+    connection.query(queryDetalleVenta, [movimiento.producto_id, movimiento.cantidad], (err, detalleVentaRes) => {
+      if (err) return res.status(500).json({ error: "Error al buscar la venta en detalle_venta" });
+      if (!detalleVentaRes.length) return res.status(404).json({ error: "No se encontró venta asociada a este movimiento" });
+
+      const ventaId = detalleVentaRes[0].venta_id;
+
+      // 3️⃣ Traer información completa de la venta
+      const queryVenta = `
+        SELECT 
+          v.id AS venta_id, v.fecha, v.total,
+          j.usuario AS jefe,
+          c.nombre AS cliente, c.telefono, c.email, c.direccion
+        FROM ventas v
+        LEFT JOIN clientes c ON v.cliente_id = c.id
+        LEFT JOIN jefe j ON v.jefe_id = j.id
+        WHERE v.id = ?
+      `;
+
+      connection.query(queryVenta, [ventaId], (err, ventaRes) => {
+        if (err) return res.status(500).json({ error: "Error al obtener la venta" });
+        if (!ventaRes.length) return res.status(404).json({ error: "No existe la venta" });
+
+        const venta = ventaRes[0];
+
+        // Detalles de la venta
+        const queryDetalle = `
+          SELECT dv.producto_id, p.nombre AS producto, p.marca, dv.cantidad, dv.precio_unitario
+          FROM detalle_venta dv
+          LEFT JOIN productos p ON dv.producto_id = p.id
+          WHERE dv.venta_id = ?
+        `;
+
+        // Movimientos de tipo 'venta' para esta venta
+        const queryMovimientos = `
+          SELECT *
+          FROM movimientos
+          WHERE tipo='venta' AND producto_id IN (SELECT producto_id FROM detalle_venta WHERE venta_id = ?)
+        `;
+
+        // Pagos
+        const queryPagos = `
+          SELECT metodo, monto, fecha
+          FROM pagos
+          WHERE tipo='venta' AND referencia_id = ?
+        `;
+
+        connection.query(queryDetalle, [ventaId], (err, detalleRes) => {
+          if (err) return res.status(500).json({ error: "Error al obtener detalle de venta" });
+
+          connection.query(queryMovimientos, [ventaId], (err, movimientosRes) => {
+            if (err) return res.status(500).json({ error: "Error al obtener movimientos" });
+
+            connection.query(queryPagos, [ventaId], (err, pagosRes) => {
+              if (err) return res.status(500).json({ error: "Error al obtener pagos" });
+
+              res.json({
+                venta,
+                detalle: detalleRes,
+                movimientos: movimientosRes,
+                pagos: pagosRes
+              });
+            });
+          });
+        });
+      });
+    });
+  });
 });
 
+
 // ==========================
-// 💰 Ruta: Ventas (opcional para detalle de venta)
+// 📦 Ruta: Obtener detalle de una salida
 // ==========================
-app.get("/ventas/:id", async (req, res) => {
+app.get("/salidas/:id", (req, res) => {
   const { id } = req.params;
-  try {
-    const [rows] = await db.query(`
-      SELECT 
-        v.id,
-        c.nombre AS cliente,
-        v.total,
-        v.fecha,
-        j.usuario AS jefe
-      FROM ventas v
-      LEFT JOIN clientes c ON v.cliente_id = c.id
-      LEFT JOIN jefe j ON v.jefe_id = j.id
-      WHERE v.id = ?
-    `, [id]);
 
-    if (!rows.length) return res.status(404).json({ error: "Venta no encontrada" });
-    res.json(rows[0]);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Error al obtener la venta" });
-  }
+  const query = `
+    SELECT 
+      s.id,
+      p.nombre AS producto,
+      s.cantidad,
+      s.fecha,
+      s.observacion,
+      j.usuario AS jefe
+    FROM salidas s
+    LEFT JOIN productos p ON s.producto_id = p.id
+    LEFT JOIN jefe j ON s.jefe_id = j.id
+    WHERE s.id = ?
+  `;
+
+  connection.query(query, [id], (err, results) => {
+    if (err) {
+      console.error("❌ Error al obtener la salida:", err);
+      return res.status(500).json({ error: "Error al obtener la salida" });
+    }
+
+    if (!results.length) {
+      return res.status(404).json({ error: "Salida no encontrada" });
+    }
+
+    res.json(results[0]);
+  });
 });
-
 
 
 // ===============================
