@@ -80,7 +80,7 @@
       padding: 2em;
       position: relative;
       z-index: 10;
-      max-width: 900px;
+      max-width: 1200px;
       margin: 0 auto;
     }
 
@@ -100,18 +100,14 @@
       margin-bottom: 40px;
       transition: transform 0.3s, box-shadow 0.3s;
       backdrop-filter: blur(8px);
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 30px;
     }
 
     .detalle:hover {
       transform: translateY(-3px);
       box-shadow: 0 12px 25px rgba(0,0,0,0.5);
-    }
-
-    .detalle p {
-      margin: 12px 0;
-      font-size: 1rem;
-      line-height: 1.6;
-      color: #ccc;
     }
 
     .section-title {
@@ -131,7 +127,10 @@
       gap: 15px 20px;
     }
 
-    @media (max-width: 600px) {
+    @media (max-width: 900px) {
+      .detalle {
+        grid-template-columns: 1fr;
+      }
       .info-grid {
         grid-template-columns: 1fr;
       }
@@ -221,7 +220,7 @@
     <h1>📥 Detalle de la Entrada</h1>
 
     <div id="info" class="detalle">
-      <p style="text-align:center; color:#ccc;">Cargando datos...</p>
+      <p style="text-align:center; color:#ccc; grid-column: 1 / -1;">Cargando datos...</p>
     </div>
 
     <a href="Movimientos.html" class="volver">⬅ Volver a Movimientos</a>
@@ -248,45 +247,49 @@
         const inventario = data.inventario || {};
 
         document.getElementById("info").innerHTML = `
-          <div class="section-title">Información General</div>
-          <div class="info-grid">
-            <div><span class="label">ID de Entrada:</span> <span class="value">${data.id}</span></div>
-            <div><span class="label">Fecha de Ingreso:</span> <span class="value">${fecha}</span></div>
-            <div><span class="label">Cantidad:</span> <span class="value">${cantidad}</span></div>
-            <div><span class="label">Precio de Compra:</span> <span class="value">$${precio_compra.toFixed(2)}</span></div>
-            <div><span class="label">Jefe Responsable:</span> <span class="value">${data.jefe || "Desconocido"}</span></div>
-            <div><span class="label">Observación:</span> <span class="value">${data.observacion || "—"}</span></div>
+          <div class="left-column">
+            <div class="section-title">Información General</div>
+            <div class="info-grid">
+              <div><span class="label">ID de Entrada:</span> <span class="value">${data.id}</span></div>
+              <div><span class="label">Fecha de Ingreso:</span> <span class="value">${fecha}</span></div>
+              <div><span class="label">Cantidad:</span> <span class="value">${cantidad}</span></div>
+              <div><span class="label">Precio de Compra:</span> <span class="value">$${precio_compra.toFixed(2)}</span></div>
+              <div><span class="label">Jefe Responsable:</span> <span class="value">${data.jefe || "Desconocido"}</span></div>
+              <div><span class="label">Observación:</span> <span class="value">${data.observacion || "—"}</span></div>
+            </div>
+
+            <div class="section-title">Producto</div>
+            <div class="info-grid">
+              <div><span class="label">Nombre:</span> <span class="value">${producto.nombre || "Sin especificar"}</span></div>
+              <div><span class="label">Marca:</span> <span class="value">${producto.marca || "—"}</span></div>
+              <div><span class="label">Modelo:</span> <span class="value">${producto.modelo || "—"}</span></div>
+              <div><span class="label">Descripción:</span> <span class="value">${producto.descripcion || "—"}</span></div>
+              <div><span class="label">Ubicación:</span> <span class="value">${producto.ubicacion || "—"}</span></div>
+            </div>
           </div>
 
-          <div class="section-title">Producto</div>
-          <div class="info-grid">
-            <div><span class="label">Nombre:</span> <span class="value">${producto.nombre || "Sin especificar"}</span></div>
-            <div><span class="label">Marca:</span> <span class="value">${producto.marca || "—"}</span></div>
-            <div><span class="label">Modelo:</span> <span class="value">${producto.modelo || "—"}</span></div>
-            <div><span class="label">Descripción:</span> <span class="value">${producto.descripcion || "—"}</span></div>
-            <div><span class="label">Ubicación:</span> <span class="value">${producto.ubicacion || "—"}</span></div>
-          </div>
+          <div class="right-column">
+            <div class="section-title">Proveedor</div>
+            <div class="info-grid">
+              <div><span class="label">Nombre:</span> <span class="value">${proveedor.nombre || "N/A"}</span></div>
+              <div><span class="label">Contacto:</span> <span class="value">${proveedor.contacto || "—"}</span></div>
+              <div><span class="label">Teléfono:</span> <span class="value">${proveedor.telefono || "—"}</span></div>
+              <div><span class="label">Email:</span> <span class="value">${proveedor.email || "—"}</span></div>
+              <div style="grid-column: 1 / -1;"><span class="label">Dirección:</span> <span class="value">${proveedor.direccion || "—"}</span></div>
+            </div>
 
-          <div class="section-title">Proveedor</div>
-          <div class="info-grid">
-            <div><span class="label">Nombre:</span> <span class="value">${proveedor.nombre || "N/A"}</span></div>
-            <div><span class="label">Contacto:</span> <span class="value">${proveedor.contacto || "—"}</span></div>
-            <div><span class="label">Teléfono:</span> <span class="value">${proveedor.telefono || "—"}</span></div>
-            <div><span class="label">Email:</span> <span class="value">${proveedor.email || "—"}</span></div>
-            <div style="grid-column: 1 / -1;"><span class="label">Dirección:</span> <span class="value">${proveedor.direccion || "—"}</span></div>
-          </div>
-
-          <div class="section-title">Inventario</div>
-          <div class="info-grid">
-            <div><span class="label">Lote:</span> <span class="value">${inventario.lote || "—"}</span></div>
-            <div><span class="label">Almacén:</span> <span class="value">${inventario.almacen || "—"}</span></div>
-            <div><span class="label">Stock Actual:</span> <span class="value">${inventario.stock || 0}</span></div>
+            <div class="section-title">Inventario</div>
+            <div class="info-grid">
+              <div><span class="label">Lote:</span> <span class="value">${inventario.lote || "—"}</span></div>
+              <div><span class="label">Almacén:</span> <span class="value">${inventario.almacen || "—"}</span></div>
+              <div><span class="label">Stock Actual:</span> <span class="value">${inventario.stock || 0}</span></div>
+            </div>
           </div>
         `;
       } catch (error) {
         console.error(error);
         document.getElementById("info").innerHTML =
-          `<p style="color:red; text-align:center;">⚠️ Error al cargar los datos de la entrada. Por favor revisa el servidor.</p>`;
+          `<p style="color:red; text-align:center; grid-column:1/-1;">⚠️ Error al cargar los datos de la entrada. Por favor revisa el servidor.</p>`;
       }
     }
 
