@@ -63,7 +63,7 @@ app.get('/productos', (req, res) => {
 });
 
 // Registrar producto SOLO si el jefe ya tiene entradas de ese producto
-app.post('/registrar/producto', (req, res) => {
+/*app.post('/registrar/producto', (req, res) => {
   const {
     nombre, descripcion, modelo, marca,
     cantidad, precio_compra, precio_venta,
@@ -97,7 +97,7 @@ const insertQuery = `
 
     res.status(201).json({ message: 'Producto registrado correctamente', producto_id: result.insertId });
   });
-});
+});*/
 
 // Registrar inventario
 app.post('/registrar/inventario', (req, res) => {
@@ -274,8 +274,6 @@ app.post('/ventas/registrar', (req, res) => {
   });
 });
 
-
-
 // ---------- LOGIN Y REGISTRO ----------
 
 app.post('/jefe/registro', async (req, res) => {
@@ -332,8 +330,6 @@ app.get('/productos/venta', (req, res) => {
   });
 });
 
-
- 
 // Obtener clientes por jefe_id
 app.get('/clientes', (req, res) => {
   const jefeId = req.query.jefe_id;
@@ -1129,6 +1125,67 @@ app.get("/salidas/:id", (req, res) => {
   });
 });
 
+app.get("/pagos", (req, res) => {
+  const { jefe_id } = req.query;
+
+  if (!jefe_id) {
+    return res.status(400).json({ error: "Falta el parámetro jefe_id" });
+  }
+
+  const query = `
+    SELECT id, tipo, referencia_id, metodo, monto, fecha 
+    FROM pagos
+    WHERE jefe_id = ?
+    ORDER BY fecha DESC
+  `;
+
+  connection.query(query, [jefe_id], (err, results) => {
+    if (err) {
+      console.error("❌ Error al obtener pagos:", err);
+      return res.status(500).json({ error: "Error al obtener los pagos" });
+    }
+    res.json(results);
+  });
+});
+
+// Registrar pago de una venta
+app.post('/pagos/registrar', (req, res) => {
+  const { venta_id, jefe_id, metodo, monto, fecha } = req.body;
+
+  if (!venta_id || !jefe_id || !metodo || monto == null) {
+    return res.status(400).json({ error: 'Faltan datos obligatorios: venta_id, jefe_id, metodo o monto' });
+  }
+
+  const query = `
+    INSERT INTO pagos (tipo, referencia_id, jefe_id, metodo, monto, fecha)
+    VALUES ('venta', ?, ?, ?, ?, ?)
+  `;
+
+  connection.query(
+    query,
+    [
+      venta_id,
+      jefe_id,
+      metodo,
+      monto,
+      fecha ? fecha.slice(0, 19) : new Date().toISOString().slice(0, 19)
+    ],
+    (err, result) => {
+      if (err) {
+        console.error('❌ Error al registrar pago:', err);
+        return res.status(500).json({ error: 'Error al registrar pago' });
+      }
+
+      // Registrar historial
+      registrarHistorial(jefe_id, 'pago', `Pago registrado para venta ID ${venta_id} por ${monto} con método ${metodo}`);
+
+      res.status(201).json({
+        message: 'Pago registrado correctamente',
+        pago_id: result.insertId
+      });
+    }
+  );
+});
 
 // ===============================
 // Levantar el servidor
