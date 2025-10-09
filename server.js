@@ -1272,6 +1272,81 @@ app.post('/generar-respaldo', async (req, res) => {
   }
 });
 
+// Obtener devoluciones por jefe_id
+app.get('/devoluciones', (req, res) => {
+  const jefeId = req.query.jefe_id;
+  if (!jefeId) return res.status(400).json({ error: 'Se requiere jefe_id' });
+
+  const query = `
+    SELECT d.id, d.tipo, d.producto_id, d.cantidad, d.motivo, d.fecha,
+           p.nombre AS producto_nombre
+    FROM devoluciones d
+    LEFT JOIN productos p ON d.producto_id = p.id
+    WHERE d.jefe_id = ?
+    ORDER BY d.fecha DESC
+  `;
+  connection.query(query, [jefeId], (err, results) => {
+    if (err) {
+      console.error('❌ Error al obtener devoluciones:', err);
+      return res.status(500).json({ error: 'Error al obtener devoluciones' });
+    }
+    res.json(results);
+  });
+});
+
+app.post('/devoluciones', (req, res) => {
+  const { tipo, producto_id, cantidad, motivo, jefe_id } = req.body;
+
+  if (!tipo || !producto_id || !cantidad || !jefe_id) {
+    return res.status(400).json({ error: 'Faltan datos obligatorios' });
+  }
+
+  const cantidadNum = parseInt(cantidad, 10); // ✅ convertir a número
+  if (isNaN(cantidadNum) || cantidadNum <= 0) {
+    return res.status(400).json({ error: 'Cantidad inválida' });
+  }
+
+  const insertQuery = `
+    INSERT INTO devoluciones (tipo, producto_id, cantidad, motivo, jefe_id, fecha)
+    VALUES (?, ?, ?, ?, ?, NOW())
+  `;
+
+  connection.query(insertQuery, [tipo, producto_id, cantidadNum, motivo || '', jefe_id], (err, result) => {
+    if (err) {
+      console.error('❌ Error al registrar devolución:', err);
+      return res.status(500).json({ error: 'Error al registrar devolución' });
+    }
+
+    // Actualizar stock según tipo
+    let updateQuery = '';
+    let cantidadUpdate = cantidadNum;
+
+    if (tipo === 'venta') {
+      updateQuery = 'UPDATE productos SET cantidad = cantidad + ? WHERE id = ?';
+    } else if (tipo === 'compra') {
+      updateQuery = 'UPDATE productos SET cantidad = cantidad - ? WHERE id = ?';
+      cantidadUpdate = -cantidadNum;
+    }
+
+    connection.query(updateQuery, [cantidadNum, producto_id], (err2) => {
+      if (err2) {
+        console.error('❌ Error al actualizar stock:', err2);
+        return res.status(500).json({ error: 'Error al actualizar stock' });
+      }
+
+      // Registrar movimiento e historial
+      registrarMovimiento(jefe_id, tipo === 'venta' ? 'devolucion venta' : 'devolucion compra', producto_id, cantidadUpdate, motivo || '');
+      registrarHistorial(jefe_id, 'devolucion', `Devolución registrada: tipo ${tipo}, producto ${producto_id}, cantidad ${cantidadNum}`);
+
+      res.status(201).json({
+        message: 'Devolución registrada correctamente',
+        devolucion_id: result.insertId
+      });
+    });
+  });
+});
+
+
 // Levantar el servidor
 const PORT = 3000;
 app.listen(PORT, () => {
