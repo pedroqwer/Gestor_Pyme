@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Devoluciones</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f8fa;
+      margin: 0;
+      padding: 0;
+    }
+    nav.menu-desplegable {
+      background-color: #2c3e50;
+      padding: 0.5em 1em;
+      display: flex;
+      justify-content: flex-start;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    }
+    .dropdown { position: relative; }
+    .dropbtn {
+      background-color: #2c3e50;
+      color: #ecf0f1;
+      padding: 10px 18px;
+      font-size: 1rem;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      border-radius: 8px;
+      transition: background-color 0.3s, transform 0.2s;
+    }
+    .dropbtn:hover { background-color: #1c80c8; }
+    .dropdown-content {
+      display: none;
+      position: absolute;
+      background-color: #34495e;
+      min-width: 220px;
+      margin-top: 5px;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0px 8px 16px rgba(0,0,0,0.25);
+      z-index: 1000;
+    }
+    .dropdown-content a {
+      color: #ecf0f1;
+      padding: 12px 16px;
+      text-decoration: none;
+      display: block;
+      transition: background 0.3s;
+    }
+    .dropdown-content a:hover { background-color: #1c80c8; }
+    .dropdown:hover .dropdown-content { display: block; }
+    .container {
+      max-width: 900px;
+      margin: 2em auto;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 4px 24px rgba(44,62,80,0.08);
+      padding: 2em;
+    }
+    .encabezado {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5em;
+      flex-wrap: wrap;
+    }
+    .encabezado h1 {
+      color: #1c80c8;
+      font-size: 2em;
+      margin: 0;
+    }
+    .filtros {
+      display: flex;
+      gap: 1em;
+      align-items: center;
+      margin-bottom: 1em;
+      flex-wrap: wrap;
+    }
+    .filtros select, .filtros input {
+      padding: 8px 12px;
+      border-radius: 6px;
+      border: 1px solid #e5e9f2;
+      font-size: 1em;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1em;
+      background: #fff;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+    }
+    th, td {
+      padding: 12px 15px;
+      border-bottom: 1px solid #e0e0e0;
+      text-align: left;
+      font-size: 1em;
+    }
+    th {
+      background-color: #1c3d5a;
+      color: white;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    tbody tr:nth-child(even) { background-color: #f9f9f9; }
+    tbody tr:hover { background-color: #d6e4f0; cursor: pointer; }
+    .botonesDiv {
+      display: flex;
+      gap: 15px;
+      margin-top: 1.5em;
+      justify-content: flex-end;
+    }
+    .butons {
+      padding: 10px 20px;
+      background: #1c80c8;
+      color: white;
+      border: none;
+      border-radius: 7px;
+      cursor: pointer;
+      font-size: 1em;
+      font-weight: 600;
+      transition: background 0.2s;
+    }
+    .butons:hover { background: #1560a8; }
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.3);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+    .modal-content {
+      background: #fff;
+      padding: 2em 1.5em;
+      border-radius: 12px;
+      box-shadow: 0 8px 32px rgba(44,62,80,0.13);
+      min-width: 320px;
+      max-width: 95vw;
+      text-align: left;
+    }
+    .modal-content h2 { color: #1c80c8; margin-top: 0; }
+    .modal-content label { display: block; margin-top: 1em; font-weight: 600; }
+    .modal-content input, .modal-content select, .modal-content textarea {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+      border-radius: 6px;
+      border: 1px solid #e5e9f2;
+      font-size: 1em;
+    }
+    .modal-content button {
+      margin-top: 1.5em;
+      padding: 10px 20px;
+      background: #27ae60;
+      color: white;
+      border: none;
+      border-radius: 7px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .modal-content button:hover { background: #1e8449; }
+    .cerrar {
+      float: right;
+      font-size: 1.5em;
+      color: #888;
+      cursor: pointer;
+      margin-top: -10px;
+    }
+  </style>
+</head>
+<body>
+  <!-- MENÚ DESPLEGABLE -->
+  <nav class="menu-desplegable">
+    <div class="dropdown">
+      <button class="dropbtn">☰ Menú</button>
+      <div class="dropdown-content">
+        <a href="Inventario.html">Inventario</a>
+        <a href="Clientes.html">Clientes</a>
+        <a href="Productos.html">Productos</a>
+        <a href="Top_Ventas.html">Más vendidos</a>
+        <a href="Ventas.html">Ventas</a>
+        <a href="Registrar_Entrada.html">Registrar Entrada nuevo producto</a>
+        <a href="Proveedores.html">Proveedores</a>
+        <a href="historial.html">Historial</a>
+        <a href="Salidas.html">Salidas</a>
+        <a href="Movimientos.html">Movimientos</a>
+        <a href="Pagos.html">Pagos</a>
+        <a href="Devoluciones.html">Devoluciones</a>
+        <a href="Login.html" id="logoutLink">Cerrar sesión</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="encabezado">
+      <h1>Devoluciones</h1>
+      <div class="filtros">
+        <select id="filtroTipo">
+          <option value="">Todos los tipos</option>
+          <option value="venta">Venta</option>
+          <option value="compra">Compra</option>
+        </select>
+        <input type="text" id="filtroProducto" placeholder="Buscar producto...">
+      </div>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>Tipo</th>
+          <th>Producto</th>
+          <th>Cantidad</th>
+          <th>Motivo</th>
+          <th>Fecha</th>
+        </tr>
+      </thead>
+      <tbody id="devolucionesBody"></tbody>
+    </table>
+    <div class="botonesDiv">
+      <button class="butons" id="AddDevolucion">Agregar devolución</button>
+    </div>
+  </div>
+
+  <!-- Modal para agregar devolución -->
+  <div class="modal" id="modalDevolucion">
+    <div class="modal-content">
+      <span class="cerrar" onclick="cerrarModal()">&times;</span>
+      <h2>Registrar devolución</h2>
+      <form id="formDevolucion">
+        <label for="tipo">Tipo:</label>
+        <select id="tipo" name="tipo" required>
+          <option value="venta">Venta</option>
+          <option value="compra">Compra</option>
+        </select>
+        <label for="producto_id">Producto:</label>
+        <select id="producto_id" name="producto_id" required></select>
+        <label for="cantidad">Cantidad:</label>
+        <input type="number" id="cantidad" name="cantidad" min="1" required>
+        <label for="motivo">Motivo:</label>
+        <textarea id="motivo" name="motivo" rows="2"></textarea>
+        <button type="submit">Registrar devolución</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const jefeId = localStorage.getItem('jefe_id');
+    if (!jefeId) {
+      alert('No hay sesión iniciada. Por favor, inicia sesión.');
+      window.location.href = 'Login.html';
+    }
+
+    const devolucionesBody = document.getElementById('devolucionesBody');
+    const filtroTipo = document.getElementById('filtroTipo');
+    const filtroProducto = document.getElementById('filtroProducto');
+    let devoluciones = [];
+    let productos = [];
+
+    // Cargar devoluciones
+    function cargarDevoluciones() {
+      fetch(`http://localhost:3000/devoluciones?jefe_id=${jefeId}`)
+        .then(res => res.json())
+        .then(data => {
+          devoluciones = Array.isArray(data) ? data : [];
+          mostrarDevoluciones();
+        })
+        .catch(err => {
+          console.error('Error al cargar devoluciones:', err);
+          alert('Error al cargar devoluciones.');
+        });
+    }
+
+    // Cargar productos para el select
+    function cargarProductos() {
+      fetch(`http://localhost:3000/productos?jefe_id=${jefeId}`)
+        .then(res => res.json())
+        .then(data => {
+          productos = Array.isArray(data) ? data : [];
+          const select = document.getElementById('producto_id');
+          select.innerHTML = productos.map(p => `<option value="${p.id}">${p.nombre}</option>`).join('');
+        });
+    }
+
+    // Mostrar devoluciones filtradas
+    function mostrarDevoluciones() {
+      const tipo = filtroTipo.value;
+      const prod = filtroProducto.value.toLowerCase();
+      devolucionesBody.innerHTML = '';
+      devoluciones
+        .filter(d => (!tipo || d.tipo === tipo) &&
+                     (!prod || (d.producto_nombre && d.producto_nombre.toLowerCase().includes(prod))))
+        .forEach(d => {
+          devolucionesBody.innerHTML += `
+            <tr>
+              <td>${d.tipo}</td>
+              <td>${d.producto_nombre || d.producto_id}</td>
+              <td>${d.cantidad}</td>
+              <td>${d.motivo || ''}</td>
+              <td>${new Date(d.fecha).toLocaleString()}</td>
+            </tr>
+          `;
+        });
+    }
+
+    filtroTipo.addEventListener('change', mostrarDevoluciones);
+    filtroProducto.addEventListener('input', mostrarDevoluciones);
+
+    document.getElementById('AddDevolucion').addEventListener('click', () => {
+      cargarProductos();
+      document.getElementById('modalDevolucion').style.display = 'flex';
+    });
+
+    function cerrarModal() {
+      document.getElementById('modalDevolucion').style.display = 'none';
+      document.getElementById('formDevolucion').reset();
+    }
+
+    document.getElementById('formDevolucion').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const tipo = document.getElementById('tipo').value;
+      const producto_id = document.getElementById('producto_id').value;
+      const cantidad = document.getElementById('cantidad').value;
+      const motivo = document.getElementById('motivo').value;
+
+      fetch('http://localhost:3000/devoluciones', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          tipo,
+          producto_id,
+          cantidad,
+          motivo,
+          jefe_id: jefeId
+        })
+      })
+      .then(res => {
+        if (res.ok) {
+          cerrarModal();
+          cargarDevoluciones();
+        } else {
+          alert('Error al registrar devolución');
+        }
+      })
+      .catch(err => {
+        console.error('Error al registrar devolución:', err);
+        alert('Error al registrar devolución');
+      });
+    });
+
+    // Inicializar
+    cargarDevoluciones();
+
+    // Cerrar modal al hacer click fuera
+    window.addEventListener('click', function(event) {
+      const modal = document.getElementById('modalDevolucion');
+      if (event.target === modal) cerrarModal();
+    });
+  </script>
+</body>
+</html>
