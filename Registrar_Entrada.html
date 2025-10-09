@@ -166,10 +166,10 @@ button:hover {
 <body>
 
 <nav class="menu-desplegable">
-    <div class="dropdown">
-      <button class="dropbtn">☰ Menú</button>
-      <div class="dropdown-content">
-        <a href="Inventario.html">Inventario</a>
+  <div class="dropdown">
+    <button class="dropbtn">☰ Menú</button>
+    <div class="dropdown-content">
+       <a href="Inventario.html">Inventario</a>
         <a href="Clientes.html">Clientes</a>
         <a href="Productos.html">Productos</a>
         <a href="Top_Ventas.html">Más vendidos</a>
@@ -179,11 +179,10 @@ button:hover {
         <a href="historial.html">Historial</a>
         <a href="Salidas.html">Salidas</a>
         <a href="Movimientos.html">Movimientos</a>
-        <a href="Pagos.html">Pagos</a>
         <a href="Login.html" id="logoutLink">Cerrar sesión</a>
-      </div>
     </div>
-  </nav>
+  </div>
+</nav>
 
 <form id="entradaForm">
   <h2>Registrar Entrada</h2>
@@ -204,6 +203,16 @@ button:hover {
     <select id="en_venta" name="en_venta">
       <option value="true" selected>Sí</option>
       <option value="false">No</option>
+    </select>
+  </div>
+
+  <!-- NUEVO CAMPO: MÉTODO DE PAGO -->
+  <div class="form-group">
+    <label for="metodo_pago">Método de Pago:</label>
+    <select id="metodo_pago" name="metodo_pago" required>
+      <option value="efectivo" selected>Efectivo</option>
+      <option value="tarjeta">Tarjeta</option>
+      <option value="transferencia">Transferencia</option>
     </select>
   </div>
 
@@ -237,7 +246,7 @@ button:hover {
   }
   cargarProveedores();
 
-  // ==== REGISTRAR PRODUCTO ====
+  // ==== REGISTRAR PRODUCTO, INVENTARIO Y PAGO ====
   document.getElementById('entradaForm').addEventListener('submit', async e=>{
     e.preventDefault();
     const jefeId = localStorage.getItem('jefe_id');
@@ -245,6 +254,8 @@ button:hover {
     try{
       const proveedorId = parseInt(form.proveedor_id.value);
       if(isNaN(proveedorId)) throw new Error('Debe seleccionar un proveedor válido');
+
+      // DATOS DEL PRODUCTO
       const productoData = {
         nombre: form.nombre.value.trim(),
         descripcion: form.descripcion.value.trim(),
@@ -257,6 +268,7 @@ button:hover {
         proveedor_id: proveedorId,
         jefe_id: parseInt(jefeId)
       };
+
       const resProducto = await fetch('http://localhost:3000/registrar/entrada',{
         method:'POST',
         headers:{'Content-Type':'application/json'},
@@ -266,6 +278,8 @@ button:hover {
       if(!resProducto.ok) throw new Error(productoResult.error || 'Error al registrar producto');
 
       const producto_id = productoResult.producto_id;
+
+      // DATOS DEL INVENTARIO
       const inventarioData = {
         producto_id,
         almacen: form.almacen.value.trim() || 'Principal',
@@ -274,6 +288,7 @@ button:hover {
         cantidad: parseInt(form.cantidad.value) || 0,
         en_venta: form.en_venta.value === 'true'
       };
+
       const resInventario = await fetch('http://localhost:3000/registrar/inventario',{
         method:'POST',
         headers:{'Content-Type':'application/json'},
@@ -282,10 +297,28 @@ button:hover {
       const inventarioResult = await resInventario.json();
       if(!resInventario.ok) throw new Error(inventarioResult.error || 'Error al registrar inventario');
 
+      // DATOS DEL PAGO
+      const pagoData = {
+        entrada_id: producto_id,
+        jefe_id: parseInt(jefeId),
+        metodo: form.metodo_pago.value,
+        monto: parseFloat(form.precio_compra.value) * parseInt(form.cantidad.value),
+        fecha: form.fecha.value || new Date().toISOString().slice(0,10)
+      };
+
+      const resPago = await fetch('http://localhost:3000/pagos/compra/registrar',{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify(pagoData)
+      });
+      const pagoResult = await resPago.json();
+      if(!resPago.ok) throw new Error(pagoResult.error || 'Error al registrar pago');
+
       const mensaje = document.getElementById('mensaje');
       mensaje.style.color='green';
-      mensaje.textContent = "✅ Producto registrado y añadido al inventario correctamente";
+      mensaje.textContent = "✅ Producto registrado, añadido al inventario y pago registrado correctamente";
       window.location.href="Productos.html";
+
     }catch(err){
       console.error(err);
       const mensaje = document.getElementById('mensaje');
