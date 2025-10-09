@@ -176,7 +176,6 @@ CREATE TABLE servicios (
 CREATE TABLE devoluciones (
     id INT AUTO_INCREMENT PRIMARY KEY,
     tipo ENUM('venta','compra') NOT NULL,  -- indica si es devolución de una venta o compra
-    referencia_id INT NOT NULL,            -- id de la venta o entrada
     producto_id INT NOT NULL,
     cantidad INT NOT NULL,
     motivo TEXT,
