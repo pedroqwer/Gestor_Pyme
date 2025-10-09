@@ -328,9 +328,20 @@ button:hover {
   });
 
   // ==== LOGOUT ====
-  document.getElementById('logoutLink').addEventListener('click', ()=>{
-    localStorage.removeItem('jefe_id');
-    localStorage.removeItem('usuario');
+ document.getElementById('logoutLink').addEventListener('click', async (e) => {
+    e.preventDefault();
+      try {
+        const res = await fetch('http://localhost:3000/generar-respaldo', { method: 'POST' });
+        if (!res.ok) throw new Error('Fallo en la generación del respaldo');
+        console.log("✅ Respaldo generado correctamente");
+      } catch (err) {
+        console.error('❌ Error al generar respaldo:', err);
+        alert("No se pudo generar el respaldo. Cierre de sesión de todas formas.");
+      }
+
+      localStorage.removeItem('jefe_id');
+      localStorage.removeItem('usuario');
+      window.location.href = 'Login.html';
   });
 
   // ==== FONDO ANIMADO MODERNO ====

@@ -9,6 +9,10 @@ const saltRounds = 10;
 const app = express();
 const port = 3000;
 
+const fs = require('fs');
+const path = require('path');
+const mysql = require('mysql2');
+
 app.use(cors());
 app.use(express.json());
 
@@ -1210,6 +1214,62 @@ app.post('/pagos/compra/registrar', (req, res) => {
       });
     }
   );
+});
+
+// 📦 Endpoint para generar respaldo SQL
+app.post('/generar-respaldo', async (req, res) => {
+  try {
+    const tablas = [
+      'productos', 'clientes', 'ventas', 'detalle_venta',
+      'inventario', 'proveedores', 'movimientos', 'historial', 'pagos'
+    ];
+
+    let respaldoSQL = `-- ========================================\n`;
+    respaldoSQL += `-- RESPALDO COMPLETO - ${new Date().toLocaleString()}\n`;
+    respaldoSQL += `-- ========================================\n\n`;
+
+    // Recorremos las tablas
+    for (const tabla of tablas) {
+      const [rows] = await connection.promise().query(`SELECT * FROM ${tabla}`);
+      if (rows.length === 0) continue;
+
+      respaldoSQL += `-- ========================================\n`;
+      respaldoSQL += `-- INSERTS para tabla: ${tabla}\n`;
+      respaldoSQL += `-- ========================================\n`;
+
+      // Obtenemos los nombres de columnas
+      const columnas = Object.keys(rows[0]);
+      respaldoSQL += `INSERT INTO ${tabla} (${columnas.join(', ')}) VALUES\n`;
+
+      // Creamos las filas
+      const valores = rows.map(row => {
+        const campos = columnas.map(col => {
+          const valor = row[col];
+          if (valor === null || valor === undefined) return 'NULL';
+          if (typeof valor === 'number') return valor;
+          if (typeof valor === 'boolean') return valor ? 1 : 0;
+          // escapamos comillas simples y convertimos a formato seguro SQL
+          return `'${String(valor).replace(/'/g, "''")}'`;
+        });
+        return `(${campos.join(', ')})`;
+      });
+
+      respaldoSQL += valores.join(',\n') + ';\n\n';
+    }
+
+    // Nombre del archivo
+    const fecha = new Date().toISOString().replace(/[:.]/g, '-');
+    const nombreArchivo = `respaldo_${fecha}.sql`;
+    const rutaArchivo = path.join(__dirname, nombreArchivo);
+
+    // Guardar archivo
+    fs.writeFileSync(rutaArchivo, respaldoSQL, 'utf8');
+
+    res.json({ message: '✅ Respaldo SQL generado correctamente', archivo: nombreArchivo });
+  } catch (err) {
+    console.error('❌ Error al generar respaldo SQL:', err);
+    res.status(500).json({ error: 'Error al generar respaldo SQL' });
+  }
 });
 
 // Levantar el servidor

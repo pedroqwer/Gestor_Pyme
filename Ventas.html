@@ -107,7 +107,6 @@
     const productTable=document.getElementById("productTable");
     const cartList=document.getElementById("cartList");
     const searchInput=document.getElementById("searchInput");
-    const logoutLink=document.getElementById("logoutLink");
     const carrito=[];
     let productosGlobal=[], clientesGlobal=[];
     const jefeId=localStorage.getItem('jefe_id');
@@ -170,6 +169,22 @@
       });
     }
 
+    document.getElementById('logoutLink').addEventListener('click', async (e) => {
+    e.preventDefault();
+      try {
+        const res = await fetch('http://localhost:3000/generar-respaldo', { method: 'POST' });
+        if (!res.ok) throw new Error('Fallo en la generación del respaldo');
+        console.log("✅ Respaldo generado correctamente");
+      } catch (err) {
+        console.error('❌ Error al generar respaldo:', err);
+        alert("No se pudo generar el respaldo. Cierre de sesión de todas formas.");
+      }
+
+      localStorage.removeItem('jefe_id');
+      localStorage.removeItem('usuario');
+      window.location.href = 'Login.html';
+    });
+    
     async function generarFactura(){
       if(carrito.length===0){ alert("El carrito está vacío."); return; }
       const seleccion=await seleccionarClienteYPago();
