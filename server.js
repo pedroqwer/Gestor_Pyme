@@ -43,7 +43,6 @@ function registrarMovimiento(jefe_id, tipo, producto_id, cantidad, observacion =
   });
 }
 // ---------- RUTAS PRINCIPALES ----------
-
 // Obtener productos por jefe_id
 app.get('/productos', (req, res) => {
   const jefeId = req.query.jefe_id;
@@ -118,7 +117,6 @@ connection.query(query, [producto_id, almacen || 'Principal', lote || null, cant
 });
 
 });
-
 
 // Registrar entrada
 app.post('/entradas/registrar', (req, res) => {
@@ -275,7 +273,6 @@ app.post('/ventas/registrar', (req, res) => {
 });
 
 // ---------- LOGIN Y REGISTRO ----------
-
 app.post('/jefe/registro', async (req, res) => {
   const { usuario, contrasena } = req.body;
   if (!usuario || !contrasena) return res.status(400).json({ error: 'Usuario y contraseña requeridos' });
@@ -372,7 +369,6 @@ app.put('/productos/actualizar-cantidad', (req, res) => {
     res.json({ message: 'Cantidad actualizada correctamente' });
   });
 });
-
 
 // Registrar proveedor
 app.post('/proveedores/registrar', (req, res) => {
@@ -589,9 +585,7 @@ app.get('/clientes/:id/historial', (req, res) => {
   });
 });
 
-// ===============================
 // ENDPOINT: Obtener datos de un proveedor
-// ===============================
 app.get('/proveedores/:id', (req, res) => {
   const proveedorId = req.params.id;
   const jefeId = req.query.jefe_id;
@@ -620,9 +614,7 @@ app.get('/proveedores/:id', (req, res) => {
   });
 });
 
-// ===============================
 // ENDPOINT: Obtener productos de un proveedor
-// ===============================
 app.get('/proveedores/:id/productos', (req, res) => {
   const proveedorId = req.params.id;
   const jefeId = req.query.jefe_id;
@@ -693,7 +685,6 @@ app.get('/productos/mas-vendidos', (req, res) => {
 });
 
 // Actualizar datos de un cliente
-// Actualizar datos de un cliente
 app.put('/clientes/:id', (req, res) => {
   const clienteId = req.params.id;
   const jefeId = req.body.jefe_id;
@@ -757,6 +748,7 @@ app.get('/productos/:id', (req, res) => {
   });
 });
 
+// Actualizar un producto (PUT) - actualización parcial
 app.put('/productos/:id', (req, res) => {
   const productoId = req.params.id;
   const jefeId = req.query.jefe_id; // se manda en la query
@@ -803,7 +795,7 @@ app.put('/productos/:id', (req, res) => {
   });
 });
 
-
+// Eliminar un producto y sus referencias en cascada
 app.delete('/productos/:id', (req, res) => {
   const productoId = req.params.id;
   const jefeId = req.query.jefe_id;
@@ -857,9 +849,7 @@ app.delete('/productos/:id', (req, res) => {
   });
 });
 
-// ===============================
 // ENDPOINT: Obtener movimientos
-// ===============================
 app.get('/movimientos', (req, res) => {
   const jefeId = req.query.jefe_id;
 
@@ -928,9 +918,7 @@ app.put('/inventario/:id/venta', (req, res) => {
   );
 });
 
-// ==========================
 // 📋 Ruta: Obtener detalle de una entrada
-// ==========================
 app.get("/entradas/:id", (req, res) => {
   const { id } = req.params;
 
@@ -1090,10 +1078,7 @@ app.get("/movimiento/:id/venta", (req, res) => {
   });
 });
 
-
-// ==========================
 // 📦 Ruta: Obtener detalle de una salida
-// ==========================
 app.get("/salidas/:id", (req, res) => {
   const { id } = req.params;
 
@@ -1187,9 +1172,47 @@ app.post('/pagos/registrar', (req, res) => {
   );
 });
 
-// ===============================
+// Registrar pago de una compra
+app.post('/pagos/compra/registrar', (req, res) => {
+  const { entrada_id, jefe_id, metodo, monto, fecha } = req.body;
+
+  // Validación básica
+  if (!entrada_id || !jefe_id || !metodo || monto == null) {
+    return res.status(400).json({ error: 'Faltan datos obligatorios: entrada_id, jefe_id, metodo o monto' });
+  }
+
+  const query = `
+    INSERT INTO pagos (tipo, referencia_id, jefe_id, metodo, monto, fecha)
+    VALUES ('compra', ?, ?, ?, ?, ?)
+  `;
+
+  connection.query(
+    query,
+    [
+      entrada_id,
+      jefe_id,
+      metodo,
+      monto,
+      fecha ? fecha.slice(0, 19) : new Date().toISOString().slice(0, 19)
+    ],
+    (err, result) => {
+      if (err) {
+        console.error('❌ Error al registrar pago de compra:', err);
+        return res.status(500).json({ error: 'Error al registrar pago de compra' });
+      }
+
+      // Registrar historial
+      registrarHistorial(jefe_id, 'pago compra', `Pago registrado para entrada ID ${entrada_id} por ${monto} con método ${metodo}`);
+
+      res.status(201).json({
+        message: 'Pago de compra registrado correctamente',
+        pago_id: result.insertId
+      });
+    }
+  );
+});
+
 // Levantar el servidor
-// ===============================
 const PORT = 3000;
 app.listen(PORT, () => {
   console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);
