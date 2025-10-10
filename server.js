@@ -1528,6 +1528,72 @@ app.put('/devoluciones/:id/actualizar-stock', (req, res) => {
   });
 });
 
+// ...existing code...
+
+// Obtener salidas por jefe_id
+app.get('/salidas', (req, res) => {
+  const jefeId = req.query.jefe_id;
+  if (!jefeId) return res.status(400).json({ error: 'Se requiere jefe_id' });
+
+  const query = `
+    SELECT s.id, s.producto_id, s.cantidad, s.fecha, s.observacion, p.nombre AS producto
+    FROM salidas s
+    LEFT JOIN productos p ON s.producto_id = p.id
+    WHERE s.jefe_id = ?
+    ORDER BY s.fecha DESC
+  `;
+  connection.query(query, [jefeId], (err, results) => {
+    if (err) {
+      console.error('❌ Error al obtener salidas:', err);
+      return res.status(500).json({ error: 'Error al obtener salidas' });
+    }
+    res.json(results);
+  });
+});
+
+// Registrar salida de inventario
+app.post('/salidas/registrar', (req, res) => {
+  const { producto_id, cantidad, observacion, jefe_id } = req.body;
+  if (!producto_id || !cantidad || !jefe_id) {
+    return res.status(400).json({ error: 'Faltan datos obligatorios' });
+  }
+  const cantidadNum = parseInt(cantidad, 10);
+  if (isNaN(cantidadNum) || cantidadNum <= 0) {
+    return res.status(400).json({ error: 'Cantidad inválida' });
+  }
+
+  connection.beginTransaction(err => {
+    if (err) return res.status(500).json({ error: 'Error al iniciar transacción' });
+
+    // Insertar salida
+    const insertSalida = `
+      INSERT INTO salidas (producto_id, cantidad, observacion, jefe_id)
+      VALUES (?, ?, ?, ?)
+    `;
+    connection.query(insertSalida, [producto_id, cantidadNum, observacion || '', jefe_id], (err, result) => {
+      if (err) return connection.rollback(() => res.status(500).json({ error: 'Error al registrar salida' }));
+
+      // Actualizar stock en productos
+      const updateProducto = `
+        UPDATE productos SET cantidad = cantidad - ? WHERE id = ?
+      `;
+      connection.query(updateProducto, [cantidadNum, producto_id], (err) => {
+        if (err) return connection.rollback(() => res.status(500).json({ error: 'Error al actualizar stock' }));
+
+        // Registrar movimiento e historial
+        registrarMovimiento(jefe_id, 'salida', producto_id, -cantidadNum, observacion || '');
+        registrarHistorial(jefe_id, 'salida', `Salida registrada: producto ${producto_id}, cantidad ${cantidadNum}, motivo: ${observacion || ''}`);
+
+        connection.commit(err => {
+          if (err) return connection.rollback(() => res.status(500).json({ error: 'Error al confirmar salida' }));
+          res.status(201).json({ message: 'Salida registrada correctamente', salida_id: result.insertId });
+        });
+      });
+    });
+  });
+});
+
+// ...existing code...
 // Levantar el servidor
 const PORT = 3000;
 app.listen(PORT, () => {
