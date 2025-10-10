@@ -358,21 +358,67 @@ app.put('/productos/actualizar-cantidad', (req, res) => {
     return res.status(400).json({ error: 'Datos incompletos para actualizar cantidad' });
   }
 
-  const query = `
-    UPDATE productos 
-    SET cantidad = ?
-    WHERE id = ? AND jefe_id = ?`;
-
-  connection.query(query, [cantidad, producto_id, jefe_id], (err, result) => {
+  // Iniciar una transacción
+  connection.beginTransaction(err => {
     if (err) {
-      console.error('❌ Error al actualizar cantidad:', err);
-      return res.status(500).json({ error: 'Error al actualizar cantidad del producto' });
+      console.error('❌ Error al iniciar la transacción:', err);
+      return res.status(500).json({ error: 'Error interno del servidor' });
     }
 
-    registrarHistorial(jefe_id, 'editar producto', `Cantidad del producto ID ${producto_id} actualizada a ${cantidad}`);
-    res.json({ message: 'Cantidad actualizada correctamente' });
+    // 1️⃣ Actualizar cantidad en inventario
+    const queryInventario = `
+      UPDATE inventario 
+      SET cantidad = ? 
+      WHERE producto_id = ?
+    `;
+
+    connection.query(queryInventario, [cantidad, producto_id], (err, result1) => {
+      if (err) {
+        console.error('❌ Error al actualizar inventario:', err);
+        return connection.rollback(() => {
+          res.status(500).json({ error: 'Error al actualizar inventario' });
+        });
+      }
+
+      // 2️⃣ Actualizar cantidad en productos
+      const queryProductos = `
+        UPDATE productos 
+        SET cantidad = ?
+        WHERE id = ? AND jefe_id = ?
+      `;
+
+      connection.query(queryProductos, [cantidad, producto_id, jefe_id], (err, result2) => {
+        if (err) {
+          console.error('❌ Error al actualizar productos:', err);
+          return connection.rollback(() => {
+            res.status(500).json({ error: 'Error al actualizar productos' });
+          });
+        }
+
+        // 3️⃣ Confirmar la transacción
+        connection.commit(err => {
+          if (err) {
+            console.error('❌ Error al confirmar transacción:', err);
+            return connection.rollback(() => {
+              res.status(500).json({ error: 'Error al confirmar cambios' });
+            });
+          }
+
+          // 4️⃣ Registrar historial
+          registrarHistorial(
+            jefe_id,
+            'editar producto',
+            `Cantidad del producto ID ${producto_id} actualizada a ${cantidad}`
+          );
+
+          console.log(`✅ Cantidad del producto ${producto_id} actualizada a ${cantidad} (productos + inventario)`);
+          res.json({ message: 'Cantidad actualizada correctamente en productos e inventario' });
+        });
+      });
+    });
   });
 });
+
 
 // Registrar proveedor
 app.post('/proveedores/registrar', (req, res) => {
@@ -767,37 +813,99 @@ app.put('/productos/:id', (req, res) => {
     return res.status(400).json({ error: 'No se recibieron datos para actualizar' });
   }
 
-  // Construir dinámicamente la parte SET del UPDATE
-  const columnas = [];
-  const valores = [];
+  // === Si se envía el campo cantidad, actualizamos también inventario ===
+  const actualizarInventario = campos.hasOwnProperty('cantidad');
 
-  for (const [key, value] of Object.entries(campos)) {
-    columnas.push(`${key} = ?`);
-    valores.push(value);
-  }
-
-  valores.push(productoId, jefeId); // para el WHERE
-
-  const query = `
-    UPDATE productos
-    SET ${columnas.join(', ')}
-    WHERE id = ? AND jefe_id = ?
-  `;
-
-  connection.query(query, valores, (err, result) => {
+  // Iniciar transacción
+  connection.beginTransaction(err => {
     if (err) {
-      console.error('❌ Error al actualizar producto:', err);
-      return res.status(500).json({ error: 'Error al actualizar producto' });
+      console.error('❌ Error al iniciar transacción:', err);
+      return res.status(500).json({ error: 'Error interno del servidor' });
     }
 
-    if (result.affectedRows === 0) {
-      return res.status(404).json({ error: 'Producto no encontrado o no pertenece al jefe' });
+    // 1️⃣ Construir dinámicamente el UPDATE para productos
+    const columnas = [];
+    const valores = [];
+
+    for (const [key, value] of Object.entries(campos)) {
+      columnas.push(`${key} = ?`);
+      valores.push(value);
     }
 
-    registrarHistorial(jefeId, 'editar producto', `Producto ID ${productoId} actualizado`);
-    res.json({ message: '✅ Producto actualizado correctamente' });
+    valores.push(productoId, jefeId); // para el WHERE
+
+    const queryProductos = `
+      UPDATE productos
+      SET ${columnas.join(', ')}
+      WHERE id = ? AND jefe_id = ?
+    `;
+
+    connection.query(queryProductos, valores, (err, result) => {
+      if (err) {
+        console.error('❌ Error al actualizar producto:', err);
+        return connection.rollback(() => {
+          res.status(500).json({ error: 'Error al actualizar producto' });
+        });
+      }
+
+      if (result.affectedRows === 0) {
+        return connection.rollback(() => {
+          res.status(404).json({ error: 'Producto no encontrado o no pertenece al jefe' });
+        });
+      }
+
+      // 2️⃣ Si hay campo cantidad, también actualizar inventario
+      if (actualizarInventario) {
+        const queryInventario = `
+          UPDATE inventario 
+          SET cantidad = ?
+          WHERE producto_id = ?
+        `;
+
+        connection.query(queryInventario, [campos.cantidad, productoId], (err, result2) => {
+          if (err) {
+            console.error('❌ Error al actualizar inventario:', err);
+            return connection.rollback(() => {
+              res.status(500).json({ error: 'Error al actualizar inventario' });
+            });
+          }
+
+          // 3️⃣ Confirmar transacción
+          connection.commit(err => {
+            if (err) {
+              console.error('❌ Error al confirmar transacción:', err);
+              return connection.rollback(() => {
+                res.status(500).json({ error: 'Error al confirmar cambios' });
+              });
+            }
+
+            registrarHistorial(
+              jefeId,
+              'editar producto',
+              `Producto ID ${productoId} actualizado${actualizarInventario ? ' (incluyendo cantidad)' : ''}`
+            );
+
+            res.json({ message: '✅ Producto y cantidad actualizados correctamente' });
+          });
+        });
+      } else {
+        // 3️⃣ Si no hay cantidad, solo confirmar producto
+        connection.commit(err => {
+          if (err) {
+            console.error('❌ Error al confirmar transacción:', err);
+            return connection.rollback(() => {
+              res.status(500).json({ error: 'Error al confirmar cambios' });
+            });
+          }
+
+          registrarHistorial(jefeId, 'editar producto', `Producto ID ${productoId} actualizado`);
+          res.json({ message: '✅ Producto actualizado correctamente' });
+        });
+      }
+    });
   });
 });
+
 
 // Eliminar un producto y sus referencias en cascada
 app.delete('/productos/:id', (req, res) => {
@@ -1344,46 +1452,77 @@ app.put('/devoluciones/:id/actualizar-stock', (req, res) => {
     }
 
     const devolucion = results[0];
-    let updateQuery = '';
-    let cantidadUpdate = 0;
+    const { tipo, cantidad, producto_id, jefe_id } = devolucion;
 
-    if (devolucion.tipo === 'venta') {
-      // Devolución de venta => regresa producto al inventario
-      updateQuery = 'UPDATE productos SET cantidad = cantidad + ? WHERE id = ?';
-      cantidadUpdate = devolucion.cantidad;
-    } else if (devolucion.tipo === 'compra') {
-      // Devolución de compra => quita producto del inventario
-      updateQuery = 'UPDATE productos SET cantidad = cantidad - ? WHERE id = ?';
-      cantidadUpdate = devolucion.cantidad; // se resta dentro del SQL
-    } else {
+    if (!['venta', 'compra'].includes(tipo)) {
       return res.status(400).json({ error: 'Tipo de devolución inválido' });
     }
 
-    connection.query(updateQuery, [cantidadUpdate, devolucion.producto_id], (err2, result) => {
-      if (err2) {
-        console.error('❌ Error al actualizar stock:', err2);
-        return res.status(500).json({ error: 'Error al actualizar stock' });
+    // Determinar operación según tipo
+    const operador = tipo === 'venta' ? '+' : '-';
+    const movimiento = tipo === 'venta' ? 'devolución de venta' : 'devolución de compra';
+
+    // === Iniciar transacción ===
+    connection.beginTransaction(err => {
+      if (err) {
+        console.error('❌ Error al iniciar transacción:', err);
+        return res.status(500).json({ error: 'Error interno del servidor' });
       }
 
-      if (result.affectedRows === 0) {
-        console.warn('⚠️ Ningún producto fue actualizado (ID inexistente)');
-        return res.status(404).json({ error: 'Producto no encontrado o sin cambios' });
-      }
+      // 1️⃣ Actualizar productos
+      const queryProductos = `
+        UPDATE productos
+        SET cantidad = cantidad ${operador} ?
+        WHERE id = ?
+      `;
 
-      // Registrar movimiento e historial
-      const tipoMovimiento =
-        devolucion.tipo === 'venta' ? 'devolucion venta' : 'devolucion compra';
+      connection.query(queryProductos, [cantidad, producto_id], (err1, result1) => {
+        if (err1) {
+          console.error('❌ Error al actualizar productos:', err1);
+          return connection.rollback(() =>
+            res.status(500).json({ error: 'Error al actualizar cantidad en productos' })
+          );
+        }
 
-      registrarHistorial(
-        devolucion.jefe_id,
-        'stock',
-        `Stock actualizado tras devolución #${devolucionId} (${tipoMovimiento})`
-      );
+        // 2️⃣ Actualizar inventario (sincronizado)
+        const queryInventario = `
+          UPDATE inventario
+          SET cantidad = cantidad ${operador} ?
+          WHERE producto_id = ?
+        `;
 
-      res.json({
-        message: '✅ Stock actualizado correctamente',
-        producto_id: devolucion.producto_id,
-        cantidad_modificada: devolucion.cantidad,
+        connection.query(queryInventario, [cantidad, producto_id], (err2, result2) => {
+          if (err2) {
+            console.error('❌ Error al actualizar inventario:', err2);
+            return connection.rollback(() =>
+              res.status(500).json({ error: 'Error al actualizar cantidad en inventario' })
+            );
+          }
+
+          // 3️⃣ Confirmar transacción
+          connection.commit(err3 => {
+            if (err3) {
+              console.error('❌ Error al confirmar transacción:', err3);
+              return connection.rollback(() =>
+                res.status(500).json({ error: 'Error al confirmar actualización de stock' })
+              );
+            }
+
+            // 4️⃣ Registrar historial
+            registrarHistorial(
+              jefe_id,
+              'actualizar stock',
+              `Stock sincronizado por ${movimiento} (#${devolucionId}) — producto ${producto_id}, cantidad ${cantidad}`
+            );
+
+            console.log(`✅ Stock actualizado (${movimiento}) para producto ${producto_id}, cantidad ${cantidad}`);
+            res.json({
+              message: `✅ Stock actualizado correctamente (${movimiento})`,
+              producto_id,
+              cantidad_modificada: cantidad,
+            });
+          });
+        });
       });
     });
   });
