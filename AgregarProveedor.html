@@ -175,7 +175,7 @@ button:hover {
         });
 
         if (response.ok) {
-          window.location.href = 'Productos.html';
+          window.location.href = 'Proveedores.html';
         } else {
           const error = await response.json();
           message.textContent = "Error: " + (error.message || "No se pudo registrar.");
