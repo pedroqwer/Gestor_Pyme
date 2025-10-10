@@ -178,7 +178,7 @@
   </style>
 </head>
 <body>
-  <!-- MENÚ DESPLEGABLE -->
+  <!-- MENÚ -->
   <nav class="menu-desplegable">
     <div class="dropdown">
       <button class="dropbtn">☰ Menú</button>
@@ -188,7 +188,7 @@
         <a href="Productos.html">Productos</a>
         <a href="Top_Ventas.html">Más vendidos</a>
         <a href="Ventas.html">Ventas</a>
-        <a href="Registrar_Entrada.html">Registrar Entrada nuevo producto</a>
+        <a href="Registrar_Entrada.html">Registrar Entrada</a>
         <a href="Proveedores.html">Proveedores</a>
         <a href="historial.html">Historial</a>
         <a href="Salidas.html">Salidas</a>
@@ -212,6 +212,7 @@
         <input type="text" id="filtroProducto" placeholder="Buscar producto...">
       </div>
     </div>
+
     <table>
       <thead>
         <tr>
@@ -224,12 +225,13 @@
       </thead>
       <tbody id="devolucionesBody"></tbody>
     </table>
+
     <div class="botonesDiv">
       <button class="butons" id="AddDevolucion">Agregar devolución</button>
     </div>
   </div>
 
-  <!-- Modal para agregar devolución -->
+  <!-- MODAL -->
   <div class="modal" id="modalDevolucion">
     <div class="modal-content">
       <span class="cerrar" onclick="cerrarModal()">&times;</span>
@@ -272,13 +274,10 @@
           devoluciones = Array.isArray(data) ? data : [];
           mostrarDevoluciones();
         })
-        .catch(err => {
-          console.error('Error al cargar devoluciones:', err);
-          alert('Error al cargar devoluciones.');
-        });
+        .catch(err => console.error('Error al cargar devoluciones:', err));
     }
 
-    // Cargar productos para el select
+    // Cargar productos
     function cargarProductos() {
       fetch(`http://localhost:3000/productos?jefe_id=${jefeId}`)
         .then(res => res.json())
@@ -305,8 +304,7 @@
               <td>${d.cantidad}</td>
               <td>${d.motivo || ''}</td>
               <td>${new Date(d.fecha).toLocaleString()}</td>
-            </tr>
-          `;
+            </tr>`;
         });
     }
 
@@ -323,6 +321,7 @@
       document.getElementById('formDevolucion').reset();
     }
 
+    // Enviar devolución y luego actualizar stock
     document.getElementById('formDevolucion').addEventListener('submit', function(e) {
       e.preventDefault();
       const tipo = document.getElementById('tipo').value;
@@ -330,28 +329,35 @@
       const cantidad = document.getElementById('cantidad').value;
       const motivo = document.getElementById('motivo').value;
 
+      // 1️⃣ Registrar devolución
       fetch('http://localhost:3000/devoluciones', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          tipo,
-          producto_id,
-          cantidad,
-          motivo,
-          jefe_id: jefeId
-        })
+        body: JSON.stringify({ tipo, producto_id, cantidad, motivo, jefe_id: jefeId })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.devolucion_id) {
+          // 2️⃣ Llamar endpoint para actualizar stock
+          return fetch(`http://localhost:3000/devoluciones/${data.devolucion_id}/actualizar-stock`, {
+            method: 'PUT'
+          });
+        } else {
+          throw new Error('No se obtuvo el ID de la devolución');
+        }
       })
       .then(res => {
         if (res.ok) {
+          alert('Devolución registrada y stock actualizado correctamente');
           cerrarModal();
           cargarDevoluciones();
         } else {
-          alert('Error al registrar devolución');
+          alert('Error al actualizar el stock');
         }
       })
       .catch(err => {
         console.error('Error al registrar devolución:', err);
-        alert('Error al registrar devolución');
+        alert('Error al procesar la devolución');
       });
     });
 
