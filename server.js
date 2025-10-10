@@ -1294,6 +1294,7 @@ app.get('/devoluciones', (req, res) => {
   });
 });
 
+// POST /devoluciones
 app.post('/devoluciones', (req, res) => {
   const { tipo, producto_id, cantidad, motivo, jefe_id } = req.body;
 
@@ -1301,7 +1302,7 @@ app.post('/devoluciones', (req, res) => {
     return res.status(400).json({ error: 'Faltan datos obligatorios' });
   }
 
-  const cantidadNum = parseInt(cantidad, 10); // ✅ convertir a número
+  const cantidadNum = parseInt(cantidad, 10);
   if (isNaN(cantidadNum) || cantidadNum <= 0) {
     return res.status(400).json({ error: 'Cantidad inválida' });
   }
@@ -1317,35 +1318,76 @@ app.post('/devoluciones', (req, res) => {
       return res.status(500).json({ error: 'Error al registrar devolución' });
     }
 
-    // Actualizar stock según tipo
-    let updateQuery = '';
-    let cantidadUpdate = cantidadNum;
+    // Solo registramos los logs
+    registrarHistorial(jefe_id, 'devolucion', `Devolución registrada (pendiente de actualizar stock): tipo ${tipo}, producto ${producto_id}, cantidad ${cantidadNum}`);
 
-    if (tipo === 'venta') {
-      updateQuery = 'UPDATE productos SET cantidad = cantidad + ? WHERE id = ?';
-    } else if (tipo === 'compra') {
-      updateQuery = 'UPDATE productos SET cantidad = cantidad - ? WHERE id = ?';
-      cantidadUpdate = -cantidadNum;
+    res.status(201).json({
+      message: 'Devolución registrada correctamente (stock no actualizado aún)',
+      devolucion_id: result.insertId
+    });
+  });
+});
+
+// ✅ PUT /devoluciones/:id/actualizar-stock
+app.put('/devoluciones/:id/actualizar-stock', (req, res) => {
+  const devolucionId = req.params.id;
+
+  const selectQuery = 'SELECT * FROM devoluciones WHERE id = ?';
+  connection.query(selectQuery, [devolucionId], (err, results) => {
+    if (err) {
+      console.error('❌ Error al consultar devolución:', err);
+      return res.status(500).json({ error: 'Error al obtener devolución' });
     }
 
-    connection.query(updateQuery, [cantidadNum, producto_id], (err2) => {
+    if (results.length === 0) {
+      return res.status(404).json({ error: 'Devolución no encontrada' });
+    }
+
+    const devolucion = results[0];
+    let updateQuery = '';
+    let cantidadUpdate = 0;
+
+    if (devolucion.tipo === 'venta') {
+      // Devolución de venta => regresa producto al inventario
+      updateQuery = 'UPDATE productos SET cantidad = cantidad + ? WHERE id = ?';
+      cantidadUpdate = devolucion.cantidad;
+    } else if (devolucion.tipo === 'compra') {
+      // Devolución de compra => quita producto del inventario
+      updateQuery = 'UPDATE productos SET cantidad = cantidad - ? WHERE id = ?';
+      cantidadUpdate = devolucion.cantidad; // se resta dentro del SQL
+    } else {
+      return res.status(400).json({ error: 'Tipo de devolución inválido' });
+    }
+
+    connection.query(updateQuery, [cantidadUpdate, devolucion.producto_id], (err2, result) => {
       if (err2) {
         console.error('❌ Error al actualizar stock:', err2);
         return res.status(500).json({ error: 'Error al actualizar stock' });
       }
 
-      // Registrar movimiento e historial
-      registrarMovimiento(jefe_id, tipo === 'venta' ? 'devolucion venta' : 'devolucion compra', producto_id, cantidadUpdate, motivo || '');
-      registrarHistorial(jefe_id, 'devolucion', `Devolución registrada: tipo ${tipo}, producto ${producto_id}, cantidad ${cantidadNum}`);
+      if (result.affectedRows === 0) {
+        console.warn('⚠️ Ningún producto fue actualizado (ID inexistente)');
+        return res.status(404).json({ error: 'Producto no encontrado o sin cambios' });
+      }
 
-      res.status(201).json({
-        message: 'Devolución registrada correctamente',
-        devolucion_id: result.insertId
+      // Registrar movimiento e historial
+      const tipoMovimiento =
+        devolucion.tipo === 'venta' ? 'devolucion venta' : 'devolucion compra';
+
+      registrarHistorial(
+        devolucion.jefe_id,
+        'stock',
+        `Stock actualizado tras devolución #${devolucionId} (${tipoMovimiento})`
+      );
+
+      res.json({
+        message: '✅ Stock actualizado correctamente',
+        producto_id: devolucion.producto_id,
+        cantidad_modificada: devolucion.cantidad,
       });
     });
   });
 });
-
 
 // Levantar el servidor
 const PORT = 3000;
