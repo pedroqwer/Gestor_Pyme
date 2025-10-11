@@ -1528,8 +1528,6 @@ app.put('/devoluciones/:id/actualizar-stock', (req, res) => {
   });
 });
 
-// ...existing code...
-
 // Obtener salidas por jefe_id
 app.get('/salidas', (req, res) => {
   const jefeId = req.query.jefe_id;
@@ -1593,7 +1591,50 @@ app.post('/salidas/registrar', (req, res) => {
   });
 });
 
-// ...existing code...
+// Obtener servicios por jefe_id
+app.get('/servicios', (req, res) => {
+  const jefeId = req.query.jefe_id;
+  if (!jefeId) return res.status(400).json({ error: 'Se requiere jefe_id' });
+
+  const query = `
+    SELECT id, nombre, descripcion, precio
+    FROM servicios
+    WHERE jefe_id = ?
+    ORDER BY nombre ASC
+  `;
+  connection.query(query, [jefeId], (err, results) => {
+    if (err) {
+      console.error('❌ Error al obtener servicios:', err);
+      return res.status(500).json({ error: 'Error al obtener servicios' });
+    }
+    res.json(results);
+  });
+});
+
+// Registrar nuevo servicio
+app.post('/servicios/registrar', (req, res) => {
+  const { nombre, descripcion, precio, jefe_id } = req.body;
+  if (!nombre || !precio || !jefe_id) {
+    return res.status(400).json({ error: 'Faltan datos obligatorios' });
+  }
+  const precioNum = parseFloat(precio);
+  if (isNaN(precioNum) || precioNum < 0) {
+    return res.status(400).json({ error: 'Precio inválido' });
+  }
+  const query = `
+    INSERT INTO servicios (nombre, descripcion, precio, jefe_id)
+    VALUES (?, ?, ?, ?)
+  `;
+  connection.query(query, [nombre, descripcion || '', precioNum, jefe_id], (err, result) => {
+    if (err) {
+      console.error('❌ Error al registrar servicio:', err);
+      return res.status(500).json({ error: 'Error al registrar servicio' });
+    }
+    registrarHistorial(jefe_id, 'servicio', `Servicio registrado: ${nombre}, precio ${precioNum}`);
+    res.status(201).json({ message: 'Servicio registrado correctamente', servicio_id: result.insertId });
+  });
+});
+
 // Levantar el servidor
 const PORT = 3000;
 app.listen(PORT, () => {
