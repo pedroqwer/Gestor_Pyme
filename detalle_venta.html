@@ -249,7 +249,7 @@
                  ${movimientos.map(m => `<tr>
                    <td>${m.id}</td>
                    <td>${m.tipo}</td>
-                   <td>${m.producto_id}</td>
+                   <td>${m.producto || "Producto eliminado"}</td>
                    <td>${m.cantidad}</td>
                    <td>${new Date(m.fecha).toLocaleString()}</td>
                    <td>${m.observacion || "—"}</td>
