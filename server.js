@@ -198,109 +198,119 @@ app.post('/ventas/registrar', (req, res) => {
     return res.status(400).json({ error: 'Datos incompletos para la venta' });
   }
 
-  const total = productos.reduce((sum, item) => sum + item.precio * item.cantidad, 0);
+  // 1️⃣ Verificar stock antes de procesar la venta
+  const ids = productos.map(p => p.id);
+  const cantidades = productos.reduce((obj, p) => { obj[p.id] = p.cantidad; return obj; }, {});
+  const query = `SELECT id, cantidad, nombre FROM productos WHERE id IN (${ids.map(() => '?').join(',')})`;
 
-  connection.beginTransaction(err => {
-    if (err) return res.status(500).json({ error: 'Error al iniciar transacción' });
+  connection.query(query, ids, (err, rows) => {
+    if (err) return res.status(500).json({ error: 'Error al verificar stock' });
 
-    // Insertar venta
-    connection.query(
-      'INSERT INTO ventas (cliente_id, total, jefe_id) VALUES (?, ?, ?)',
-      [cliente_id, total, Number(jefe_id)],
-      (err, resultVenta) => {
-        if (err) {
-          return connection.rollback(() =>
-            res.status(500).json({ error: 'Error al registrar venta' })
-          );
-        }
+    const sinStock = rows.filter(row => row.cantidad < cantidades[row.id]);
+    if (sinStock.length > 0) {
+      const nombres = sinStock.map(r => r.nombre).join(', ');
+      return res.status(400).json({ error: `No hay suficiente stock para: ${nombres}` });
+    }
 
-        const ventaId = resultVenta.insertId;
+    // 2️⃣ Procesar la venta normalmente
+    const total = productos.reduce((sum, item) => sum + item.precio * item.cantidad, 0);
 
-        const tareas = productos.map(producto => {
-          return new Promise((resolve, reject) => {
+    connection.beginTransaction(err => {
+      if (err) return res.status(500).json({ error: 'Error al iniciar transacción' });
 
-            // Insertar detalle de venta
-            connection.query(
-              'INSERT INTO detalle_venta (venta_id, producto_id, cantidad, precio_unitario) VALUES (?, ?, ?, ?)',
-              [ventaId, producto.id, producto.cantidad, producto.precio],
-              err => {
-                if (err) return reject(err);
+      connection.query(
+        'INSERT INTO ventas (cliente_id, total, jefe_id) VALUES (?, ?, ?)',
+        [cliente_id, total, Number(jefe_id)],
+        (err, resultVenta) => {
+          if (err) {
+            return connection.rollback(() =>
+              res.status(500).json({ error: 'Error al registrar venta' })
+            );
+          }
 
-                // Restar del stock total en productos
-                connection.query(
-                  'UPDATE productos SET cantidad = cantidad - ? WHERE id = ?',
-                  [producto.cantidad, producto.id],
-                  err => {
-                    if (err) return reject(err);
+          const ventaId = resultVenta.insertId;
 
-                    // Restar del inventario por lotes FIFO
-                    connection.query(
-                      `SELECT id, cantidad FROM inventario 
-                       WHERE producto_id = ? AND cantidad > 0 
-                       ORDER BY fecha_ingreso ASC`,
-                      [producto.id],
-                      (err, filas) => {
-                        if (err) return reject(err);
+          const tareas = productos.map(producto => {
+            return new Promise((resolve, reject) => {
+              connection.query(
+                'INSERT INTO detalle_venta (venta_id, producto_id, cantidad, precio_unitario) VALUES (?, ?, ?, ?)',
+                [ventaId, producto.id, producto.cantidad, producto.precio],
+                err => {
+                  if (err) return reject(err);
 
-                        let qtyRestante = producto.cantidad;
+                  connection.query(
+                    'UPDATE productos SET cantidad = cantidad - ? WHERE id = ?',
+                    [producto.cantidad, producto.id],
+                    err => {
+                      if (err) return reject(err);
 
-                        const actualizarInventario = (index) => {
-                          if (qtyRestante <= 0 || index >= filas.length) return resolve();
+                      connection.query(
+                        `SELECT id, cantidad FROM inventario 
+                         WHERE producto_id = ? AND cantidad > 0 
+                         ORDER BY fecha_ingreso ASC`,
+                        [producto.id],
+                        (err, filas) => {
+                          if (err) return reject(err);
 
-                          let lote = filas[index];
-                          let restar = Math.min(qtyRestante, lote.cantidad);
+                          let qtyRestante = producto.cantidad;
 
-                          connection.query(
-                            'UPDATE inventario SET cantidad = cantidad - ? WHERE id = ?',
-                            [restar, lote.id],
-                            err => {
-                              if (err) return reject(err);
+                          const actualizarInventario = (index) => {
+                            if (qtyRestante <= 0 || index >= filas.length) return resolve();
 
-                              qtyRestante -= restar;
-                              actualizarInventario(index + 1);
-                            }
+                            let lote = filas[index];
+                            let restar = Math.min(qtyRestante, lote.cantidad);
+
+                            connection.query(
+                              'UPDATE inventario SET cantidad = cantidad - ? WHERE id = ?',
+                              [restar, lote.id],
+                              err => {
+                                if (err) return reject(err);
+
+                                qtyRestante -= restar;
+                                actualizarInventario(index + 1);
+                              }
+                            );
+                          };
+
+                          actualizarInventario(0);
+
+                          registrarMovimiento(
+                            Number(jefe_id),
+                            'venta',
+                            producto.id,
+                            producto.cantidad,
+                            `Venta realizada`
                           );
-                        };
-
-                        actualizarInventario(0);
-
-                        // Registrar movimiento
-                        registrarMovimiento(
-                          Number(jefe_id),
-                          'venta',
-                          producto.id,
-                          producto.cantidad,
-                          `Venta realizada`
-                        );
-                      }
-                    );
-                  }
-                );
-              }
-            );
-          });
-        });
-
-        Promise.all(tareas)
-          .then(() => {
-            connection.commit(err => {
-              if (err) {
-                return connection.rollback(() =>
-                  res.status(500).json({ error: 'Error al confirmar venta' })
-                );
-              }
-
-              registrarHistorial(jefe_id, 'venta', `Venta registrada ID ${ventaId}`);
-              res.json({ message: 'Venta registrada correctamente', venta_id: ventaId });
+                        }
+                      );
+                    }
+                  );
+                }
+              );
             });
-          })
-          .catch(err => {
-            connection.rollback(() =>
-              res.status(500).json({ error: 'Error al procesar la venta', detalle: err.message })
-            );
           });
-      }
-    );
+
+          Promise.all(tareas)
+            .then(() => {
+              connection.commit(err => {
+                if (err) {
+                  return connection.rollback(() =>
+                    res.status(500).json({ error: 'Error al confirmar venta' })
+                  );
+                }
+
+                registrarHistorial(jefe_id, 'venta', `Venta registrada ID ${ventaId}`);
+                res.json({ message: 'Venta registrada correctamente', venta_id: ventaId });
+              });
+            })
+            .catch(err => {
+              connection.rollback(() =>
+                res.status(500).json({ error: 'Error al procesar la venta', detalle: err.message })
+              );
+            });
+        }
+      );
+    });
   });
 });
 
@@ -448,7 +458,7 @@ app.put('/productos/actualizar-cantidad', (req, res) => {
 });
 
 // Registrar proveedor
-/*app.post('/proveedores/registrar', (req, res) => {
+app.post('/proveedores/registrar', (req, res) => {
   const { nombre, contacto, telefono, email, direccion, jefe_id } = req.body;
 
   // Validación básica
@@ -471,7 +481,7 @@ app.put('/productos/actualizar-cantidad', (req, res) => {
     registrarHistorial(jefe_id, 'crear proveedor', `Proveedor ${nombre} registrado`);
     res.status(201).json({ message: 'Proveedor registrado correctamente', proveedor_id: result.insertId });
   });
-});*/
+});
 
 app.get('/proveedores', (req, res) => {
   const jefeId = req.query.jefe_id; // ✅ leer desde query string
@@ -943,7 +953,6 @@ app.put('/productos/:id', (req, res) => {
   });
 });
 
-
 // Eliminar un producto y sus referencias en cascada
 app.delete('/productos/:id', (req, res) => {
   const productoId = req.params.id;
@@ -998,7 +1007,7 @@ app.delete('/productos/:id', (req, res) => {
   });
 });
 
-  // ENDPOINT: Obtener movimientos
+// ENDPOINT: Obtener movimientos
 app.get("/movimientos", (req, res) => {
   const jefeId = req.query.jefe_id;
 
@@ -1147,15 +1156,15 @@ app.get("/entradas/:id", (req, res) => {
 app.get("/movimiento/:id/venta", (req, res) => {
   const { id } = req.params;
 
-  // 1️⃣ Obtener el movimiento inicial
-  const queryMovimiento = `SELECT * FROM movimientos WHERE id = ? AND tipo='venta'`;
+  // 1️⃣ Obtener el movimiento (solo si es de tipo 'venta')
+  const queryMovimiento = `SELECT * FROM movimientos WHERE id = ? AND tipo = 'venta'`;
   connection.query(queryMovimiento, [id], (err, movRes) => {
     if (err) return res.status(500).json({ error: "Error al obtener el movimiento" });
     if (!movRes.length) return res.status(404).json({ error: "No existe un movimiento de venta con ese ID" });
 
     const movimiento = movRes[0];
 
-    // 2️⃣ Buscar la venta asociada en detalle_venta
+    // 2️⃣ Buscar la venta asociada a ese movimiento
     const queryDetalleVenta = `
       SELECT dv.venta_id
       FROM detalle_venta dv
@@ -1164,16 +1173,21 @@ app.get("/movimiento/:id/venta", (req, res) => {
     `;
     connection.query(queryDetalleVenta, [movimiento.producto_id, movimiento.cantidad], (err, detalleVentaRes) => {
       if (err) return res.status(500).json({ error: "Error al buscar la venta en detalle_venta" });
-      if (!detalleVentaRes.length) return res.status(404).json({ error: "No se encontró venta asociada a este movimiento" });
+      if (!detalleVentaRes.length) return res.status(404).json({ error: "No se encontró una venta asociada a este movimiento" });
 
       const ventaId = detalleVentaRes[0].venta_id;
 
-      // 3️⃣ Traer información completa de la venta
+      // 3️⃣ Obtener información general de la venta y cliente
       const queryVenta = `
         SELECT 
-          v.id AS venta_id, v.fecha, v.total,
+          v.id AS venta_id,
+          v.fecha,
+          v.total,
           j.usuario AS jefe,
-          c.nombre AS cliente, c.telefono, c.email, c.direccion
+          c.nombre AS cliente,
+          c.telefono,
+          c.email,
+          c.direccion
         FROM ventas v
         LEFT JOIN clientes c ON v.cliente_id = c.id
         LEFT JOIN jefe j ON v.jefe_id = j.id
@@ -1181,52 +1195,45 @@ app.get("/movimiento/:id/venta", (req, res) => {
       `;
       connection.query(queryVenta, [ventaId], (err, ventaRes) => {
         if (err) return res.status(500).json({ error: "Error al obtener la venta" });
-        if (!ventaRes.length) return res.status(404).json({ error: "No existe la venta" });
+        if (!ventaRes.length) return res.status(404).json({ error: "No existe la venta asociada" });
 
         const venta = ventaRes[0];
 
-        // 4️⃣ Detalles de la venta
+        // 4️⃣ Obtener los productos vendidos
         const queryDetalle = `
-          SELECT dv.producto_id, p.nombre AS producto, p.marca, dv.cantidad, dv.precio_unitario
+          SELECT 
+            dv.producto_id,
+            p.nombre AS producto,
+            p.marca,
+            dv.cantidad,
+            dv.precio_unitario
           FROM detalle_venta dv
           LEFT JOIN productos p ON dv.producto_id = p.id
           WHERE dv.venta_id = ?
         `;
 
-        // 5️⃣ Movimientos de tipo 'venta' con nombre y marca del producto
-        const queryMovimientos = `
-          SELECT m.id, m.tipo, m.cantidad, m.jefe_id, m.fecha, m.observacion,
-                 p.nombre AS producto, p.marca
-          FROM movimientos m
-          LEFT JOIN productos p ON m.producto_id = p.id
-          WHERE m.tipo='venta' 
-            AND m.producto_id IN (SELECT producto_id FROM detalle_venta WHERE venta_id = ?)
-        `;
-
-        // 6️⃣ Pagos asociados a la venta
+        // 5️⃣ Obtener los pagos asociados
         const queryPagos = `
-          SELECT metodo, monto, fecha
+          SELECT 
+            metodo, 
+            monto, 
+            fecha
           FROM pagos
-          WHERE tipo='venta' AND referencia_id = ?
+          WHERE tipo = 'venta' AND referencia_id = ?
         `;
 
-        // Ejecutar consultas en paralelo para mejorar eficiencia
+        // 6️⃣ Ejecutar ambas consultas en paralelo
         connection.query(queryDetalle, [ventaId], (err, detalleRes) => {
-          if (err) return res.status(500).json({ error: "Error al obtener detalle de venta" });
+          if (err) return res.status(500).json({ error: "Error al obtener los detalles de la venta" });
 
-          connection.query(queryMovimientos, [ventaId], (err, movimientosRes) => {
-            if (err) return res.status(500).json({ error: "Error al obtener movimientos" });
+          connection.query(queryPagos, [ventaId], (err, pagosRes) => {
+            if (err) return res.status(500).json({ error: "Error al obtener los pagos" });
 
-            connection.query(queryPagos, [ventaId], (err, pagosRes) => {
-              if (err) return res.status(500).json({ error: "Error al obtener pagos" });
-
-              // 7️⃣ Respuesta final
-              res.json({
-                venta,
-                detalle: detalleRes,
-                movimientos: movimientosRes,
-                pagos: pagosRes
-              });
+            // 7️⃣ Respuesta final simplificada (sin movimientos)
+            res.json({
+              venta,
+              detalle: detalleRes,
+              pagos: pagosRes
             });
           });
         });
@@ -1711,7 +1718,106 @@ app.post('/servicios/registrar', (req, res) => {
   });
 });
 
-// Levantar el servidor
+// ...existing code...
+
+// Actualizar proveedor
+app.put('/proveedores/:id', (req, res) => {
+  const proveedorId = req.params.id;
+  const jefeId = req.query.jefe_id;
+  const { nombre, contacto, telefono, email, direccion } = req.body;
+
+  if (!proveedorId || !jefeId || !nombre) {
+    return res.status(400).json({ error: 'Datos incompletos para actualizar proveedor' });
+  }
+
+  const query = `
+    UPDATE proveedores
+    SET nombre = ?, contacto = ?, telefono = ?, email = ?, direccion = ?
+    WHERE id = ? AND jefe_id = ?
+  `;
+
+  connection.query(query, [nombre, contacto, telefono, email, direccion, proveedorId, jefeId], (err, result) => {
+    if (err) return res.status(500).json({ error: 'Error al actualizar proveedor' });
+    if (result.affectedRows === 0) return res.status(404).json({ error: 'Proveedor no encontrado o no pertenece al jefe' });
+
+    registrarHistorial(jefeId, 'editar proveedor', `Proveedor ${nombre} actualizado`);
+    res.json({ message: 'Proveedor actualizado correctamente' });
+  });
+});
+
+// Eliminar proveedor
+app.delete('/proveedores/:id', (req, res) => {
+  const proveedorId = req.params.id;
+  const jefeId = req.query.jefe_id;
+
+  if (!proveedorId || !jefeId) {
+    return res.status(400).json({ error: 'ID del proveedor y jefe_id requeridos' });
+  }
+
+  const query = 'DELETE FROM proveedores WHERE id = ? AND jefe_id = ?';
+  connection.query(query, [proveedorId, jefeId], (err, result) => {
+    if (err) return res.status(500).json({ error: 'Error al eliminar proveedor' });
+    if (result.affectedRows === 0) return res.status(404).json({ error: 'Proveedor no encontrado o no pertenece al jefe' });
+
+    registrarHistorial(jefeId, 'eliminar proveedor', `Proveedor ID ${proveedorId} eliminado`);
+    res.json({ message: 'Proveedor eliminado correctamente' });
+  });
+});
+
+// ...existing code...
+
+// Obtener servicio por id
+app.get('/servicios/:id', (req, res) => {
+  const servicioId = req.params.id;
+  const jefeId = req.query.jefe_id;
+  if (!servicioId || !jefeId) {
+    return res.status(400).json({ error: 'Faltan datos obligatorios' });
+  }
+  const query = 'SELECT id, nombre, descripcion, precio FROM servicios WHERE id = ? AND jefe_id = ?';
+  connection.query(query, [servicioId, jefeId], (err, results) => {
+    if (err) return res.status(500).json({ error: 'Error al obtener servicio' });
+    if (results.length === 0) return res.status(404).json({ error: 'Servicio no encontrado' });
+    res.json(results[0]);
+  });
+});
+
+// Actualizar servicio
+app.put('/servicios/:id', (req, res) => {
+  const servicioId = req.params.id;
+  const jefeId = req.query.jefe_id;
+  const { nombre, descripcion, precio } = req.body;
+  if (!servicioId || !jefeId || !nombre || precio == null) {
+    return res.status(400).json({ error: 'Faltan datos obligatorios' });
+  }
+  const query = `
+    UPDATE servicios
+    SET nombre = ?, descripcion = ?, precio = ?
+    WHERE id = ? AND jefe_id = ?
+  `;
+  connection.query(query, [nombre, descripcion || '', precio, servicioId, jefeId], (err, result) => {
+    if (err) return res.status(500).json({ error: 'Error al actualizar servicio' });
+    if (result.affectedRows === 0) return res.status(404).json({ error: 'Servicio no encontrado o no pertenece al jefe' });
+    registrarHistorial(jefeId, 'editar servicio', `Servicio ${nombre} actualizado`);
+  });
+});
+
+// Eliminar servicio
+app.delete('/servicios/:id', (req, res) => {
+  const servicioId = req.params.id;
+  const jefeId = req.query.jefe_id;
+  if (!servicioId || !jefeId) {
+    return res.status(400).json({ error: 'Faltan datos obligatorios' });
+  }
+  const query = 'DELETE FROM servicios WHERE id = ? AND jefe_id = ?';
+  connection.query(query, [servicioId, jefeId], (err, result) => {
+    if (err) return res.status(500).json({ error: 'Error al eliminar servicio' });
+    if (result.affectedRows === 0) return res.status(404).json({ error: 'Servicio no encontrado o no pertenece al jefe' });
+    registrarHistorial(jefeId, 'eliminar servicio', `Servicio ID ${servicioId} eliminado`);
+    res.json({ message: 'Servicio eliminado correctamente' });
+  });
+});
+
+// ...existing code...// Levantar el servidor
 const PORT = 3000;
 app.listen(PORT, () => {
   console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);

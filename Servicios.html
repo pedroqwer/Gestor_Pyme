@@ -341,17 +341,23 @@
     }
 
     function mostrarServicios(lista) {
-      serviciosBody.innerHTML = '';
-      lista.forEach(s => {
-        serviciosBody.innerHTML += `
-          <tr>
-            <td>${s.nombre}</td>
-            <td>${s.descripcion || ''}</td>
-            <td>${s.precio}</td>
-          </tr>`;
-      });
-    }
+  serviciosBody.innerHTML = '';
+  lista.forEach(s => {
+    serviciosBody.innerHTML += `
+      <tr class="servicio-row" data-id="${s.id}">
+        <td>${s.nombre}</td>
+        <td>${s.descripcion || ''}</td>
+        <td>${s.precio}</td>
+      </tr>`;
+  });
 
+  // Añadir evento click a cada fila
+  document.querySelectorAll('.servicio-row').forEach(row => {
+    row.onclick = function() {
+      window.location.href = `Detalles_Servicio.html?id=${row.dataset.id}`;
+    };
+  });
+}
     filtroNombre.addEventListener('input', () => {
       const texto = filtroNombre.value.toLowerCase();
       const filtrados = servicios.filter(s =>

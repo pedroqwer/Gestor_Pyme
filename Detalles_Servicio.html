@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Detalles del Servicio</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f5f8fa; margin: 0; }
+    nav.menu-desplegable { background: #2c3e50; padding: 0.5em 1em; }
+    .dropdown { position: relative; }
+    .dropbtn { background: #2c3e50; color: #ecf0f1; padding: 10px 18px; font-size: 1rem; font-weight: 600; border: none; cursor: pointer; border-radius: 8px; }
+    .dropbtn:hover { background: #1c80c8; }
+    .dropdown-content { display: none; position: absolute; background: #34495e; min-width: 220px; margin-top: 5px; border-radius: 8px; overflow: hidden; box-shadow: 0px 8px 16px rgba(0,0,0,0.25); z-index: 1000; }
+    .dropdown-content a { color: #ecf0f1; padding: 12px 16px; text-decoration: none; display: block; }
+    .dropdown-content a:hover { background-color: #1c80c8; }
+    .dropdown:hover .dropdown-content { display: block; }
+    .main-content { max-width: 500px; margin: 2em auto; background: #fff; border-radius: 12px; box-shadow: 0 4px 24px rgba(44,62,80,0.08); padding: 2em; }
+    .card { background: #eaf6fb; border-radius: 10px; padding: 1.5em; margin-bottom: 1em; box-shadow: 0 2px 8px rgba(44,62,80,0.08); }
+    .card h2 { color: #1c80c8; margin-top: 0; }
+    .card p { margin: 0.5em 0; }
+    .acciones { display: flex; gap: 15px; margin-top: 1.5em; }
+    .acciones button { padding: 10px 20px; border: none; border-radius: 7px; font-size: 1em; font-weight: 600; cursor: pointer; }
+    .editar-btn { background: #27ae60; color: white; }
+    .editar-btn:hover { background: #1e8449; }
+    .eliminar-btn { background: #e74c3c; color: white; }
+    .eliminar-btn:hover { background: #c0392b; }
+    .modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.3); justify-content: center; align-items: center; z-index: 1000; }
+    .modal-content { background: #fff; padding: 2em 1.5em; border-radius: 12px; box-shadow: 0 8px 32px rgba(44,62,80,0.13); min-width: 320px; max-width: 95vw; text-align: left; }
+    .modal-content h2 { color: #1c80c8; margin-top: 0; }
+    .modal-content label { display: block; margin-top: 1em; font-weight: 600; }
+    .modal-content input, .modal-content textarea { width: 100%; padding: 8px; margin-top: 5px; border-radius: 6px; border: 1px solid #e5e9f2; font-size: 1em; }
+    .modal-content button { margin-top: 1.5em; padding: 10px 20px; background: #27ae60; color: white; border: none; border-radius: 7px; font-weight: 600; cursor: pointer; transition: background 0.2s; }
+    .modal-content button:hover { background: #1e8449; }
+    .cerrar { float: right; font-size: 1.5em; color: #888; cursor: pointer; margin-top: -10px; }
+    .mensaje { margin-top: 1em; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <!-- Menú -->
+  <nav class="menu-desplegable">
+    <div class="dropdown">
+      <button class="dropbtn">☰ Menú</button>
+      <div class="dropdown-content">
+        <a href="Inventario.html">Inventario</a>
+        <a href="Clientes.html">Clientes</a>
+        <a href="Productos.html">Productos</a>
+        <a href="Servicios.html">Servicios</a>
+        <a href="Top_Ventas.html">Más vendidos</a>
+        <a href="Ventas.html">Ventas</a>
+        <a href="Devoluciones.html">Devoluciones</a>
+        <a href="Registrar_Entrada.html">Registrar Entrada nuevo producto</a>
+        <a href="Proveedores.html">Proveedores</a>
+        <a href="historial.html">Historial</a>
+        <a href="Salidas.html">Salidas</a>
+        <a href="Movimientos.html">Movimientos</a>
+        <a href="Pagos.html">Pagos</a>
+        <a href="Login.html" id="logoutLink">Cerrar sesión</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Contenido principal -->
+  <div class="main-content">
+    <div class="card" id="servicioCard">
+      <h2 id="nombreServicio">Servicio</h2>
+      <p><strong>Descripción:</strong> <span id="descripcionServicio"></span></p>
+      <p><strong>Precio:</strong> $<span id="precioServicio"></span></p>
+    </div>
+    <div class="acciones">
+      <button class="editar-btn" id="editarBtn">Editar</button>
+      <button class="eliminar-btn" id="eliminarBtn">Eliminar</button>
+    </div>
+    <div class="mensaje" id="mensaje"></div>
+  </div>
+
+  <!-- Modal actualizar -->
+  <div id="modalActualizar" class="modal">
+    <div class="modal-content">
+      <span class="cerrar" onclick="cerrarModal()">&times;</span>
+      <h2>Actualizar Servicio</h2>
+      <form id="formActualizar">
+        <label for="nombre">Nombre:</label>
+        <input type="text" id="nombre" name="nombre" required>
+        <label for="descripcion">Descripción:</label>
+        <textarea id="descripcion" name="descripcion" rows="2"></textarea>
+        <label for="precio">Precio:</label>
+        <input type="number" id="precio" name="precio" min="0" step="0.01" required>
+        <button type="submit">Guardar cambios</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // Obtener id del servicio desde la URL (?id=...)
+    function getServicioId() {
+      const params = new URLSearchParams(window.location.search);
+      return params.get('id');
+    }
+    const jefeId = localStorage.getItem('jefe_id');
+    const servicioId = getServicioId();
+    if (!jefeId || !servicioId) {
+      alert('No hay sesión iniciada o falta el ID del servicio.');
+      window.location.href = 'Servicios.html';
+    }
+
+    // Cargar datos del servicio
+    function cargarServicio() {
+      fetch(`http://localhost:3000/servicios/${servicioId}?jefe_id=${jefeId}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.error || data.message) {
+            document.getElementById('mensaje').textContent = data.error || data.message;
+            return;
+          }
+          document.getElementById('nombreServicio').textContent = data.nombre;
+          document.getElementById('descripcionServicio').textContent = data.descripcion || '';
+          document.getElementById('precioServicio').textContent = data.precio;
+          document.getElementById('nombre').value = data.nombre;
+          document.getElementById('descripcion').value = data.descripcion || '';
+          document.getElementById('precio').value = data.precio;
+        });
+    }
+    cargarServicio();
+
+    // Abrir modal actualizar
+    document.getElementById('editarBtn').onclick = () => {
+      document.getElementById('modalActualizar').style.display = 'flex';
+    };
+    function cerrarModal() {
+      document.getElementById('modalActualizar').style.display = 'none';
+    }
+
+    // Actualizar servicio
+    document.getElementById('formActualizar').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const nombre = document.getElementById('nombre').value;
+      const descripcion = document.getElementById('descripcion').value;
+      const precio = document.getElementById('precio').value;
+      fetch(`http://localhost:3000/servicios/${servicioId}?jefe_id=${jefeId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nombre, descripcion, precio })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.error) {
+          document.getElementById('mensaje').textContent = data.error;
+        } else {
+          document.getElementById('mensaje').textContent = data.message;
+          cerrarModal();
+          cargarServicio();
+        }
+      });
+    });
+
+    // Eliminar servicio
+    document.getElementById('eliminarBtn').onclick = () => {
+      if (!confirm('¿Seguro que deseas eliminar este servicio?')) return;
+      fetch(`http://localhost:3000/servicios/${servicioId}?jefe_id=${jefeId}`, {
+        method: 'DELETE'
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.error) {
+          document.getElementById('mensaje').textContent = data.error;
+        } else {
+          alert('Servicio eliminado correctamente');
+          window.location.href = 'Servicios.html';
+        }
+      });
+    };
+
+    // Cerrar modal al hacer click fuera
+    window.addEventListener('click', function(event) {
+      const modal = document.getElementById('modalActualizar');
+      if (event.target === modal) cerrarModal();
+    });
+  </script>
+</body>
+</html>
