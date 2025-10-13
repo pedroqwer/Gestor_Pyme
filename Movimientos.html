@@ -278,7 +278,7 @@
         const fechaMovimiento = new Date(m.fecha);
         fila.innerHTML = `
           <td data-label="Tipo">${m.tipo}</td>
-          <td data-label="Producto">${m.producto}</td>
+          <td data-label="Producto">${m.producto_nombre || "—"}</td>
           <td data-label="Cantidad">${m.cantidad}</td>
           <td data-label="Fecha">${fechaMovimiento.toLocaleString()}</td>
           <td data-label="Observación">${m.observacion || "—"}</td>
@@ -286,10 +286,11 @@
         fila.addEventListener("click", () => {
           let url = "";
           if (m.tipo === "venta") url = `detalle_venta.html?id=${m.id}`;
-          else if (m.tipo === "entrada") url = `detalle_entrada.html?id=${m.id}`;
+          else if (m.tipo === "entrada") url = `detalle_entrada.html?id=${m.entrada_id}`; // ⚡ aquí usamos entrada_id
           else if (m.tipo === "salida") url = `detalle_salida.html?id=${m.id}`;
           if (url) window.location.href = url;
         });
+
         tbody.appendChild(fila);
       });
       actualizarTotales(lista);

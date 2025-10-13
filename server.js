@@ -998,35 +998,40 @@ app.delete('/productos/:id', (req, res) => {
   });
 });
 
-// ENDPOINT: Obtener movimientos
-app.get('/movimientos', (req, res) => {
+  // ENDPOINT: Obtener movimientos
+app.get("/movimientos", (req, res) => {
   const jefeId = req.query.jefe_id;
-
-  if (!jefeId) {
-    return res.status(400).json({ error: 'Se requiere el id del jefe' });
-  }
 
   const query = `
     SELECT 
       m.id,
       m.tipo,
+      m.producto_id,
       m.cantidad,
+      m.fecha,
       m.observacion,
-      DATE_FORMAT(m.fecha, '%Y-%m-%d %H:%i:%s') AS fecha,
-      p.nombre AS producto
+      p.nombre AS producto_nombre,
+      e.id AS entrada_id
     FROM movimientos m
-    JOIN productos p ON m.producto_id = p.id
+    LEFT JOIN productos p ON m.producto_id = p.id
+    LEFT JOIN entradas e ON m.tipo='entrada' AND m.producto_id = e.producto_id
     WHERE m.jefe_id = ?
     ORDER BY m.fecha DESC
   `;
 
   connection.query(query, [jefeId], (err, results) => {
-    if (err) {
-      console.error('❌ Error al obtener movimientos:', err);
-      return res.status(500).json({ error: 'Error al obtener movimientos' });
-    }
-
-    res.json(results);
+    if (err) return res.status(500).json({ error: err });
+    const movimientos = results.map(r => ({
+      id: r.id,
+      tipo: r.tipo,
+      producto_id: r.producto_id,
+      producto_nombre: r.producto_nombre || "—",
+      cantidad: r.cantidad,
+      fecha: r.fecha,
+      observacion: r.observacion,
+      entrada_id: r.entrada_id // ⚡ id real de la entrada
+    }));
+    res.json(movimientos);
   });
 });
 
@@ -1589,7 +1594,6 @@ app.get('/salidas', (req, res) => {
   });
 });
 
-// Registrar salida de inventario
 app.post('/salidas/registrar', (req, res) => {
   const { producto_id, cantidad, observacion, jefe_id } = req.body;
   if (!producto_id || !cantidad || !jefe_id) {
@@ -1603,7 +1607,7 @@ app.post('/salidas/registrar', (req, res) => {
   connection.beginTransaction(err => {
     if (err) return res.status(500).json({ error: 'Error al iniciar transacción' });
 
-    // Insertar salida
+    // 1️⃣ Insertar salida
     const insertSalida = `
       INSERT INTO salidas (producto_id, cantidad, observacion, jefe_id)
       VALUES (?, ?, ?, ?)
@@ -1611,20 +1615,52 @@ app.post('/salidas/registrar', (req, res) => {
     connection.query(insertSalida, [producto_id, cantidadNum, observacion || '', jefe_id], (err, result) => {
       if (err) return connection.rollback(() => res.status(500).json({ error: 'Error al registrar salida' }));
 
-      // Actualizar stock en productos
+      // 2️⃣ Actualizar stock en productos
       const updateProducto = `
         UPDATE productos SET cantidad = cantidad - ? WHERE id = ?
       `;
       connection.query(updateProducto, [cantidadNum, producto_id], (err) => {
-        if (err) return connection.rollback(() => res.status(500).json({ error: 'Error al actualizar stock' }));
+        if (err) return connection.rollback(() => res.status(500).json({ error: 'Error al actualizar stock en productos' }));
 
-        // Registrar movimiento e historial
-        registrarMovimiento(jefe_id, 'salida', producto_id, -cantidadNum, observacion || '');
-        registrarHistorial(jefe_id, 'salida', `Salida registrada: producto ${producto_id}, cantidad ${cantidadNum}, motivo: ${observacion || ''}`);
+        // 3️⃣ Reducir stock en inventario por lotes
+        const selectInventario = `
+          SELECT id, cantidad FROM inventario
+          WHERE producto_id = ? AND cantidad > 0
+          ORDER BY cantidad DESC
+        `;
+        connection.query(selectInventario, [producto_id], (err, lotes) => {
+          if (err) return connection.rollback(() => res.status(500).json({ error: 'Error al obtener inventario' }));
 
-        connection.commit(err => {
-          if (err) return connection.rollback(() => res.status(500).json({ error: 'Error al confirmar salida' }));
-          res.status(201).json({ message: 'Salida registrada correctamente', salida_id: result.insertId });
+          let cantidadRestante = cantidadNum;
+
+          function reducirLotes(index) {
+            if (index >= lotes.length) {
+              if (cantidadRestante > 0) {
+                return connection.rollback(() => res.status(400).json({ error: 'No hay suficiente stock en inventario' }));
+              }
+
+              // 4️⃣ Registrar movimiento e historial
+              registrarMovimiento(jefe_id, 'salida', producto_id, cantidadNum, observacion || '');
+              registrarHistorial(jefe_id, 'salida', `Salida registrada: producto ${producto_id}, cantidad ${cantidadNum}, motivo: ${observacion || ''}`);
+
+              return connection.commit(err => {
+                if (err) return connection.rollback(() => res.status(500).json({ error: 'Error al confirmar salida' }));
+                res.status(201).json({ message: 'Salida registrada correctamente', salida_id: result.insertId });
+              });
+            }
+
+            const lote = lotes[index];
+            const reducir = Math.min(lote.cantidad, cantidadRestante);
+
+            const updateLote = `UPDATE inventario SET cantidad = cantidad - ? WHERE id = ?`;
+            connection.query(updateLote, [reducir, lote.id], (err) => {
+              if (err) return connection.rollback(() => res.status(500).json({ error: 'Error al actualizar inventario' }));
+              cantidadRestante -= reducir;
+              reducirLotes(index + 1);
+            });
+          }
+
+          reducirLotes(0);
         });
       });
     });
